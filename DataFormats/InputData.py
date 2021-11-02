@@ -65,10 +65,33 @@ class InputDataCluster:
 # stores the parameters for the Feature Selection Algorithm
 class InputDataFeatureSelection:
 
-    def __init__(self, selection_algorithm='PCA', n_features=0, variance=0.8):
+    def __init__(self, selection_algorithm='PCA', seed=0,
+                 n_features_pca=0,
+                 variance_var=0.8,
+                 n_components_sparse=-1,
+                 n_components_gaussian=-1):
+
         self.selection_algorithm = selection_algorithm
-        self.n_features = n_features
-        self.variance = variance
+        self.seed = seed
+
+        # pca
+        self.n_features_pca = n_features_pca
+
+        # variance
+        self.variance_var = variance_var
+
+
+        # sparse
+        if n_components_sparse == -1:
+            self.n_components_sparse = 'auto'
+        else:
+            self.n_components_sparse = n_components_sparse
+
+        # gaussian
+        if n_components_gaussian == -1:
+            self.n_components_gaussian = 'auto'
+        else:
+            self.n_components_gaussian = n_components_gaussian
 
 
 # Stores the parameters for the Scaling Algorithm

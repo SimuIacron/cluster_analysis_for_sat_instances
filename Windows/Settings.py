@@ -25,32 +25,60 @@ def create_layout():
 
         html.Button('Calculate', id='submit-val', n_clicks=0),
 
+        html.Label('Seed'),
+        daq.NumericInput(
+            id='numeric-input-seed',
+            value=0,
+            min=0
+        ),
+
         html.H2('Scaling'),
         dcc.Dropdown(
             id='dropdown-scaling-algorithm',
             options=create_dropdown(scaling.SCALINGALGORITHMS),
             value=create_dropdown(scaling.SCALINGALGORITHMS)[0]['value']
         ),
+
         html.H2('Feature Filtering'),
         dcc.Dropdown(
             id='dropdown-feature-selection-algorithm',
             options=create_dropdown(feature_reduction.FEATURESELECTIONALGORITHMS),
             value=create_dropdown(feature_reduction.FEATURESELECTIONALGORITHMS)[0]['value']
         ),
-        html.Label('Remaining Features (0 means open) (PCA)'),
-        daq.NumericInput(
-            id='numeric-input-features-selection',
-            value=10,
-            min=0
-        ),
-        html.Label('Variance (Variance)'),
+
+        html.H4('Variance'),
+        html.Label('Variance'),
         dcc.Slider(
-            id='slider-variance',
+            id='slider-variance-var',
             min=0.1,
             max=1,
             step=0.01,
             value=0.8,
             tooltip={"placement": "bottom", "always_visible": False},
+        ),
+
+        html.H4('PCA'),
+        html.Label('Remaining Features (0 means open)'),
+        daq.NumericInput(
+            id='numeric-input-features-selection-pca',
+            value=10,
+            min=0
+        ),
+
+        html.H4('Sparse'),
+        html.Label('Component amount (-1 is auto)'),
+        daq.NumericInput(
+            id='numeric-input-components-sparse',
+            value=-1,
+            min=-1
+        ),
+
+        html.H4('Gaussian'),
+        html.Label('Component amount (-1 is auto)'),
+        daq.NumericInput(
+            id='numeric-input-components-gaussian',
+            value=-1,
+            min=-1
         ),
 
         # clustering
@@ -59,12 +87,6 @@ def create_layout():
             id='dropdown-cluster-algorithm',
             options=create_dropdown(clustering.CLUSTERALGORITHMS),
             value=create_dropdown(clustering.CLUSTERALGORITHMS)[0]['value']
-        ),
-        html.Label('Seed'),
-        daq.NumericInput(
-            id='numeric-input-seed',
-            value=0,
-            min=0
         ),
 
         html.H4('K-Means'),
@@ -85,7 +107,7 @@ def create_layout():
             value=0.5,
             tooltip={"placement": "bottom", "always_visible": False},
         ),
-        html.Label('Preference'),
+        html.Label('Preference (-1 means None)'),
         daq.NumericInput(
             id='numeric-input-preference-aff',
             value=-1,
@@ -138,7 +160,7 @@ def create_layout():
                 [('ward', 'ward'), ('complete', 'complete'), ('average', 'average'), ('single', 'single')]),
             value='ward'
         ),
-        html.Label('Distance Threshold'),
+        html.Label('Distance Threshold (-1 means None)'),
         dcc.Slider(
             id='slider-distance-threshold-agg',
             min=-1,
@@ -221,14 +243,17 @@ def register_callback(app, db_instance: DbInstance):
          Output('clustering-graph-3', 'figure'),
          Output('div-cluster-statistics', 'children')],
         [Input('submit-val', 'n_clicks')],
-        [State('dropdown-scaling-algorithm', 'value'),
+        [State('numeric-input-seed', 'value'),
+
+         State('dropdown-scaling-algorithm', 'value'),
 
          State('dropdown-feature-selection-algorithm', 'value'),
-         State('numeric-input-features-selection', 'value'),
-         State('slider-variance', 'value'),
+         State('numeric-input-features-selection-pca', 'value'),
+         State('slider-variance-var', 'value'),
+         State('numeric-input-components-sparse', 'value'),
+         State('numeric-input-components-gaussian', 'value'),
 
          State('dropdown-cluster-algorithm', 'value'),
-         State('numeric-input-seed', 'value'),
          State('numeric-input-n-cluster-k-means', 'value'),
          State('slider-damping-aff', 'value'),
          State('numeric-input-preference-aff', 'value'),
@@ -250,9 +275,17 @@ def register_callback(app, db_instance: DbInstance):
          ]
     )
     def update_output(n_clicks,
+                      seed,
+
                       scaling_value,
-                      feature_reduction_value, n_features, variance,
-                      cluster_value, seed,
+
+                      feature_reduction_value,
+                      n_features_pca,
+                      variance_var,
+                      n_components_sparse,
+                      n_components_gaussian,
+
+                      cluster_value,
                       n_clusters_k_means,
                       damping_aff, preference_aff, affinity_aff,
                       bandwidth_mean,
@@ -262,7 +295,6 @@ def register_callback(app, db_instance: DbInstance):
                       n_components_gauss,
                       threshold_birch, branching_factor_birch, n_clusters_birch,
                       eps_dbscan, min_samples_dbscan):
-
         # cluster params
         input_data_cluster = \
             InputDataCluster(cluster_algorithm=cluster_value, seed=seed,
@@ -282,8 +314,13 @@ def register_callback(app, db_instance: DbInstance):
         input_data_scaling = InputDataScaling(scaling_algorithm=scaling_value)
 
         # feature selection params
-        input_data_feature_selection = InputDataFeatureSelection(selection_algorithm=feature_reduction_value,
-                                                                 n_features=n_features, variance=variance)
+        input_data_feature_selection = \
+            InputDataFeatureSelection(selection_algorithm=feature_reduction_value,
+                                      seed=seed,
+                                      n_features_pca=n_features_pca,
+                                      variance_var=variance_var,
+                                      n_components_sparse=n_components_sparse,
+                                      n_components_gaussian=n_components_gaussian)
 
         # run algorithms
         clusters, yhat, reduced_instance_list, instances_list_s = run(db_instance, input_data_cluster,
