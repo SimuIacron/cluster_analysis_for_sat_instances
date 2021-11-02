@@ -1,3 +1,4 @@
+# stores the parameters for the clustering algorithms
 class InputDataCluster:
 
     def __init__(self, cluster_algorithm='KMEANS', seed=0,
@@ -61,6 +62,7 @@ class InputDataCluster:
         self.min_samples_dbscan = min_samples_dbscan
 
 
+# stores the parameters for the Feature Selection Algorithm
 class InputDataFeatureSelection:
 
     def __init__(self, selection_algorithm='PCA', n_features=0, variance=0.8):
@@ -69,6 +71,7 @@ class InputDataFeatureSelection:
         self.variance = variance
 
 
+# Stores the parameters for the Scaling Algorithm
 class InputDataScaling:
 
     def __init__(self, scaling_algorithm='SCALEMINUSPLUS1'):

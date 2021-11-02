@@ -31,7 +31,7 @@ def count_family_for_cluster(cluster_idx, yhat, family):
     return keys, values, cluster_amount
 
 
-# draws a scatter plot of the clusters
+# returns a scatter plot of the clusters
 # yhat: Describes which instance is in which cluster
 # data: Features of the instances
 # solver_time: The times of the solvers for each instance
@@ -47,7 +47,7 @@ def clusters_scatter_plot(yhat, data, solver_time, solver_features):
     return fig
 
 
-# Shows Median and Mean of the solver times for a cluster
+# returns the Median and Mean of the solver times for a cluster
 # cluster_idx: Index of the cluster
 # yhat: Describes which instance is in which cluster
 # solver_time: The times of the solvers for each instance
@@ -80,7 +80,7 @@ def cluster_statistics(cluster_idx, yhat, solver_time, solver_features):
     return fig
 
 
-# Shows the amount of each family in a cluster as a bar chart
+# returns the amount of each family in a cluster as a bar chart
 # cluster_idx: Index of the cluster
 # yhat: Describes which instance is in which cluster
 # family: List of the family of all instances
@@ -96,7 +96,7 @@ def cluster_family_amount(cluster_idx, yhat, family):
     return fig
 
 
-# Shows bar chart where it is shown what amount of each family all clusters hold
+# returns a bar chart where it is shown what amount of each family all clusters hold
 # clusters: list of all clusters
 # yhat: Describes which instance is in which cluster
 # family: List of the family of all instances
@@ -112,7 +112,7 @@ def clusters_family_amount(clusters, yhat, family):
     return fig
 
 
-# shows bar chart of how many instances with timeout each cluster has
+# returns a bar chart of how many instances with timeout each cluster has
 # a instance is considered to have a timeout when all solvers timeout
 # clusters: list of all clusters
 # yhat: Describes which instance is in which cluster

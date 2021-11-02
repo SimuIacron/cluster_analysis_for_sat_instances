@@ -1,6 +1,7 @@
 from sklearn.preprocessing import StandardScaler
 
 import util
+from DataFormats.InputData import InputDataScaling
 
 SCALINGALGORITHMS = [
     ('Scale to [-1,1]', 'SCALEMINUSPLUS1'),
@@ -9,7 +10,10 @@ SCALINGALGORITHMS = [
     ('No Scaling', 'NONE')
 ]
 
-def scaling(data, algorithm="NONE"):
+
+def scaling(data, params: InputDataScaling):
+    algorithm = params.scaling_algorithm
+
     if algorithm == "STANDARDSCALER":
         scaler = StandardScaler()
         scaler.fit(data)

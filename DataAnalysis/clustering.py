@@ -27,9 +27,7 @@ CLUSTERALGORITHMS = [
 
 # clusters the given data with the select algorithm and display a plot of two features
 # instance_list: The data to cluster
-# axis1: feature that is used as the x axis in the plot
-# axis2: feature that is used as the y axis in the plot
-# algorithm: The cluster algorithm
+# params: Parameters for the clustering algorithms
 def cluster(instances_list, params: InputDataCluster):
     print("Starting clustering...")
 

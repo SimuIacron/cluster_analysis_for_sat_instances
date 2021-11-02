@@ -5,6 +5,7 @@ from DataAnalysis import evaluation
 from DataFormats.DbInstance import DbInstance
 
 
+# creates for each cluster that exists two graphs
 def create_layout(clusters, yhat, db_instance: DbInstance):
     graphs = []
     for cluster in clusters:

@@ -117,7 +117,6 @@ def create_layout():
             min=1
         ),
 
-
         html.H4('Agglomerative Clustering'),
         html.Label('Cluster Amounts'),
         daq.NumericInput(
@@ -214,6 +213,8 @@ def create_layout():
 
 
 def register_callback(app, db_instance: DbInstance):
+    # when calculation button (Input) is pressed read in all parameters (State), calculate the clusters
+    # and output the graphs and windows (Output)
     @app.callback(
         [Output('clustering-graph-1', 'figure'),
          Output('clustering-graph-2', 'figure'),
@@ -261,23 +262,35 @@ def register_callback(app, db_instance: DbInstance):
                       n_components_gauss,
                       threshold_birch, branching_factor_birch, n_clusters_birch,
                       eps_dbscan, min_samples_dbscan):
-        input_data_cluster = InputDataCluster(cluster_algorithm=cluster_value, seed=seed,
-                                              n_clusters_k_means=n_clusters_k_means,
-                                              damping_aff=damping_aff, preference_aff=preference_aff, affinity_aff=affinity_aff,
-                                              bandwidth_mean=bandwidth_mean,
-                                              n_clusters_spectral=n_clusters_spectral,
-                                              n_clusters_agg=n_clusters_agg, affinity_agg=affinity_agg, linkage_agg=linkage_agg, distance_threshold=distance_threshold,
-                                              min_samples_opt=min_samples_opt, min_clusters_opt=min_clusters_opt,
-                                              n_components_gauss=n_components_gauss,
-                                              threshold_birch=threshold_birch, branching_factor_birch=branching_factor_birch, n_clusters_birch=n_clusters_birch,
-                                              eps_dbscan=eps_dbscan, min_samples_dbscan=min_samples_dbscan)
+
+        # cluster params
+        input_data_cluster = \
+            InputDataCluster(cluster_algorithm=cluster_value, seed=seed,
+                             n_clusters_k_means=n_clusters_k_means,
+                             damping_aff=damping_aff, preference_aff=preference_aff, affinity_aff=affinity_aff,
+                             bandwidth_mean=bandwidth_mean,
+                             n_clusters_spectral=n_clusters_spectral,
+                             n_clusters_agg=n_clusters_agg, affinity_agg=affinity_agg, linkage_agg=linkage_agg,
+                             distance_threshold=distance_threshold,
+                             min_samples_opt=min_samples_opt, min_clusters_opt=min_clusters_opt,
+                             n_components_gauss=n_components_gauss,
+                             threshold_birch=threshold_birch, branching_factor_birch=branching_factor_birch,
+                             n_clusters_birch=n_clusters_birch,
+                             eps_dbscan=eps_dbscan, min_samples_dbscan=min_samples_dbscan)
+
+        # scaling params
         input_data_scaling = InputDataScaling(scaling_algorithm=scaling_value)
+
+        # feature selection params
         input_data_feature_selection = InputDataFeatureSelection(selection_algorithm=feature_reduction_value,
                                                                  n_features=n_features, variance=variance)
 
-        clusters, yhat, reduced_instance_list, instances_list_s = run_clustering(db_instance, input_data_cluster,
-                                                                                 input_data_scaling,
-                                                                                 input_data_feature_selection)
+        # run algorithms
+        clusters, yhat, reduced_instance_list, instances_list_s = run(db_instance, input_data_cluster,
+                                                                      input_data_scaling,
+                                                                      input_data_feature_selection)
+
+        # return graphs and windows
         return [
             evaluation.clusters_scatter_plot(yhat, reduced_instance_list, db_instance.solver_wh,
                                              DatabaseReader.FEATURES_SOLVER),
@@ -287,26 +300,24 @@ def register_callback(app, db_instance: DbInstance):
         ]
 
 
-def run_clustering(db_instance: DbInstance, input_data_cluster: InputDataCluster,
-                   input_data_scaling: InputDataScaling,
-                   input_data_feature_selection: InputDataFeatureSelection):
-    print("Start scaling...")
-    instances_list_s = scaling.scaling(db_instance.instances_wh, algorithm=input_data_scaling.scaling_algorithm)
+# runs all algorithms with the data and parameters
+def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
+        input_data_scaling: InputDataScaling,
+        input_data_feature_selection: InputDataFeatureSelection):
+    print('Calculation started')
 
-    print("Scaling finished")
+    # scaling
+    instances_list_s = scaling.scaling(db_instance.instances_wh, input_data_scaling)
 
-    # reduce dimensions
+    # feature reduction
     reduced_instance_list = \
-        feature_reduction.feature_reduction(instances_list_s,
-                                            algorithm=input_data_feature_selection.selection_algorithm,
-                                            features=input_data_feature_selection.n_features,
-                                            variance=input_data_feature_selection.variance)
+        feature_reduction.feature_reduction(instances_list_s, input_data_feature_selection)
 
     print('Remaining features: ' + str(len(reduced_instance_list[0])))
-    print("Starting clustering...")
 
     # clustering
     (clusters, yhat) = clustering.cluster(reduced_instance_list, input_data_cluster)
-    print("Clustering finished")
+
+    print('Calculation finished')
 
     return clusters, yhat, reduced_instance_list, instances_list_s

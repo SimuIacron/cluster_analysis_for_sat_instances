@@ -1,6 +1,7 @@
 from dash import dcc
 
 
+# creates three graph objects
 def create_layout():
     return [
         dcc.Graph(

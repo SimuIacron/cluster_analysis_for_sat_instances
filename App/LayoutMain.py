@@ -5,6 +5,9 @@ from DataFormats.DbInstance import DbInstance
 from Windows import ClusteringGraph, Settings
 
 
+# inits a layout with three tabs and calls the window files for the first two
+# the third tab is an output which gets filled when the clusters are calculated, because it layout depends
+# on the amount of clusters.
 def init_layout():
     return [dcc.Tabs([
         dcc.Tab(label='Settings', children=Settings.create_layout()),
@@ -13,6 +16,7 @@ def init_layout():
     ])]
 
 
+# registers the callbacks in the settings tab
 def register_callbacks(app, db_instance: DbInstance):
     Settings.register_callback(app, db_instance)
 
