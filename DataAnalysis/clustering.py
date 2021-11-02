@@ -10,6 +10,7 @@ import util
 from sklearn.cluster import DBSCAN, KMeans, AffinityPropagation, MeanShift, SpectralClustering, AgglomerativeClustering, \
     OPTICS, Birch
 
+from DataFormats.InputData import InputDataCluster
 
 CLUSTERALGORITHMS = [
     ('K-Means', 'KMEANS'),
@@ -29,28 +30,33 @@ CLUSTERALGORITHMS = [
 # axis1: feature that is used as the x axis in the plot
 # axis2: feature that is used as the y axis in the plot
 # algorithm: The cluster algorithm
-def cluster(instances_list, algorithm="DBSCAN", n_clusters=5, eps=1, min_samples=10):
+def cluster(instances_list, params: InputDataCluster):
     print("Starting clustering...")
+
+    algorithm = params.cluster_algorithm
 
     # select clustering algorithm
     if algorithm == "KMEANS":
-        model = KMeans(n_clusters=n_clusters)
+        model = KMeans(random_state=params.seed, n_clusters=params.n_clusters_k_means)
     elif algorithm == "AFFINITY":
-        model = AffinityPropagation()
+        model = AffinityPropagation(random_state=params.seed, damping=params.damping_aff,
+                                    preference=params.preference_aff, affinity=params.affinity_aff)
     elif algorithm == "MEANSHIFT":
-        model = MeanShift()
+        model = MeanShift(bandwidth=params.bandwidth_mean)
     elif algorithm == "SPECTRAL":
-        model = SpectralClustering()
+        model = SpectralClustering(random_state=params.seed, n_clusters=params.n_clusters_spectral)
     elif algorithm == "AGGLOMERATIVE":
-        model = AgglomerativeClustering()
+        model = AgglomerativeClustering(n_clusters=params.n_clusters_agg, affinity=params.affinity_agg,
+                                        linkage=params.linkage_agg, distance_threshold=params.distance_threshold)
     elif algorithm == "OPTICS":
-        model = OPTICS()
-    elif algorithm == "BIRCH":
-        model = Birch()
+        model = OPTICS(min_samples=params.min_samples_opt, min_cluster_size=params.min_clusters_opt)
     elif algorithm == "GAUSSIAN":
-        model = GaussianMixture(n_components=n_clusters)
+        model = GaussianMixture(random_state=params.seed, n_components=params.n_components_gauss)
+    elif algorithm == "BIRCH":
+        model = Birch(threshold=params.threshold_birch, branching_factor=params.branching_factor_birch,
+                      n_clusters=params.n_clusters_birch)
     else:  # algorithm == "DBSCAN":
-        model = DBSCAN(eps=eps, min_samples=min_samples)
+        model = DBSCAN(eps=params.eps_dbscan, min_samples=params.min_samples_dbscan)
 
     # fit model and extract clusters
     model.fit(instances_list)
@@ -62,19 +68,3 @@ def cluster(instances_list, algorithm="DBSCAN", n_clusters=5, eps=1, min_samples
 
     # return clusters and the mapping of each instance to the cluster
     return clusters, yhat
-
-    # fig = pyplot.figure()
-    # ax = fig.add_subplot(projection='2d')
-
-    # x_axis = []
-    # y_axis = []
-    # z_axis = []
-    # for cluster in clusters:
-    #     for i in range(len(yhat)):
-    #        if yhat[i] == cluster:
-    #            x_axis.append(instances_list[i][index1])
-    #            y_axis.append(instances_list[i][index2])
-    #            z_axis.append(instances_list[i][index3])
-
-    #       pyplot.scatter(x_axis, y_axis) #, z_axis)
-    # pyplot.show()
