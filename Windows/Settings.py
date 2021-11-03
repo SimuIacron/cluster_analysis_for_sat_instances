@@ -29,23 +29,18 @@ def create_layout():
 
         html.Button('Calculate', id='submit-val', n_clicks=0),
 
-        html.Label('Seed'),
-        daq.NumericInput(
-            id='numeric-input-seed',
-            value=0,
-            min=0
-        ),
+
 
         dcc.Checklist(
             id='checkbox-export-json',
-            options=[{'label': 'Export json', 'value': 'export_json'}],
+            options=[{'label': 'Export settings as json', 'value': 'export_json'}],
             value=['']
         ),
 
         dcc.Upload(
             id='json-upload',
             children=html.Div(
-                ["Drag and drop or click to select a file to upload."]
+                ["Upload json file to import settings."]
             ),
             style={
                 "width": "100%",
@@ -84,6 +79,14 @@ def create_layout():
             value=create_dropdown(feature_reduction.FEATURESELECTIONALGORITHMS)[0]['value']
         ),
 
+        html.Label('Seed Filtering'),
+        daq.NumericInput(
+            id='numeric-input-seed-filtering',
+            value=0,
+            min=0,
+            max=1000
+        ),
+
         html.H4('Variance'),
         html.Label('Variance'),
         dcc.Slider(
@@ -100,7 +103,8 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-features-selection-pca',
             value=10,
-            min=0
+            min=0,
+            max=1000
         ),
 
         html.H4('Sparse'),
@@ -108,7 +112,8 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-components-sparse',
             value=-1,
-            min=-1
+            min=-1,
+            max=1000
         ),
 
         html.H4('Gaussian'),
@@ -116,7 +121,8 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-components-gaussian',
             value=-1,
-            min=-1
+            min=-1,
+            max=1000
         ),
 
         # clustering
@@ -127,12 +133,21 @@ def create_layout():
             value=create_dropdown(clustering.CLUSTERALGORITHMS)[0]['value']
         ),
 
+        html.Label('Seed Clustering'),
+        daq.NumericInput(
+            id='numeric-input-seed-clustering',
+            value=0,
+            min=0,
+            max=1000
+        ),
+
         html.H4('K-Means'),
         html.Label('Cluster amounts'),
         daq.NumericInput(
             id='numeric-input-n-cluster-k-means',
             value=5,
-            min=1
+            min=1,
+            max=1000
         ),
 
         html.H4('Affinity'),
@@ -149,7 +164,8 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-preference-aff',
             value=-1,
-            min=-1
+            min=-1,
+            max=1000
         ),
         html.Label('Affinity'),
         dcc.Dropdown(
@@ -174,7 +190,8 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-n-cluster-spectral',
             value=5,
-            min=1
+            min=1,
+            max=1000
         ),
 
         html.H4('Agglomerative Clustering'),
@@ -182,7 +199,8 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-n-cluster-agg',
             value=2,
-            min=1
+            min=1,
+            max=1000
         ),
         html.Label('Affinity'),
         dcc.Dropdown(
@@ -213,13 +231,15 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-min-samples-opt',
             value=5,
-            min=1
+            min=1,
+            max=1000
         ),
         html.Label('Min clusters'),
         daq.NumericInput(
             id='numeric-input-min-clusters-opt',
             value=3,
-            min=1
+            min=1,
+            max=1000
         ),
 
         html.H4('Gaussian'),
@@ -227,7 +247,8 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-components-gauss',
             value=1,
-            min=1
+            min=1,
+            max=1000
         ),
 
         html.H4('Birch'),
@@ -244,13 +265,15 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-branching-factor-birch',
             value=50,
-            min=2
+            min=2,
+            max=1000
         ),
         html.Label('Cluster Amount'),
         daq.NumericInput(
             id='numeric-input-n-clusters-birch',
             value=3,
-            min=1
+            min=1,
+            max=1000
         ),
 
         html.H4('DBSCAN'),
@@ -267,7 +290,8 @@ def create_layout():
         daq.NumericInput(
             id='numeric-input-min-samples-dbscan',
             value=5,
-            min=1
+            min=1,
+            max=1000
         )
     ]
 
@@ -281,19 +305,20 @@ def register_callback(app, db_instance: DbInstance):
          Output('clustering-graph-3', 'figure'),
          Output('div-cluster-statistics', 'children')],
         [Input('submit-val', 'n_clicks')],
-        [State('numeric-input-seed', 'value'),
-         State('checkbox-export-json', 'value'),
+        [State('checkbox-export-json', 'value'),
          State('checkbox-dataset', 'value'),
 
          State('dropdown-scaling-algorithm', 'value'),
 
          State('dropdown-feature-selection-algorithm', 'value'),
+         State('numeric-input-seed-filtering', 'value'),
          State('numeric-input-features-selection-pca', 'value'),
          State('slider-variance-var', 'value'),
          State('numeric-input-components-sparse', 'value'),
          State('numeric-input-components-gaussian', 'value'),
 
          State('dropdown-cluster-algorithm', 'value'),
+         State('numeric-input-seed-clustering', 'value'),
          State('numeric-input-n-cluster-k-means', 'value'),
          State('slider-damping-aff', 'value'),
          State('numeric-input-preference-aff', 'value'),
@@ -315,19 +340,20 @@ def register_callback(app, db_instance: DbInstance):
          ]
     )
     def update_output(n_clicks,
-                      seed,
                       export_json,
                       dataset_selection,
 
                       scaling_value,
 
                       feature_reduction_value,
+                      seed_filtering,
                       n_features_pca,
                       variance_var,
                       n_components_sparse,
                       n_components_gaussian,
 
                       cluster_value,
+                      seed_clustering,
                       n_clusters_k_means,
                       damping_aff, preference_aff, affinity_aff,
                       bandwidth_mean,
@@ -340,7 +366,7 @@ def register_callback(app, db_instance: DbInstance):
 
         # cluster params
         input_data_cluster = \
-            InputDataCluster(cluster_algorithm=cluster_value, seed=seed,
+            InputDataCluster(cluster_algorithm=cluster_value, seed=seed_clustering,
                              n_clusters_k_means=n_clusters_k_means,
                              damping_aff=damping_aff, preference_aff=preference_aff, affinity_aff=affinity_aff,
                              bandwidth_mean=bandwidth_mean,
@@ -359,7 +385,7 @@ def register_callback(app, db_instance: DbInstance):
         # feature selection params
         input_data_feature_selection = \
             InputDataFeatureSelection(selection_algorithm=feature_reduction_value,
-                                      seed=seed,
+                                      seed=seed_filtering,
                                       n_features_pca=n_features_pca,
                                       variance_var=variance_var,
                                       n_components_sparse=n_components_sparse,
@@ -383,7 +409,38 @@ def register_callback(app, db_instance: DbInstance):
         ]
 
     @app.callback(
-        [Output('numeric-input-seed', 'value')],
+        [Output('checkbox-dataset', 'value'),
+
+         Output('dropdown-scaling-algorithm', 'value'),
+
+         Output('dropdown-feature-selection-algorithm', 'value'),
+         Output('numeric-input-seed-filtering', 'value'),
+         Output('numeric-input-features-selection-pca', 'value'),
+         Output('slider-variance-var', 'value'),
+         Output('numeric-input-components-sparse', 'value'),
+         Output('numeric-input-components-gaussian', 'value'),
+
+         Output('dropdown-cluster-algorithm', 'value'),
+         Output('numeric-input-seed-clustering', 'value'),
+         Output('numeric-input-n-cluster-k-means', 'value'),
+         Output('slider-damping-aff', 'value'),
+         Output('numeric-input-preference-aff', 'value'),
+         Output('dropdown-affinity-aff', 'value'),
+         Output('slider-bandwidth-mean', 'value'),
+         Output('numeric-input-n-cluster-spectral', 'value'),
+         Output('numeric-input-n-cluster-agg', 'value'),
+         Output('dropdown-affinity-agg', 'value'),
+         Output('dropdown-linkage-agg', 'value'),
+         Output('slider-distance-threshold-agg', 'value'),
+         Output('numeric-input-min-samples-opt', 'value'),
+         Output('numeric-input-min-clusters-opt', 'value'),
+         Output('numeric-input-components-gauss', 'value'),
+         Output('slider-threshold-birch', 'value'),
+         Output('numeric-input-branching-factor-birch', 'value'),
+         Output('numeric-input-n-clusters-birch', 'value'),
+         Output('slider-eps-dbscan', 'value'),
+         Output('numeric-input-min-samples-dbscan', 'value')
+         ],
         [Input('json-upload', 'contents'),
          Input('json-upload', 'filename')])
     def upload_json_file(contents, filename):
@@ -391,10 +448,11 @@ def register_callback(app, db_instance: DbInstance):
             content_type, content_string = contents.split(",")
 
             decoded = base64.b64decode(content_string)
-            dict_final = JsonExport.convert_bytes_to_dict(decoded)
 
             # output here the correct values
-            return [10]
+            values = JsonExport.convert_bytes_view(decoded)
+            print(values)
+            return values
 
         # needs to throw an exception if there is no uploaded file
         # to prevent faulty update on startup of application
