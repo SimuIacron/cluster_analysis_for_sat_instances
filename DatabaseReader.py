@@ -73,6 +73,30 @@ def remove_keywords_from_query_with_hash(query):
     return query
 
 
+def combine_queries(queries, queries_without_hash):
+    # combine the queries, to one
+    # check if all queries have the same order, if not throw an error for now
+    final_query_without_hash = []
+    final_query = []
+    for i in range(len(queries[0])):
+        for j in range(len(queries)):
+            if queries[0][i][0] != queries[j][i][0]:
+                raise AssertionError()
+
+    final_query_without_hash = []
+    final_query = []
+    for i in range(len(queries[0])):
+        instance_without_hash = []
+        instance = [queries[0][i][0]]
+        for j in range(len(queries_without_hash)):
+            instance = instance + queries_without_hash[j][i]
+            instance_without_hash = instance_without_hash + queries_without_hash[j][i]
+        final_query.append(instance)
+        final_query_without_hash.append(instance_without_hash)
+
+    return final_query, final_query_without_hash
+
+
 # reads the given features from the db and returns a query with and without the instance hashes
 def read_from_db(features):
     with GBD(DB_PATH) as gbd:
@@ -91,27 +115,7 @@ def read_from_db(features):
             queries.append(query)
             queries_without_hash.append(query_without_hash)
 
-        # combine the queries, to one
-        # check if all queries have the same order, if not throw an error for now
-        final_query_without_hash = []
-        final_query = []
-        for i in range(len(queries[0])):
-            for j in range(len(queries)):
-                if queries[0][i][0] != queries[j][i][0]:
-                    raise AssertionError()
-
-        final_query_without_hash = []
-        final_query = []
-        for i in range(len(queries[0])):
-            instance_without_hash = []
-            instance = [queries[0][i][0]]
-            for j in range(len(queries_without_hash)):
-                instance = instance + queries_without_hash[j][i]
-                instance_without_hash = instance_without_hash + queries_without_hash[j][i]
-            final_query.append(instance)
-            final_query_without_hash.append(instance_without_hash)
-
-        return final_query, final_query_without_hash
+        return combine_queries(queries, queries_without_hash)
 
 
 def read_family_from_db():

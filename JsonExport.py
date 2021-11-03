@@ -5,8 +5,10 @@ import os
 from DataFormats.InputData import InputDataFeatureSelection, InputDataCluster, InputDataScaling
 
 
-def export_json(cluster_params: InputDataCluster, feature_selection_params: InputDataFeatureSelection,
+def export_json(dataset, cluster_params: InputDataCluster, feature_selection_params: InputDataFeatureSelection,
                 scaling_params: InputDataScaling):
+
+    misc_dict = {'dataset_selection': dataset}
 
     cluster_dict = {key: value for key, value in cluster_params.__dict__.items() if
                     not key.startswith('__') and not callable(key)}
@@ -15,8 +17,8 @@ def export_json(cluster_params: InputDataCluster, feature_selection_params: Inpu
     scaling_dict = {key: value for key, value in scaling_params.__dict__.items() if
                     not key.startswith('__') and not callable(key)}
 
-    dict_params = {'cluster_params': cluster_dict, 'feature_selection_params': feature_selection_dict,
-                   'scaling_dict': scaling_dict}
+    dict_params = {'misc': misc_dict, 'cluster_params': cluster_dict,
+                   'feature_selection_params': feature_selection_dict, 'scaling_dict': scaling_dict}
 
     dict_final = {'params': dict_params}
 
@@ -26,3 +28,6 @@ def export_json(cluster_params: InputDataCluster, feature_selection_params: Inpu
     with open(os.environ['JSONPATH'] + dt_string, 'w') as outfile:
         json.dump(dict_final, outfile)
 
+
+def convert_bytes_to_dict(data):
+    return json.loads(data.decode('utf-8'))

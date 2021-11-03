@@ -1,3 +1,6 @@
+import base64
+
+import dash.exceptions
 import pandas as pd
 import plotly.express as px
 from dash import html, Input, Output, dcc, State
@@ -37,6 +40,34 @@ def create_layout():
             id='checkbox-export-json',
             options=[{'label': 'Export json', 'value': 'export_json'}],
             value=['']
+        ),
+
+        dcc.Upload(
+            id='json-upload',
+            children=html.Div(
+                ["Drag and drop or click to select a file to upload."]
+            ),
+            style={
+                "width": "100%",
+                "height": "60px",
+                "lineHeight": "60px",
+                "borderWidth": "1px",
+                "borderStyle": "dashed",
+                "borderRadius": "5px",
+                "textAlign": "center",
+                "margin": "10px",
+            }
+        ),
+
+        html.Label('Cluster Dataset'),
+        dcc.Checklist(
+            id='checkbox-dataset',
+            options=[
+                {'label': 'Base', 'value': 'base'},
+                {'label': 'Gate', 'value': 'gate'},
+                {'label': 'Solver', 'value': 'solver'}
+            ],
+            value=['base', 'gate']
         ),
 
         html.H2('Scaling'),
@@ -252,6 +283,7 @@ def register_callback(app, db_instance: DbInstance):
         [Input('submit-val', 'n_clicks')],
         [State('numeric-input-seed', 'value'),
          State('checkbox-export-json', 'value'),
+         State('checkbox-dataset', 'value'),
 
          State('dropdown-scaling-algorithm', 'value'),
 
@@ -285,6 +317,7 @@ def register_callback(app, db_instance: DbInstance):
     def update_output(n_clicks,
                       seed,
                       export_json,
+                      dataset_selection,
 
                       scaling_value,
 
@@ -332,12 +365,13 @@ def register_callback(app, db_instance: DbInstance):
                                       n_components_sparse=n_components_sparse,
                                       n_components_gaussian=n_components_gaussian)
 
+        db_instance.generate_dataset(dataset_selection)
         # run algorithms
         clusters, yhat, reduced_instance_list, instances_list_s = run(db_instance, input_data_cluster,
                                                                       input_data_scaling,
                                                                       input_data_feature_selection)
         if 'export_json' in export_json:
-            JsonExport.export_json(input_data_cluster, input_data_feature_selection, input_data_scaling)
+            JsonExport.export_json(dataset_selection, input_data_cluster, input_data_feature_selection, input_data_scaling)
 
         # return graphs and windows
         return [
@@ -348,6 +382,24 @@ def register_callback(app, db_instance: DbInstance):
             ClusterStatistics.create_layout(clusters, yhat, db_instance)
         ]
 
+    @app.callback(
+        [Output('numeric-input-seed', 'value')],
+        [Input('json-upload', 'contents'),
+         Input('json-upload', 'filename')])
+    def upload_json_file(contents, filename):
+        if contents:
+            content_type, content_string = contents.split(",")
+
+            decoded = base64.b64decode(content_string)
+            dict_final = JsonExport.convert_bytes_to_dict(decoded)
+
+            # output here the correct values
+            return [10]
+
+        # needs to throw an exception if there is no uploaded file
+        # to prevent faulty update on startup of application
+        raise dash.exceptions.PreventUpdate()
+
 
 # runs all algorithms with the data and parameters
 def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
@@ -356,7 +408,7 @@ def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
     print('Calculation started')
 
     # scaling
-    instances_list_s = scaling.scaling(db_instance.instances_wh, input_data_scaling)
+    instances_list_s = scaling.scaling(db_instance.dataset_wh, input_data_scaling)
 
     # feature reduction
     reduced_instance_list = \
