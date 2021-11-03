@@ -5,6 +5,7 @@ import dash_daq.NumericInput as daq
 from numpy import argmin
 
 import DatabaseReader
+import JsonExport
 import util
 from DataAnalysis import scaling, feature_reduction, clustering, evaluation
 from DataFormats.InputData import InputDataScaling, InputDataCluster, InputDataFeatureSelection
@@ -30,6 +31,12 @@ def create_layout():
             id='numeric-input-seed',
             value=0,
             min=0
+        ),
+
+        dcc.Checklist(
+            id='checkbox-export-json',
+            options=[{'label': 'Export json', 'value': 'export_json'}],
+            value=['']
         ),
 
         html.H2('Scaling'),
@@ -244,6 +251,7 @@ def register_callback(app, db_instance: DbInstance):
          Output('div-cluster-statistics', 'children')],
         [Input('submit-val', 'n_clicks')],
         [State('numeric-input-seed', 'value'),
+         State('checkbox-export-json', 'value'),
 
          State('dropdown-scaling-algorithm', 'value'),
 
@@ -276,6 +284,7 @@ def register_callback(app, db_instance: DbInstance):
     )
     def update_output(n_clicks,
                       seed,
+                      export_json,
 
                       scaling_value,
 
@@ -295,6 +304,7 @@ def register_callback(app, db_instance: DbInstance):
                       n_components_gauss,
                       threshold_birch, branching_factor_birch, n_clusters_birch,
                       eps_dbscan, min_samples_dbscan):
+
         # cluster params
         input_data_cluster = \
             InputDataCluster(cluster_algorithm=cluster_value, seed=seed,
@@ -326,6 +336,8 @@ def register_callback(app, db_instance: DbInstance):
         clusters, yhat, reduced_instance_list, instances_list_s = run(db_instance, input_data_cluster,
                                                                       input_data_scaling,
                                                                       input_data_feature_selection)
+        if 'export_json' in export_json:
+            JsonExport.export_json(input_data_cluster, input_data_feature_selection, input_data_scaling)
 
         # return graphs and windows
         return [
