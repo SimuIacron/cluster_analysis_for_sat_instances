@@ -118,17 +118,22 @@ def read_from_db(features):
         return combine_queries(queries, queries_without_hash)
 
 
+# -------------------------------------------------------
+# all functions below return a tuple of the requested features with
+# and without hash
+# it also appends the list of feature names
+# -------------------------------------------------------
 def read_family_from_db():
-    return read_from_db(FEATURES_FAMILY)
+    return read_from_db(FEATURES_FAMILY), FEATURES_FAMILY
 
 
 def read_solver_from_db():
-    return read_from_db(FEATURES_SOLVER)
+    return read_from_db(FEATURES_SOLVER), FEATURES_SOLVER
 
 
 def read_gate_from_db():
-    return read_from_db(FEATURES_GATE)
+    return read_from_db(FEATURES_GATE), FEATURES_GATE
 
 
 def read_base_from_db():
-    return read_from_db(FEATURES_BASE)
+    return read_from_db(FEATURES_BASE), FEATURES_BASE

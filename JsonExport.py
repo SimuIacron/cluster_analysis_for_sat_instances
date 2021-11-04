@@ -50,7 +50,9 @@ def convert_bytes(data):
                          n_clusters_birch=cluster_dict['n_clusters_birch'],
                          eps_dbscan=cluster_dict['eps_dbscan'], min_samples_dbscan=cluster_dict['min_samples_dbscan'])
 
-    scaling_params = InputDataScaling(scaling_algorithm=scaling_dict['scaling_algorithm'])
+    scaling_params = InputDataScaling(scaling_algorithm=scaling_dict['scaling_algorithm'],
+                                      scaling_technique=scaling_dict['scaling_technique'],
+                                      scaling_k_best=scaling_dict['scaling_k_best'])
 
     selection_params = \
         InputDataFeatureSelection(selection_algorithm=feature_selection_dict['selection_algorithm'],
@@ -61,6 +63,7 @@ def convert_bytes(data):
                                   n_components_gaussian=feature_selection_dict['n_components_gaussian'])
 
     return dataset, cluster_params, selection_params, scaling_params
+
 
 def convert_bytes_view(data):
     dict_final = json.loads(data.decode('utf-8'))
@@ -99,6 +102,8 @@ def convert_bytes_view(data):
         dataset,
 
         scaling_dict['scaling_algorithm'],
+        scaling_dict['scaling_technique'],
+        scaling_dict['scaling_k_best'],
 
         feature_selection_dict['selection_algorithm'],
         feature_selection_dict['seed'],

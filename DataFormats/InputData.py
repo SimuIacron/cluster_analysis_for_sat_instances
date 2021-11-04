@@ -97,5 +97,7 @@ class InputDataFeatureSelection:
 # Stores the parameters for the Scaling Algorithm
 class InputDataScaling:
 
-    def __init__(self, scaling_algorithm='SCALEMINUSPLUS1'):
+    def __init__(self, scaling_algorithm='SCALEMINUSPLUS1', scaling_technique='NORMALSCALE', scaling_k_best=3):
         self.scaling_algorithm = scaling_algorithm
+        self.scaling_technique = scaling_technique
+        self.scaling_k_best = scaling_k_best

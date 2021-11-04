@@ -38,3 +38,17 @@ def scale_array_to_minus_plus_1(array):
 # example: [[1,2], [3,4], [5,6]] --> [[1,3,5], [2,4,6]]
 def rotateNestedLists(nested_list):
     return list(map(list, zip(*nested_list)))
+
+
+# selected the k smallest values in an array an sets them to 1
+# all other values get set to 0
+# example k = 2 [2,5,1,7,3,9] --> [1,0,1,0,0,0]
+def select_k_best_mins(array, k):
+    sorted_array = sorted(array)
+    k_best = sorted_array[:k]
+    output = [0] * len(array)
+    for item in k_best:
+        output[array.index(item)] = 1
+    return output
+
+

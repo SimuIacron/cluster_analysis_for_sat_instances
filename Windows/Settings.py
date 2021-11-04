@@ -72,6 +72,21 @@ def create_layout():
             value=create_dropdown(scaling.SCALINGALGORITHMS)[0]['value']
         ),
 
+        html.H4('Scale to [-1,1]'),
+        html.Label('Scaling technique'),
+        dcc.Dropdown(
+            id='dropdown-scaling-technique',
+            options=create_dropdown(scaling.SCALINGTECHNIQUES),
+            value=create_dropdown(scaling.SCALINGTECHNIQUES)[0]['value']
+        ),
+        html.Label('K'),
+        daq.NumericInput(
+            id='numeric-input-k-best',
+            value=3,
+            min=1,
+            max=1000
+        ),
+
         html.H2('Feature Filtering'),
         dcc.Dropdown(
             id='dropdown-feature-selection-algorithm',
@@ -309,6 +324,8 @@ def register_callback(app, db_instance: DbInstance):
          State('checkbox-dataset', 'value'),
 
          State('dropdown-scaling-algorithm', 'value'),
+         State('dropdown-scaling-technique', 'value'),
+         State('numeric-input-k-best', 'value'),
 
          State('dropdown-feature-selection-algorithm', 'value'),
          State('numeric-input-seed-filtering', 'value'),
@@ -344,6 +361,8 @@ def register_callback(app, db_instance: DbInstance):
                       dataset_selection,
 
                       scaling_value,
+                      scaling_technique,
+                      scaling_k_best,
 
                       feature_reduction_value,
                       seed_filtering,
@@ -380,7 +399,8 @@ def register_callback(app, db_instance: DbInstance):
                              eps_dbscan=eps_dbscan, min_samples_dbscan=min_samples_dbscan)
 
         # scaling params
-        input_data_scaling = InputDataScaling(scaling_algorithm=scaling_value)
+        input_data_scaling = InputDataScaling(scaling_algorithm=scaling_value, scaling_technique=scaling_technique,
+                                              scaling_k_best=scaling_k_best)
 
         # feature selection params
         input_data_feature_selection = \
@@ -397,7 +417,8 @@ def register_callback(app, db_instance: DbInstance):
                                                                       input_data_scaling,
                                                                       input_data_feature_selection)
         if 'export_json' in export_json:
-            JsonExport.export_json(dataset_selection, input_data_cluster, input_data_feature_selection, input_data_scaling)
+            JsonExport.export_json(dataset_selection, input_data_cluster, input_data_feature_selection,
+                                   input_data_scaling)
 
         # return graphs and windows
         return [
@@ -412,6 +433,7 @@ def register_callback(app, db_instance: DbInstance):
         [Output('checkbox-dataset', 'value'),
 
          Output('dropdown-scaling-algorithm', 'value'),
+         Output('dropdown-scaling-technique', 'value'),
 
          Output('dropdown-feature-selection-algorithm', 'value'),
          Output('numeric-input-seed-filtering', 'value'),
@@ -466,13 +488,11 @@ def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
     print('Calculation started')
 
     # scaling
-    instances_list_s = scaling.scaling(db_instance.dataset_wh, input_data_scaling)
+    instances_list_s = scaling.scaling(db_instance.dataset_wh, db_instance.dataset_f, input_data_scaling)
 
     # feature reduction
     reduced_instance_list = \
-        feature_reduction.feature_reduction(instances_list_s, input_data_feature_selection)
-
-    print('Remaining features: ' + str(len(reduced_instance_list[0])))
+        feature_reduction.feature_reduction(instances_list_s, db_instance.dataset_f, input_data_feature_selection)
 
     # clustering
     (clusters, yhat) = clustering.cluster(reduced_instance_list, input_data_cluster)
