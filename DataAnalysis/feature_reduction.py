@@ -15,6 +15,11 @@ FEATURESELECTIONALGORITHMS = [
     ('No feature selection', 'NONE')
 ]
 
+FEATURESELECTIONIGNORE = [
+    ('Variance applies to all features ', 'NONE'),
+    ('Variance ignores solver time', 'TIMEIGNORE')
+]
+
 
 def feature_reduction(data, features, params: InputDataFeatureSelection):
     algorithm = params.selection_algorithm

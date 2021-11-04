@@ -113,6 +113,13 @@ def create_layout():
             tooltip={"placement": "bottom", "always_visible": False},
         ),
 
+        html.Label('Variance ignore'),
+        dcc.Dropdown(
+            id='dropdown-feature-selection-var-ignore',
+            options=create_dropdown(feature_reduction.FEATURESELECTIONIGNORE),
+            value=create_dropdown(feature_reduction.FEATURESELECTIONIGNORE)[0]['value']
+        ),
+
         html.H4('PCA'),
         html.Label('Remaining Features (0 means open)'),
         daq.NumericInput(
@@ -166,7 +173,7 @@ def create_layout():
         ),
 
         html.H4('Affinity'),
-        html.Label('Damping'),
+        html.Label('Damping: Damps the responsibility and availability messages to avoid numerical oscillations'),
         dcc.Slider(
             id='slider-damping-aff',
             min=0.5,
@@ -175,7 +182,7 @@ def create_layout():
             value=0.5,
             tooltip={"placement": "bottom", "always_visible": False},
         ),
-        html.Label('Preference (-1 means None)'),
+        html.Label('Preference (-1 means None): Controls how many exemplars are used'),
         daq.NumericInput(
             id='numeric-input-preference-aff',
             value=-1,
@@ -190,7 +197,7 @@ def create_layout():
         ),
 
         html.H4('MeanShift'),
-        html.Label('Bandwidth'),
+        html.Label('Bandwidth (-1 means it gets estimated): Dictates the size of the region to search through'),
         dcc.Slider(
             id='slider-bandwidth-mean',
             min=-1,
@@ -228,7 +235,10 @@ def create_layout():
         dcc.Dropdown(
             id='dropdown-linkage-agg',
             options=create_dropdown(
-                [('ward', 'ward'), ('complete', 'complete'), ('average', 'average'), ('single', 'single')]),
+                [('ward (minimizes the sum squared difference within all clusters)', 'ward'),
+                 ('complete (minimizes the maximum distance between observations of pairs of cluster)s', 'complete'),
+                 ('average (minimizes the average of the distance between all observations of pairs of clusters)', 'average'),
+                 ('single (minimizes the distance between the closest observation of pairs of clusters)', 'single')]),
             value='ward'
         ),
         html.Label('Distance Threshold (-1 means None)'),
@@ -292,7 +302,7 @@ def create_layout():
         ),
 
         html.H4('DBSCAN'),
-        html.Label('Eps (DBSCAN)'),
+        html.Label('Eps (DBSCAN): In which area we check for other samples around the selected sample'),
         dcc.Slider(
             id='slider-eps-dbscan',
             min=0.1,
@@ -301,7 +311,7 @@ def create_layout():
             value=1,
             tooltip={"placement": "bottom", "always_visible": False},
         ),
-        html.Label('Min Samples (DBSCAN)'),
+        html.Label('Min Samples (DBSCAN): How many points samples have to be around the selected sample to be a core-sample'),
         daq.NumericInput(
             id='numeric-input-min-samples-dbscan',
             value=5,
@@ -331,6 +341,7 @@ def register_callback(app, db_instance: DbInstance):
          State('numeric-input-seed-filtering', 'value'),
          State('numeric-input-features-selection-pca', 'value'),
          State('slider-variance-var', 'value'),
+         State('dropdown-feature-selection-var-ignore', 'value'),
          State('numeric-input-components-sparse', 'value'),
          State('numeric-input-components-gaussian', 'value'),
 
@@ -368,6 +379,7 @@ def register_callback(app, db_instance: DbInstance):
                       seed_filtering,
                       n_features_pca,
                       variance_var,
+                      ignore_var,
                       n_components_sparse,
                       n_components_gaussian,
 
@@ -408,6 +420,7 @@ def register_callback(app, db_instance: DbInstance):
                                       seed=seed_filtering,
                                       n_features_pca=n_features_pca,
                                       variance_var=variance_var,
+                                      ignore_var=ignore_var,
                                       n_components_sparse=n_components_sparse,
                                       n_components_gaussian=n_components_gaussian)
 
@@ -434,11 +447,13 @@ def register_callback(app, db_instance: DbInstance):
 
          Output('dropdown-scaling-algorithm', 'value'),
          Output('dropdown-scaling-technique', 'value'),
+         Output('numeric-input-k-best', 'value'),
 
          Output('dropdown-feature-selection-algorithm', 'value'),
          Output('numeric-input-seed-filtering', 'value'),
          Output('numeric-input-features-selection-pca', 'value'),
          Output('slider-variance-var', 'value'),
+         Output('dropdown-feature-selection-var-ignore', 'value'),
          Output('numeric-input-components-sparse', 'value'),
          Output('numeric-input-components-gaussian', 'value'),
 

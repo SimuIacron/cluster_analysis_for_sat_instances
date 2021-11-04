@@ -59,6 +59,7 @@ def convert_bytes(data):
                                   seed=feature_selection_dict['seed'],
                                   n_features_pca=feature_selection_dict['n_features_pca'],
                                   variance_var=feature_selection_dict['variance_var'],
+                                  ignore_var=feature_selection_dict['ignore_var'],
                                   n_components_sparse=feature_selection_dict['n_components_sparse'],
                                   n_components_gaussian=feature_selection_dict['n_components_gaussian'])
 
@@ -109,6 +110,7 @@ def convert_bytes_view(data):
         feature_selection_dict['seed'],
         feature_selection_dict['n_features_pca'],
         feature_selection_dict['variance_var'],
+        feature_selection_dict['ignore_var'],
         n_components_sparse,
         n_components_gaussian,
 

@@ -68,6 +68,7 @@ class InputDataFeatureSelection:
     def __init__(self, selection_algorithm='PCA', seed=0,
                  n_features_pca=0,
                  variance_var=0.8,
+                 ignore_var='NONE',
                  n_components_sparse=-1,
                  n_components_gaussian=-1):
 
@@ -79,6 +80,7 @@ class InputDataFeatureSelection:
 
         # variance
         self.variance_var = variance_var
+        self.ignore_var = ignore_var
 
 
         # sparse
