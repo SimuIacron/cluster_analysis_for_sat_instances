@@ -10,10 +10,10 @@ from numpy import argmin
 import DatabaseReader
 import JsonExport
 import util
-from DataAnalysis import scaling, feature_reduction, clustering, evaluation
+from DataAnalysis import scaling, feature_reduction, clustering, evaluation, scoring
 from DataFormats.InputData import InputDataScaling, InputDataCluster, InputDataFeatureSelection
 from DataFormats.DbInstance import DbInstance
-from Windows import ClusterStatistics
+from Windows import ClusterStatisticsWindow, ScoringWindow
 
 
 def create_dropdown(dropdown_data):
@@ -28,8 +28,6 @@ def create_layout():
     return [
 
         html.Button('Calculate', id='submit-val', n_clicks=0),
-
-
 
         dcc.Checklist(
             id='checkbox-export-json',
@@ -237,7 +235,8 @@ def create_layout():
             options=create_dropdown(
                 [('ward (minimizes the sum squared difference within all clusters)', 'ward'),
                  ('complete (minimizes the maximum distance between observations of pairs of cluster)s', 'complete'),
-                 ('average (minimizes the average of the distance between all observations of pairs of clusters)', 'average'),
+                 ('average (minimizes the average of the distance between all observations of pairs of clusters)',
+                  'average'),
                  ('single (minimizes the distance between the closest observation of pairs of clusters)', 'single')]),
             value='ward'
         ),
@@ -311,7 +310,8 @@ def create_layout():
             value=1,
             tooltip={"placement": "bottom", "always_visible": False},
         ),
-        html.Label('Min Samples (DBSCAN): How many points samples have to be around the selected sample to be a core-sample'),
+        html.Label(
+            'Min Samples (DBSCAN): How many points samples have to be around the selected sample to be a core-sample'),
         daq.NumericInput(
             id='numeric-input-min-samples-dbscan',
             value=5,
@@ -328,7 +328,8 @@ def register_callback(app, db_instance: DbInstance):
         [Output('clustering-graph-1', 'figure'),
          Output('clustering-graph-2', 'figure'),
          Output('clustering-graph-3', 'figure'),
-         Output('div-cluster-statistics', 'children')],
+         Output('div-cluster-statistics', 'children'),
+         Output('div-scoring', 'children')],
         [Input('submit-val', 'n_clicks')],
         [State('checkbox-export-json', 'value'),
          State('checkbox-dataset', 'value'),
@@ -426,9 +427,8 @@ def register_callback(app, db_instance: DbInstance):
 
         db_instance.generate_dataset(dataset_selection)
         # run algorithms
-        clusters, yhat, reduced_instance_list, instances_list_s = run(db_instance, input_data_cluster,
-                                                                      input_data_scaling,
-                                                                      input_data_feature_selection)
+        clusters, yhat, reduced_instance_list, instances_list_s, score_family_list = \
+            run(db_instance, input_data_cluster, input_data_scaling, input_data_feature_selection)
         if 'export_json' in export_json:
             JsonExport.export_json(dataset_selection, input_data_cluster, input_data_feature_selection,
                                    input_data_scaling)
@@ -439,7 +439,8 @@ def register_callback(app, db_instance: DbInstance):
                                              DatabaseReader.FEATURES_SOLVER),
             evaluation.clusters_family_amount(clusters, yhat, db_instance.family_wh),
             evaluation.clusters_timeout_amount(clusters, yhat, DatabaseReader.TIMEOUT, db_instance.solver_wh),
-            ClusterStatistics.create_layout(clusters, yhat, db_instance)
+            ClusterStatisticsWindow.create_layout(clusters, yhat, db_instance),
+            ScoringWindow.create_layout(family_statistics=score_family_list)
         ]
 
     @app.callback(
@@ -512,6 +513,12 @@ def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
     # clustering
     (clusters, yhat) = clustering.cluster(reduced_instance_list, input_data_cluster)
 
+    score_family_list = scoring.score_cluster_family(yhat, db_instance)
+
     print('Calculation finished')
 
-    return clusters, yhat, reduced_instance_list, instances_list_s
+    return clusters, yhat, reduced_instance_list, instances_list_s, score_family_list
+
+
+def generateStatistics():
+    pass

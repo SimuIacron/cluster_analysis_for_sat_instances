@@ -90,8 +90,8 @@ def cluster_family_amount(cluster_idx, yhat, family):
     sorted_values = sorted(values)
     sorted_values_ratio = [(value / cluster_amount) for value in sorted_values]
 
-    df = pd.DataFrame(dict(axis1=sorted_keys, axis2=sorted_values_ratio, values=sorted_values))
-    fig = px.bar(df, x='axis1', y='axis2', hover_data=['values'])
+    df = pd.DataFrame(dict(family=sorted_keys, amount=sorted_values_ratio, values=sorted_values))
+    fig = px.bar(df, x='family', y='amount', hover_data=['values'])
     fig.update_layout(title='Cluster: ' + str(cluster_idx) + " : " + str(cluster_amount))
     return fig
 
@@ -141,6 +141,17 @@ def clusters_timeout_amount(clusters, yhat, timeout_value, solver_time):
     # Change the bar mode
     fig.update_layout(barmode='stack')
     return fig
+
+
+def family_score_chart(family_score):
+    keys = [item[0] for item in family_score]
+    values = [item[1] for item in family_score]
+
+    df = pd.DataFrame(dict(score=keys, value=values))
+    fig = px.bar(df, x='score', y='value')
+    fig.update_layout(title='Family Scores')
+    return fig
+
 
 
 
