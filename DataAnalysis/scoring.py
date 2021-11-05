@@ -1,6 +1,58 @@
+import DatabaseReader
+import util
 from DataFormats.DbInstance import DbInstance
 from sklearn.metrics import adjusted_mutual_info_score, adjusted_rand_score, completeness_score, fowlkes_mallows_score, \
     homogeneity_score, mutual_info_score, normalized_mutual_info_score, rand_score, v_measure_score
+from collections import Counter
+
+
+def get_k_best_solvers_for_instance(instance_solver_times, k):
+    solver_features = DatabaseReader.FEATURES_SOLVER
+    sorted_features = [x for _, x in sorted(zip(instance_solver_times, solver_features))]
+    return sorted_features[:k]
+
+
+def score_solvers_squared_relativ(yhat, db_instance: DbInstance, k):
+    cluster_dict = {}
+    for i in range(len(yhat)):
+        cluster = yhat[i]
+        if cluster not in cluster_dict:
+            cluster_dict[cluster] = []
+
+        cluster_dict[cluster].append(get_k_best_solvers_for_instance(db_instance.solver_wh[i], k))
+
+    score_dict = {}
+    for key, value in cluster_dict.items():
+        flatten_solver = util.flatten(value)
+        total_amount = len(flatten_solver)
+        count = Counter(flatten_solver)
+        score = 0
+        for algo, amount in count.items():
+            score = score + (amount/total_amount) * (amount/total_amount)
+        score_dict[key] = score * k
+
+    return score_dict
+
+
+
+def score_solver_similarity_in_cluster_occurence(yhat, db_instance:DbInstance, k):
+    cluster_dict = {}
+    for i in range(len(yhat)):
+        cluster = yhat[i]
+        if cluster not in cluster_dict:
+            cluster_dict[cluster] = []
+
+        cluster_dict[cluster].append(get_k_best_solvers_for_instance(db_instance.solver_wh[i], k))
+
+    score_dict = {}
+    for key, value in cluster_dict.items():
+        flatten_solver = util.flatten(value)
+        amount = len(list(dict.fromkeys(flatten_solver)))
+        score = amount / k
+        score_dict[key] = score
+
+    pass
+
 
 
 def convert_families_to_int(instance_family):
@@ -21,15 +73,17 @@ def score_cluster_family(yhat, db_instance: DbInstance):
     scoring_list = []
     family_int = convert_families_to_int(db_instance.family_wh)
 
-    scoring_list.append(('adjusted mutual information score', adjusted_mutual_info_score(yhat, family_int)))
-    scoring_list.append(('adjusted rand score', adjusted_rand_score(yhat, family_int)))
-    scoring_list.append(('completeness score', completeness_score(yhat, family_int)))
-    scoring_list.append(('fowlkes mallows score', fowlkes_mallows_score(yhat, family_int)))
-    scoring_list.append(('homogeneity score', homogeneity_score(yhat, family_int)))
-    scoring_list.append(('mutual info score', mutual_info_score(yhat, family_int)))
-    scoring_list.append(('normalized mutual info score', normalized_mutual_info_score(yhat, family_int)))
-    scoring_list.append(('rand score', rand_score(yhat, family_int)))
-    scoring_list.append(('v measure score', v_measure_score(yhat, family_int)))
+    scoring_list.append(('adjusted mutual information score', adjusted_mutual_info_score(family_int, yhat)))
+    scoring_list.append(('adjusted rand score', adjusted_rand_score(family_int, yhat)))
+    scoring_list.append(('completeness score', completeness_score(family_int, yhat)))
+    scoring_list.append(('fowlkes mallows score', fowlkes_mallows_score(family_int, yhat)))
+    scoring_list.append(('homogeneity score', homogeneity_score(family_int, yhat)))
+    scoring_list.append(('mutual info score', mutual_info_score(family_int, yhat)))
+    scoring_list.append(('normalized mutual info score', normalized_mutual_info_score(family_int, yhat)))
+    scoring_list.append(('rand score', rand_score(family_int, yhat)))
+    scoring_list.append(('v measure score', v_measure_score(family_int, yhat)))
     print(scoring_list)
 
-    return scoring_list
+    score_dict_time = score_solvers_squared_relativ(yhat, db_instance, 3)
+
+    return scoring_list, score_dict_time

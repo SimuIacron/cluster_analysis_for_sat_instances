@@ -52,3 +52,12 @@ def select_k_best_mins(array, k):
     return output
 
 
+def flatten(t):
+    final_list = []
+    for sublist in t:
+        for item in sublist:
+            final_list.append(item)
+
+    return final_list
+
+

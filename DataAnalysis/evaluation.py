@@ -153,6 +153,16 @@ def family_score_chart(family_score):
     return fig
 
 
+def time_score_chart(scoring_dict_time):
+    keys = [key for key, item in scoring_dict_time.items()]
+    values = [value for key, value in scoring_dict_time.items()]
+
+    df = pd.DataFrame(dict(cluster=keys, score=values))
+    fig = px.bar(df, x='cluster', y='score')
+    fig.update_layout(title='Solver Time Squared score')
+    return fig
+
+
 
 
 
