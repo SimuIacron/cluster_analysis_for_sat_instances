@@ -71,7 +71,7 @@ class InputDataFeatureSelection:
                  ignore_var='NONE',
                  n_components_sparse=-1,
                  n_components_gaussian=-1,
-                 mutual_info=0.2):
+                 percentile_best=50):
 
         self.selection_algorithm = selection_algorithm
         self.seed = seed
@@ -83,7 +83,7 @@ class InputDataFeatureSelection:
         self.variance_var = variance_var
         self.ignore_var = ignore_var
 
-        self.mutual_info = mutual_info
+        self.percentile_best = percentile_best
 
 
         # sparse

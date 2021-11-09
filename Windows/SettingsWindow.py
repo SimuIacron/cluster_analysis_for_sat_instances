@@ -505,15 +505,17 @@ def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
         input_data_feature_selection: InputDataFeatureSelection):
     print('Calculation started')
 
-    # scaling
-    instances_list_s = scaling.scaling(db_instance.dataset_wh, db_instance.dataset_f, input_data_scaling)
+
 
     # feature reduction
     reduced_instance_list = \
-        feature_reduction.feature_reduction(instances_list_s, db_instance.dataset_f, db_instance.solver_wh, input_data_feature_selection)
+        feature_reduction.feature_reduction(db_instance.dataset_wh, db_instance.dataset_f, db_instance.solver_wh, input_data_feature_selection)
+
+    # scaling
+    instances_list_s = scaling.scaling(reduced_instance_list, db_instance.dataset_f, input_data_scaling)
 
     # clustering
-    (clusters, yhat) = clustering.cluster(reduced_instance_list, input_data_cluster)
+    (clusters, yhat) = clustering.cluster(instances_list_s, input_data_cluster)
 
     score_family_list, score_dict_time = scoring.score_cluster_family(yhat, db_instance)
 

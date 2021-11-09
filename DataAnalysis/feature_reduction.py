@@ -41,20 +41,14 @@ def feature_reduction(data, features, solvers, params: InputDataFeatureSelection
     elif algorithm == "MUTUALINFO":
 
         best_solver = get_best_solver_per_instance(solvers)
-        mi = mutual_info_classif(data, best_solver)
-        print(mi)
-        return_data = []
-        rot_data = util.rotateNestedLists(data)
-        remaining_features = []
-        for i in range(len(rot_data)):
-            if mi[i] > params.mutual_info:
-                return_data.append(rot_data[i])
-                remaining_features.append(features[i])
+        sel = SelectPercentile(mutual_info_classif, percentile=params.percentile_best)
+        reduced = sel.fit_transform(data, best_solver)
 
-        print("Remaining features: " + str(len(return_data)))
+        print(sel.scores_)
+        print("Remaining features: " + str(len(reduced[0])))
         print("Remaining features:")
-        print(remaining_features)
-        return util.rotateNestedLists(rot_data)
+        print(sel.get_feature_names_out(features))
+        return reduced
 
     elif algorithm == "GAUSSIAN":
         model = GaussianRandomProjection(random_state=params.seed, n_components=params.n_components_gaussian)
