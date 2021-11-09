@@ -20,6 +20,18 @@ class DbInstance:
         (self.family, self.family_wh), self.family_f = DatabaseReader.read_family_from_db()
         print("Queries finished")
 
+        self.solver, removed_array = DatabaseReader.remove_empties(self.solver)
+
+        self.solver_wh = DatabaseReader.remove_with_index_array(self.solver_wh, removed_array)
+        self.gate = DatabaseReader.remove_with_index_array(self.gate, removed_array)
+        self.gate_wh = DatabaseReader.remove_with_index_array(self.gate_wh, removed_array)
+        self.base = DatabaseReader.remove_with_index_array(self.base, removed_array)
+        self.base_wh = DatabaseReader.remove_with_index_array(self.base_wh, removed_array)
+        self.family = DatabaseReader.remove_with_index_array(self.family, removed_array)
+        self.family_wh = DatabaseReader.remove_with_index_array(self.family_wh, removed_array)
+
+        print("remaining instances: " + str(len(self.solver)))
+
     # depending on which datasets where selected (currently base, gate and solver_time)
     # the dataset that is used for clustering is constructed and stored
     # in the self.dataset, self.dataset_wh and self.dataset_f variables
@@ -46,4 +58,3 @@ class DbInstance:
             self.dataset_f = self.dataset_f + self.solver_f
 
         self.dataset, self.dataset_wh = DatabaseReader.combine_queries(data, data_wh)
-

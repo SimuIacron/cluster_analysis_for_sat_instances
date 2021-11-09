@@ -1,18 +1,20 @@
 from sklearn.decomposition import PCA
-from sklearn.feature_selection import VarianceThreshold, SelectPercentile, chi2
+from sklearn.feature_selection import VarianceThreshold, SelectPercentile, chi2, mutual_info_classif
 from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
 
 import DatabaseReader
 import util
 from DataFormats.InputData import InputDataFeatureSelection
 import numpy as np
+from numpy import argmin
 
 FEATURESELECTIONALGORITHMS = [
+    ('Mutual info', 'MUTUALINFO'),
+    ('No feature selection', 'NONE'),
     ('Variance', 'VARIANCE'),
     ('PCA', 'PCA'),
-    ('sparse', 'SPARSE'),  # currently broken
-    ('gaussian', 'GAUSSIAN'),  # currently broken
-    ('No feature selection', 'NONE')
+    ('sparse', 'SPARSE'),
+    ('gaussian', 'GAUSSIAN')
 ]
 
 FEATURESELECTIONIGNORE = [
@@ -20,14 +22,40 @@ FEATURESELECTIONIGNORE = [
     ('Variance ignores solver time', 'TIMEIGNORE')
 ]
 
+def get_best_solver_per_instance(solvers):
+    best_list = []
+    for inst in solvers:
+        index = argmin(inst)
+        best_list.append(index)
 
-def feature_reduction(data, features, params: InputDataFeatureSelection):
+    return best_list
+
+
+def feature_reduction(data, features, solvers, params: InputDataFeatureSelection):
     algorithm = params.selection_algorithm
 
     ignore_solver_time = True
 
     if algorithm == "SPARSE":
         model = SparseRandomProjection(random_state=params.seed, n_components=params.n_components_sparse)
+    elif algorithm == "MUTUALINFO":
+
+        best_solver = get_best_solver_per_instance(solvers)
+        mi = mutual_info_classif(data, best_solver)
+        print(mi)
+        return_data = []
+        rot_data = util.rotateNestedLists(data)
+        remaining_features = []
+        for i in range(len(rot_data)):
+            if mi[i] > params.mutual_info:
+                return_data.append(rot_data[i])
+                remaining_features.append(features[i])
+
+        print("Remaining features: " + str(len(return_data)))
+        print("Remaining features:")
+        print(remaining_features)
+        return util.rotateNestedLists(rot_data)
+
     elif algorithm == "GAUSSIAN":
         model = GaussianRandomProjection(random_state=params.seed, n_components=params.n_components_gaussian)
     elif algorithm == "NONE":

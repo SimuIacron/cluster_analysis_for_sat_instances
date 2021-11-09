@@ -70,7 +70,8 @@ class InputDataFeatureSelection:
                  variance_var=0.8,
                  ignore_var='NONE',
                  n_components_sparse=-1,
-                 n_components_gaussian=-1):
+                 n_components_gaussian=-1,
+                 mutual_info=0.2):
 
         self.selection_algorithm = selection_algorithm
         self.seed = seed
@@ -81,6 +82,8 @@ class InputDataFeatureSelection:
         # variance
         self.variance_var = variance_var
         self.ignore_var = ignore_var
+
+        self.mutual_info = mutual_info
 
 
         # sparse

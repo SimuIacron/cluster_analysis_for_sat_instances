@@ -482,6 +482,8 @@ def register_callback(app, db_instance: DbInstance):
         [Input('json-upload', 'contents'),
          Input('json-upload', 'filename')])
     def upload_json_file(contents, filename):
+        # KNOWN BUG: Reuploading the same file, only works if different file has been uploaded before
+
         if contents:
             content_type, content_string = contents.split(",")
 
@@ -508,7 +510,7 @@ def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
 
     # feature reduction
     reduced_instance_list = \
-        feature_reduction.feature_reduction(instances_list_s, db_instance.dataset_f, input_data_feature_selection)
+        feature_reduction.feature_reduction(instances_list_s, db_instance.dataset_f, db_instance.solver_wh, input_data_feature_selection)
 
     # clustering
     (clusters, yhat) = clustering.cluster(reduced_instance_list, input_data_cluster)
@@ -518,7 +520,3 @@ def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
     print('Calculation finished')
 
     return clusters, yhat, reduced_instance_list, instances_list_s, score_family_list, score_dict_time
-
-
-def generateStatistics():
-    pass

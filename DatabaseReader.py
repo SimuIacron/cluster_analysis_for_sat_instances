@@ -6,7 +6,7 @@ import util
 DB_PATH = os.environ["DBPATH"] + "meta.db" + os.pathsep + \
           os.environ["DBPATH"] + "base.db" + os.pathsep + \
           os.environ["DBPATH"] + "gate.db" + os.pathsep + \
-          os.environ["DBPATH"] + "sc2020.db"
+          os.environ["DBPATH"] + "runtimes.db"
 
 TIMEOUT = 5000
 
@@ -40,33 +40,45 @@ FEATURES_BASE = ['clauses', 'variables', 'clause_size_1', 'clause_size_2', 'clau
                  'cg_degrees_variance', 'cg_degrees_min', 'cg_degrees_max', 'cg_degrees_entropy',
                  'base_features_runtime']
 
-FEATURES_SOLVER = ['cadical_sc2020', 'duriansat', 'exmaple_padc_dl', 'exmaple_padc_dl_ovau_exp',
-                   'exmaple_padc_dl_ovau_lin',
-                   'exmaple_psids_dl', 'kissat', 'kissat_sat', 'kissat_unsat', 'maple_scavel', 'maple_alluip_trail',
-                   'maple_lrb_vsids_2_init', 'maplecomsps_lrb_vsids_2', 'maple_scavel01', 'maple_scavel02',
-                   'maple_dl_f2trc',
-                   'maplelcmdistchronobt_dl_v3', 'maple_f2trc', 'maple_f2trc_s', 'maple_cm_dist',
-                   'maple_cm_dist_sattime2s',
-                   'maple_cm_dist_simp2', 'maple_cmused_dist', 'maple_mix', 'maple_simp', 'parafrost', 'parafrost_cbt',
-                   'pausat', 'relaxed', 'relaxed_newtech', 'relaxed_notimepara', 'slime', 'undominated_top16',
-                   'undominated_top24', 'undominated_top36', 'undominated', 'cadical_alluip', 'cadical_alluip_trail',
-                   'cadical_trail', 'cryptominisat_ccnr', 'cryptominisat_ccnr_lsids', 'cryptominisat_walksat',
-                   'exp_l_mld_cbt_dl', 'exp_v_lgb_mld_cbt_dl', 'exp_v_l_mld_cbt_dl', 'exp_v_mld_cbt_dl', 'glucose3',
-                   'upglucose_3_padc']
+# sc2020.db
+# FEATURES_SOLVER = ['cadical_sc2020', 'duriansat', 'exmaple_padc_dl', 'exmaple_padc_dl_ovau_exp',
+#                   'exmaple_padc_dl_ovau_lin',
+#                   'exmaple_psids_dl', 'kissat', 'kissat_sat', 'kissat_unsat', 'maple_scavel', 'maple_alluip_trail',
+#                   'maple_lrb_vsids_2_init', 'maplecomsps_lrb_vsids_2', 'maple_scavel01', 'maple_scavel02',
+#                   'maple_dl_f2trc',
+#                   'maplelcmdistchronobt_dl_v3', 'maple_f2trc', 'maple_f2trc_s', 'maple_cm_dist',
+#                   'maple_cm_dist_sattime2s',
+#                   'maple_cm_dist_simp2', 'maple_cmused_dist', 'maple_mix', 'maple_simp', 'parafrost', 'parafrost_cbt',
+#                   'pausat', 'relaxed', 'relaxed_newtech', 'relaxed_notimepara', 'slime', 'undominated_top16',
+#                   'undominated_top24', 'undominated_top36', 'undominated', 'cadical_alluip', 'cadical_alluip_trail',
+#                   'cadical_trail', 'cryptominisat_ccnr', 'cryptominisat_ccnr_lsids', 'cryptominisat_walksat',
+#                   'exp_l_mld_cbt_dl', 'exp_v_lgb_mld_cbt_dl', 'exp_v_l_mld_cbt_dl', 'exp_v_mld_cbt_dl', 'glucose3',
+#                   'upglucose_3_padc']
+
+# runtimes.db
+FEATURES_SOLVER = ['cadical_elimfalse', 'cadical', 'cadical_pripro', 'cadical_stability', 'candy', 'glucose_chanseok',
+                   'glucose', 'glucose_syrup', 'glucose_var_decay099', 'kissat', 'lingeling', 'march_nh', 'minisat',
+                   'relaxed', 'yalsat']
 
 FEATURES_FAMILY = ['family']
 
 
-def remove_keywords_from_query_with_hash(query):
+def remove_keywords_from_query_with_hash(query, features):
+
     for inst in query:
         for i in range(1, len(inst)):
-            if inst[i] == "empty" or inst[i] == "memout":
-                inst[i] = 0
-            elif inst[i] == 'timeout' or inst[i] == 'failed':
-                inst[i] = TIMEOUT
+
+            if inst[i] == "empty":
+                inst[i] = -1
+            elif inst[i] == "memout" or inst[i] is None or inst[i] == 'timeout' or inst[i] == 'failed':
+                if features == FEATURES_SOLVER:
+                    inst[i] = TIMEOUT
+                else:
+                    inst[i] = 0
             else:
                 try:
                     inst[i] = float(inst[i])
+                # needed to let discrete values such as families intact
                 except ValueError:
                     pass
 
@@ -86,6 +98,8 @@ def combine_queries(queries, queries_without_hash):
     final_query_without_hash = []
     final_query = []
     for i in range(len(queries[0])):
+
+
         instance_without_hash = []
         instance = [queries[0][i][0]]
         for j in range(len(queries_without_hash)):
@@ -96,6 +110,28 @@ def combine_queries(queries, queries_without_hash):
 
     return final_query, final_query_without_hash
 
+
+def remove_with_index_array(dataset, removed_indexes):
+    result = []
+    for i in range(len(removed_indexes)):
+        if removed_indexes[i] == 1:
+            result.append(dataset[i])
+
+    return result
+
+
+def remove_empties(dataset):
+    result = []
+    removed_indexes = []
+
+    for inst in dataset:
+        if -1 not in inst:
+            result.append(inst)
+            removed_indexes.append(1)
+        else:
+            removed_indexes.append(0)
+
+    return result, removed_indexes
 
 # reads the given features from the db and returns a query with and without the instance hashes
 def read_from_db(features):
@@ -108,9 +144,9 @@ def read_from_db(features):
         queries = []
         queries_without_hash = []
         for sub_features in split_features:
-            query = gbd.query_search("competition_track = main_2020", [], sub_features)
+            query = gbd.query_search("local like %sat202%", [], sub_features)
             query = [list(i) for i in query]
-            query = remove_keywords_from_query_with_hash(query)
+            query = remove_keywords_from_query_with_hash(query, sub_features)
             query_without_hash = [el[1:] for el in query]
             queries.append(query)
             queries_without_hash.append(query_without_hash)
