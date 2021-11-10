@@ -4,6 +4,25 @@ import plotly.express as px
 import util
 import plotly.graph_objects as go
 
+from DataAnalysis import scoring
+from DataFormats.DbInstance import DbInstance
+
+
+def solver_score_cluster(cluster_idx, yhat, db_instance: DbInstance):
+    dict_solver = scoring.score_solvers_on_rank_cluster(yhat, cluster_idx, db_instance, [1000, 2000, 3000, 4000, 5000],
+                                                        [5, 4, 3, 2, 1])
+
+    keys = []
+    values = []
+
+    for key, value in dict_solver.items():
+        keys.append(key)
+        values.append(value)
+
+    df = pd.DataFrame(dict(family=keys, amount=values))
+    fig = px.bar(df, x='family', y='amount')
+    fig.update_layout(title='Cluster: ' + str(cluster_idx))
+    return fig
 
 # counts how often each family occurs in a cluster and returns them as a list of family names and their amounts
 # also returns the amount of elements in the cluster

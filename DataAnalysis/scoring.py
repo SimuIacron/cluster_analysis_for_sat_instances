@@ -12,6 +12,47 @@ def get_k_best_solvers_for_instance(instance_solver_times, k):
     return sorted_features[:k]
 
 
+def get_best_solver_int(db_instance: DbInstance):
+    solver_features = DatabaseReader.FEATURES_SOLVER
+    final = []
+    for inst in db_instance.solver_wh:
+        sorted_features = [x for _, x in sorted(zip(inst, solver_features))]
+        final.append(solver_features.index(sorted_features[0]))
+
+    return final
+
+
+
+def score_solvers_on_rank_cluster(yhat, cluster_idx, db_instance: DbInstance, ranks, factors):
+
+    rank_count = [[] for dummy in range(len(ranks))]
+    cluster_amount = 0
+    for i in range(len(yhat)):
+        if yhat[i] == cluster_idx:
+            cluster_amount = cluster_amount + 1
+            for j in range(len(db_instance.solver_wh[i])):
+                counter = 0
+                while counter < len(ranks):
+                    if db_instance.solver_wh[i][j] <= ranks[counter]:
+                        rank_count[counter].append(db_instance.solver_f[j])
+                        break
+
+                    counter = counter + 1
+
+    solver_dict = {}
+    for i in range(len(rank_count)):
+        count = Counter(rank_count[i])
+        for key, value in count.items():
+            if key not in solver_dict:
+                solver_dict[key] = 0
+
+            solver_dict[key] = solver_dict[key] + factors[i] * value
+
+    for key, value in solver_dict.items():
+        solver_dict[key] = value / (len(db_instance.solver_wh[0]) * cluster_amount)
+    return solver_dict
+
+
 def score_solvers_squared_relativ(yhat, db_instance: DbInstance, k):
     cluster_dict = {}
     for i in range(len(yhat)):

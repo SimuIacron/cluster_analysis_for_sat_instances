@@ -17,10 +17,16 @@ def create_layout(clusters, yhat, db_instance: DbInstance):
 
         graph2 = dcc.Graph(
             style={'height': 800},
+            figure=evaluation.solver_score_cluster(cluster, yhat, db_instance)
+        )
+
+        graph3 = dcc.Graph(
+            style={'height': 800},
             figure=evaluation.cluster_family_amount(cluster, yhat, db_instance.family_wh)
         )
 
         graphs.append(graph1)
         graphs.append(graph2)
+        graphs.append(graph3)
 
     return graphs

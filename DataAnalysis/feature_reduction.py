@@ -1,5 +1,5 @@
 from sklearn.decomposition import PCA
-from sklearn.feature_selection import VarianceThreshold, SelectPercentile, chi2, mutual_info_classif
+from sklearn.feature_selection import VarianceThreshold, SelectPercentile, chi2, mutual_info_classif, SelectKBest
 from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
 
 import DatabaseReader
@@ -44,7 +44,16 @@ def feature_reduction(data, features, solvers, params: InputDataFeatureSelection
         sel = SelectPercentile(mutual_info_classif, percentile=params.percentile_best)
         reduced = sel.fit_transform(data, best_solver)
 
-        print(sel.scores_)
+        print("Remaining features: " + str(len(reduced[0])))
+        print("Remaining features:")
+        print(sel.get_feature_names_out(features))
+        return reduced
+
+    elif algorithm == "MUTUALINFOK":
+        best_solver = get_best_solver_per_instance(solvers)
+        sel = SelectKBest(mutual_info_classif, k=params.percentile_best)
+        reduced = sel.fit_transform(data, best_solver)
+
         print("Remaining features: " + str(len(reduced[0])))
         print("Remaining features:")
         print(sel.get_feature_names_out(features))
