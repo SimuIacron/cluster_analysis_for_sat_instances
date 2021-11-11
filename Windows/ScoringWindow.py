@@ -5,7 +5,7 @@ from dash import html, dcc
 from DataAnalysis import evaluation
 
 
-def create_layout(family_statistics, scoring_dict_time):
+def create_layout(family_statistics):
     #family_labels = [html.H2('Family scores')]
     #for stats in family_statistics:
     #    family_labels.append(html.Label(stats[0] + ': ' + str(stats[1])))
@@ -16,9 +16,4 @@ def create_layout(family_statistics, scoring_dict_time):
         figure=evaluation.family_score_chart(family_statistics)
     )
 
-    graph2 = dcc.Graph(
-        style={'height': 800},
-        figure=evaluation.time_score_chart(scoring_dict_time)
-    )
-
-    return [graph1, graph2]
+    return [graph1]

@@ -7,12 +7,17 @@ from collections import Counter
 from numpy import max
 
 
+# gets for the given instance (only an array of solver times of the instance)
+# the best k solvers, which get determined by the shortest running time
 def get_k_best_solvers_for_instance(instance_solver_times, k):
     solver_features = DatabaseReader.FEATURES_SOLVER
     sorted_features = [x for _, x in sorted(zip(instance_solver_times, solver_features))]
     return sorted_features[:k]
 
 
+# returns a clustering which uses the best solvers as each cluster
+# this means every instance which have the same best solver
+# are considered to be in a cluster
 def get_best_solver_int(db_instance: DbInstance):
     solver_features = DatabaseReader.FEATURES_SOLVER
     final = []
@@ -21,7 +26,6 @@ def get_best_solver_int(db_instance: DbInstance):
         final.append(solver_features.index(sorted_features[0]))
 
     return final
-
 
 
 def score_solvers_on_rank_cluster(yhat, cluster_idx, db_instance: DbInstance, ranks, factors):
@@ -54,49 +58,8 @@ def score_solvers_on_rank_cluster(yhat, cluster_idx, db_instance: DbInstance, ra
     return solver_dict
 
 
-def score_solvers_squared_relativ(yhat, db_instance: DbInstance, k):
-    cluster_dict = {}
-    for i in range(len(yhat)):
-        cluster = yhat[i]
-        if cluster not in cluster_dict:
-            cluster_dict[cluster] = []
-
-        cluster_dict[cluster].append(get_k_best_solvers_for_instance(db_instance.solver_wh[i], k))
-
-    score_dict = {}
-    for key, value in cluster_dict.items():
-        flatten_solver = util.flatten(value)
-        total_amount = len(flatten_solver)
-        count = Counter(flatten_solver)
-        score = 0
-        for algo, amount in count.items():
-            score = score + (amount/total_amount) * (amount/total_amount)
-        score_dict[key] = score * k
-
-    return score_dict
-
-
-
-def score_solver_similarity_in_cluster_occurence(yhat, db_instance:DbInstance, k):
-    cluster_dict = {}
-    for i in range(len(yhat)):
-        cluster = yhat[i]
-        if cluster not in cluster_dict:
-            cluster_dict[cluster] = []
-
-        cluster_dict[cluster].append(get_k_best_solvers_for_instance(db_instance.solver_wh[i], k))
-
-    score_dict = {}
-    for key, value in cluster_dict.items():
-        flatten_solver = util.flatten(value)
-        amount = len(list(dict.fromkeys(flatten_solver)))
-        score = amount / k
-        score_dict[key] = score
-
-    pass
-
-
-
+# returns a cluster by families
+# this means all instances that have the same family are considered to be in the same cluster
 def convert_families_to_int(instance_family):
     counter = 0
     family_dict = {}
@@ -111,6 +74,7 @@ def convert_families_to_int(instance_family):
     return instance_family_int
 
 
+# creates a contingency matrix of the two given clusterings
 def create_contingency_matrix(labels_pred, labels_true):
     labels = list(zip(labels_pred, labels_true))
     pred_len = len(set(labels_pred))
@@ -122,6 +86,9 @@ def create_contingency_matrix(labels_pred, labels_true):
 
     return contingency_matrix
 
+# creates one sum row of the contingency tables of a clustering
+# this is just a list which counts how many of each cluster occur in the given clustering
+# for example [0,0,1,2,2,0] --> [3, 1, 2]
 def create_contingency_row(labels):
     row_len = len(set(labels))
     row = [0] * row_len
@@ -132,6 +99,8 @@ def create_contingency_row(labels):
     return row
 
 
+# calculates the van dongen criterion normalized as described in the paper
+# Wu (2009) “Adapting the right measures for k-means clustering”
 def van_dongen_normalized(labels_pred, labels_true):
     n = len(labels_pred)
     c = create_contingency_matrix(labels_pred, labels_true)
@@ -149,6 +118,7 @@ def van_dongen_normalized(labels_pred, labels_true):
     return vd
 
 
+# collection of scoring algorithms given by sklearn
 def score_cluster_family(yhat, db_instance: DbInstance):
     scoring_list = []
     family_int = convert_families_to_int(db_instance.family_wh)
@@ -164,6 +134,4 @@ def score_cluster_family(yhat, db_instance: DbInstance):
     scoring_list.append(('v measure score', v_measure_score(family_int, yhat)))
     print(scoring_list)
 
-    score_dict_time = score_solvers_squared_relativ(yhat, db_instance, 3)
-
-    return scoring_list, score_dict_time
+    return scoring_list

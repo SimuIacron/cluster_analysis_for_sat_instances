@@ -427,7 +427,7 @@ def register_callback(app, db_instance: DbInstance):
 
         db_instance.generate_dataset(dataset_selection)
         # run algorithms
-        clusters, yhat, reduced_instance_list, instances_list_s, score_family_list, score_dict_time = \
+        clusters, yhat, reduced_instance_list, instances_list_s, score_family_list = \
             run(db_instance, input_data_cluster, input_data_scaling, input_data_feature_selection)
         if 'export_json' in export_json:
             JsonExport.export_json(dataset_selection, input_data_cluster, input_data_feature_selection,
@@ -440,7 +440,7 @@ def register_callback(app, db_instance: DbInstance):
             evaluation.clusters_family_amount(clusters, yhat, db_instance.family_wh),
             evaluation.clusters_timeout_amount(clusters, yhat, DatabaseReader.TIMEOUT, db_instance.solver_wh),
             ClusterStatisticsWindow.create_layout(clusters, yhat, db_instance),
-            ScoringWindow.create_layout(score_family_list, score_dict_time)
+            ScoringWindow.create_layout(score_family_list)
         ]
 
     @app.callback(
@@ -517,8 +517,8 @@ def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
     # clustering
     (clusters, yhat) = clustering.cluster(instances_list_s, input_data_cluster)
 
-    score_family_list, score_dict_time = scoring.score_cluster_family(yhat, db_instance)
+    score_family_list = scoring.score_cluster_family(yhat, db_instance)
 
     print('Calculation finished')
 
-    return clusters, yhat, reduced_instance_list, instances_list_s, score_family_list, score_dict_time
+    return clusters, yhat, reduced_instance_list, instances_list_s, score_family_list
