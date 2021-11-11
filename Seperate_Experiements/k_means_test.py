@@ -63,16 +63,16 @@ for comb in output[1:]:
         # clustering
         (clusters, yhat) = clustering.cluster(instances_list_s, input_data_cluster)
 
-        mutual_info = adjusted_mutual_info_score(solver_int, yhat)
+        mutual_info = normalized_mutual_info_score(solver_int, yhat)
         mutual_info_solver_list.append(mutual_info)
-        mutual_info = adjusted_mutual_info_score(family_int, yhat)
+        mutual_info = normalized_mutual_info_score(family_int, yhat)
         mutual_info_family_list.append(mutual_info)
 
     fig_solver.add_trace(go.Scatter(x=list(k_range), y=mutual_info_solver_list, mode='lines', name=" ".join(str(x) for x in comb)))
     fig_family.add_trace(go.Scatter(x=list(k_range), y=mutual_info_family_list, mode='lines', name=" ".join(str(x) for x in comb)))
 
-exportFigure.export_plot_as_html(fig_family, '001_kmeans_mut_family')
-exportFigure.export_plot_as_html(fig_solver, '001_kmeans_mut_solver')
+exportFigure.export_plot_as_html(fig_family, '001_kmeans_mut_family_normalized')
+exportFigure.export_plot_as_html(fig_solver, '001_kmeans_mut_solver_normalized')
 
 fig_family.show()
 fig_solver.show()
