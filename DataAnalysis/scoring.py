@@ -28,6 +28,35 @@ def get_best_solver_int(db_instance: DbInstance):
     return final
 
 
+# calculates the score of a cluster, by giving each solver of instances a value through
+# linear interpolation of [0,timeout] --> [1,0]
+# then adding the values of all solvers and
+# returning the score of the highest solver
+def score_solvers_on_linear_rank_cluster(yhat, cluster_idx, db_instance: DbInstance, timeout):
+    cluster_amount = 0
+    solver_dict = {}
+    for i in range(len(yhat)):
+        if yhat[i] == cluster_idx:
+            cluster_amount = cluster_amount + 1
+            for j in range(len(db_instance.solver_wh[0])):
+                if db_instance.solver_f[j] not in solver_dict:
+                    solver_dict[db_instance.solver_f[j]] = 0
+                add_value = ((db_instance.solver_wh[i][j] / timeout) - 1) * (-1)
+                solver_dict[db_instance.solver_f[j]] = solver_dict[db_instance.solver_f[j]] + add_value
+
+    best_solver = ''
+    best_solver_score = 0
+    for key, value in solver_dict.items():
+        if value > best_solver_score:
+            best_solver = key
+            best_solver_score = value
+
+    return best_solver, best_solver_score / cluster_amount
+
+
+# scores a cluster by mapping each solver by it's time on the instances to a rank (given by the rank array)
+# then calculates the score of each solver by the factors of each ranks
+# return the best solver score
 def score_solvers_on_rank_cluster(yhat, cluster_idx, db_instance: DbInstance, ranks, factors):
 
     rank_count = [[] for dummy in range(len(ranks))]
@@ -53,9 +82,14 @@ def score_solvers_on_rank_cluster(yhat, cluster_idx, db_instance: DbInstance, ra
 
             solver_dict[key] = solver_dict[key] + factors[i] * value
 
+    best_solver = ''
+    best_solver_score = 0
     for key, value in solver_dict.items():
-        solver_dict[key] = value / (len(db_instance.solver_wh[0]) * cluster_amount)
-    return solver_dict
+        score = value / (factors[0] * cluster_amount)
+        if score > best_solver_score:
+            best_solver = key
+            best_solver_score = score
+    return best_solver, best_solver_score
 
 
 # returns a cluster by families

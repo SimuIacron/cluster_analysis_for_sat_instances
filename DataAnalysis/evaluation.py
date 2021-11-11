@@ -8,20 +8,37 @@ from DataAnalysis import scoring
 from DataFormats.DbInstance import DbInstance
 
 
-def solver_score_cluster(cluster_idx, yhat, db_instance: DbInstance):
-    dict_solver = scoring.score_solvers_on_rank_cluster(yhat, cluster_idx, db_instance, [1000, 2000, 3000, 4000, 5000],
-                                                        [5, 4, 3, 2, 1])
+# draws plot of evaluation of clusters using ranks
+def solver_score_cluster(clusters, yhat, db_instance: DbInstance):
+    solvers = []
+    solver_scores = []
+    for cluster_idx in clusters:
+        best_solver, best_solver_score = scoring.score_solvers_on_rank_cluster(yhat, cluster_idx, db_instance,
+                                                                               [500, 1000, 2500, 5000],
+                                                                               [4, 3, 2, 1])
 
-    keys = []
-    values = []
+        solvers.append(best_solver)
+        solver_scores.append(best_solver_score)
 
-    for key, value in dict_solver.items():
-        keys.append(key)
-        values.append(value)
+    df = pd.DataFrame(dict(clusters=clusters, score=solver_scores, names=solvers))
+    fig = px.bar(df, x='clusters', y='score', hover_data=['names'])
+    fig.update_layout(title='Family Scores')
+    return fig
 
-    df = pd.DataFrame(dict(family=keys, amount=values))
-    fig = px.bar(df, x='family', y='amount')
-    fig.update_layout(title='Cluster: ' + str(cluster_idx))
+# draws plot for linear score evaluation of clusters
+def solver_score_cluster_linear(clusters, yhat, db_instance: DbInstance):
+    solvers = []
+    solver_scores = []
+    for cluster_idx in clusters:
+        best_solver, best_solver_score = scoring.score_solvers_on_linear_rank_cluster(yhat, cluster_idx, db_instance,
+                                                                               5000)
+
+        solvers.append(best_solver)
+        solver_scores.append(best_solver_score)
+
+    df = pd.DataFrame(dict(clusters=clusters, score=solver_scores, names=solvers))
+    fig = px.bar(df, x='clusters', y='score', hover_data=['names'])
+    fig.update_layout(title='Family Scores Linear')
     return fig
 
 
@@ -163,7 +180,8 @@ def clusters_timeout_amount(clusters, yhat, timeout_value, solver_time):
     return fig
 
 
-def family_score_chart(family_score):
+def family_score_chart(yhat, db_instance):
+    family_score = scoring.score_cluster_family(yhat, db_instance)
     keys = [item[0] for item in family_score]
     values = [item[1] for item in family_score]
 
@@ -171,12 +189,3 @@ def family_score_chart(family_score):
     fig = px.bar(df, x='score', y='value')
     fig.update_layout(title='Family Scores')
     return fig
-
-
-
-
-
-
-
-
-
