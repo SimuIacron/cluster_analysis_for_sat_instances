@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.metrics import normalized_mutual_info_score, adjusted_mutual_info_score
+from sklearn.metrics import normalized_mutual_info_score, adjusted_mutual_info_score, completeness_score
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -21,11 +21,24 @@ solver_int = scoring.get_best_solver_int(db_instance)
 
 
 
-fig_family = go.Figure(layout=go.Layout(
-        title=go.layout.Title(text="Family")
+# fig_family = go.Figure(layout=go.Layout(
+#        title=go.layout.Title(text="Family")
+#    ))
+#fig_solver = go.Figure(layout=go.Layout(
+#        title=go.layout.Title(text="Solver")
+#    ))
+#fig_family_comp = go.Figure(layout=go.Layout(
+#        title=go.layout.Title(text="Completeness Family")
+#    ))
+#fig_solver_comp = go.Figure(layout=go.Layout(
+#        title=go.layout.Title(text="Completeness Solver")
+#    ))
+
+fig_family_vd = go.Figure(layout=go.Layout(
+        title=go.layout.Title(text="VD Family")
     ))
-fig_solver = go.Figure(layout=go.Layout(
-        title=go.layout.Title(text="Solver")
+fig_solver_vd = go.Figure(layout=go.Layout(
+        title=go.layout.Title(text="VD Solver")
     ))
 for comb in output[1:]:
     print(comb)
@@ -49,9 +62,13 @@ for comb in output[1:]:
 
     instances_list_s = scaling.scaling(reduced_instance_list, db_instance.dataset_f, input_data_scaling)
 
-    mutual_info_solver_list = []
-    mutual_info_family_list = []
-    k_range = [i * 5 for i in range(1, 100)]
+    #mutual_info_solver_list = []
+    #mutual_info_family_list = []
+    #mutual_info_solver_comp_list = []
+    #mutual_info_family_comp_list = []
+    vd_family = []
+    vd_solver = []
+    k_range = [i * 5 for i in range(1, 50)]
     for k in k_range:
 
         input_data_cluster = InputDataCluster(
@@ -63,19 +80,27 @@ for comb in output[1:]:
         # clustering
         (clusters, yhat) = clustering.cluster(instances_list_s, input_data_cluster)
 
-        mutual_info = normalized_mutual_info_score(solver_int, yhat)
-        mutual_info_solver_list.append(mutual_info)
-        mutual_info = normalized_mutual_info_score(family_int, yhat)
-        mutual_info_family_list.append(mutual_info)
+        #mutual_info = normalized_mutual_info_score(solver_int, yhat)
+        #mutual_info_solver_list.append(mutual_info)
+        #mutual_info = normalized_mutual_info_score(family_int, yhat)
+        #mutual_info_family_list.append(mutual_info)
+        #mutual_info = completeness_score(solver_int, yhat)
+        #mutual_info_solver_comp_list.append(mutual_info)
+        #mutual_info = completeness_score(family_int, yhat)
+        #mutual_info_family_comp_list.append(mutual_info)
+        value = scoring.van_dongen_normalized(solver_int, yhat)
+        vd_solver.append(value)
+        value = scoring.van_dongen_normalized(family_int, yhat)
+        vd_family.append(value)
 
-    fig_solver.add_trace(go.Scatter(x=list(k_range), y=mutual_info_solver_list, mode='lines', name=" ".join(str(x) for x in comb)))
-    fig_family.add_trace(go.Scatter(x=list(k_range), y=mutual_info_family_list, mode='lines', name=" ".join(str(x) for x in comb)))
+    fig_solver_vd.add_trace(go.Scatter(x=list(k_range), y=vd_solver, mode='lines', name=" ".join(str(x) for x in comb)))
+    fig_family_vd.add_trace(go.Scatter(x=list(k_range), y=vd_family, mode='lines', name=" ".join(str(x) for x in comb)))
 
-exportFigure.export_plot_as_html(fig_family, '001_kmeans_mut_family_normalized')
-exportFigure.export_plot_as_html(fig_solver, '001_kmeans_mut_solver_normalized')
+exportFigure.export_plot_as_html(fig_family_vd, '005_kmeans_family_vd')
+exportFigure.export_plot_as_html(fig_solver_vd, '005_kmeans_solver_vd')
 
-fig_family.show()
-fig_solver.show()
+fig_solver_vd.show()
+fig_family_vd.show()
 
 
 

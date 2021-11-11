@@ -4,6 +4,7 @@ from DataFormats.DbInstance import DbInstance
 from sklearn.metrics import adjusted_mutual_info_score, adjusted_rand_score, completeness_score, fowlkes_mallows_score, \
     homogeneity_score, mutual_info_score, normalized_mutual_info_score, rand_score, v_measure_score
 from collections import Counter
+from numpy import max
 
 
 def get_k_best_solvers_for_instance(instance_solver_times, k):
@@ -108,6 +109,44 @@ def convert_families_to_int(instance_family):
         instance_family_int.append(family_dict[item[0]])
 
     return instance_family_int
+
+
+def create_contingency_matrix(labels_pred, labels_true):
+    labels = list(zip(labels_pred, labels_true))
+    pred_len = len(set(labels_pred))
+    true_len = len(set(labels_true))
+    contingency_matrix = [[0] * true_len for dummy in range(pred_len)]
+
+    for (i, j) in labels:
+        contingency_matrix[i][j] = contingency_matrix[i][j] + 1
+
+    return contingency_matrix
+
+def create_contingency_row(labels):
+    row_len = len(set(labels))
+    row = [0] * row_len
+
+    for i in labels:
+        row[i] = row[i] + 1
+
+    return row
+
+
+def van_dongen_normalized(labels_pred, labels_true):
+    n = len(labels_pred)
+    c = create_contingency_matrix(labels_pred, labels_true)
+    c_t = create_contingency_matrix(labels_true, labels_pred)
+
+    sum1 = 0
+    for i in range(len(set(labels_pred))):
+        sum1 = sum1 + max(c[i])
+
+    sum2 = 0
+    for j in range(len(set(labels_true))):
+        sum2 = sum2 + max(c_t[j])
+
+    vd = (2 * n - sum1 - sum2) / (2 * n - max(create_contingency_row(labels_pred)) - max(create_contingency_row(labels_true)))
+    return vd
 
 
 def score_cluster_family(yhat, db_instance: DbInstance):
