@@ -11,9 +11,9 @@ from DataFormats.InputData import InputDataCluster, InputDataScaling, InputDataF
 
 from itertools import combinations
 
-input = ['base', 'gate', 'solver']
+input_dbs = ['base', 'gate', 'solver']
 
-output = sum([list(map(list, combinations(input, i))) for i in range(len(input) + 1)], [])
+output = sum([list(map(list, combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
 
 db_instance = DbInstance()
 
@@ -36,14 +36,14 @@ for comb in output[1:]:
 
     input_data_scaling = InputDataScaling(
         scaling_algorithm='SCALEMINUSPLUS1',
-        scaling_technique='NORMALSCALE',
+        scaling_technique='TIMESELECTBEST',
         scaling_k_best=3
     )
 
     input_data_feature_selection = InputDataFeatureSelection(
-        selection_algorithm='NONE',
+        selection_algorithm='MUTUALINFO',
         seed=0,
-        percentile_best=10)
+        percentile_best=30)
 
     reduced_instance_list = feature_reduction.feature_reduction(
             db_instance.dataset_wh, db_instance.dataset_f, db_instance.solver_wh, input_data_feature_selection
@@ -92,7 +92,7 @@ for comb in output[1:]:
 
 # exportFigure.export_plot_as_html(fig_1, '007_kmeans_best_scale_solver')
 # exportFigure.export_plot_as_html(fig_2, '007_kmeans_worst_scale_solver')
-exportFigure.export_plot_as_html(fig_3, '007_kmeans_mean_scale_solver_normal')
+exportFigure.export_plot_as_html(fig_3, '007_kmeans_mean_scale_solver_normal_r_mut')
 
 # fig_1.show()
 # fig_2.show()
