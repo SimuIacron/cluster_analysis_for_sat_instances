@@ -1,4 +1,5 @@
 import pandas as pd
+from numpy import mean
 from sklearn.metrics import normalized_mutual_info_score, adjusted_mutual_info_score, completeness_score
 import plotly.express as px
 import plotly.graph_objects as go
@@ -19,26 +20,14 @@ db_instance = DbInstance()
 family_int = scoring.convert_families_to_int(db_instance.family_wh)
 solver_int = scoring.get_best_solver_int(db_instance)
 
-
-
-# fig_family = go.Figure(layout=go.Layout(
-#        title=go.layout.Title(text="Family")
-#    ))
-#fig_solver = go.Figure(layout=go.Layout(
-#        title=go.layout.Title(text="Solver")
-#    ))
-#fig_family_comp = go.Figure(layout=go.Layout(
-#        title=go.layout.Title(text="Completeness Family")
-#    ))
-#fig_solver_comp = go.Figure(layout=go.Layout(
-#        title=go.layout.Title(text="Completeness Solver")
-#    ))
-
-fig_family_vd = go.Figure(layout=go.Layout(
-        title=go.layout.Title(text="VD Family")
+fig_1 = go.Figure(layout=go.Layout(
+        title=go.layout.Title(text="007_kmeans_best_scale_solver")
     ))
-fig_solver_vd = go.Figure(layout=go.Layout(
-        title=go.layout.Title(text="VD Solver")
+fig_2 = go.Figure(layout=go.Layout(
+        title=go.layout.Title(text="007_kmeans_worst_scale_solver")
+    ))
+fig_3 = go.Figure(layout=go.Layout(
+        title=go.layout.Title(text="007_kmeans_mean_scale_solver")
     ))
 for comb in output[1:]:
     print(comb)
@@ -47,7 +36,7 @@ for comb in output[1:]:
 
     input_data_scaling = InputDataScaling(
         scaling_algorithm='SCALEMINUSPLUS1',
-        scaling_technique='TIMESELECTBEST',
+        scaling_technique='NORMALSCALE',
         scaling_k_best=3
     )
 
@@ -62,13 +51,11 @@ for comb in output[1:]:
 
     instances_list_s = scaling.scaling(reduced_instance_list, db_instance.dataset_f, input_data_scaling)
 
-    #mutual_info_solver_list = []
-    #mutual_info_family_list = []
-    #mutual_info_solver_comp_list = []
-    #mutual_info_family_comp_list = []
-    vd_family = []
-    vd_solver = []
-    k_range = [i * 5 for i in range(1, 50)]
+    solver_list = []
+    family_list = []
+    list_1 = []
+    # k_range = [i * 5 for i in range(1, 100)]
+    k_range = range(1, 50)
     for k in k_range:
 
         input_data_cluster = InputDataCluster(
@@ -80,27 +67,36 @@ for comb in output[1:]:
         # clustering
         (clusters, yhat) = clustering.cluster(instances_list_s, input_data_cluster)
 
-        #mutual_info = normalized_mutual_info_score(solver_int, yhat)
-        #mutual_info_solver_list.append(mutual_info)
-        #mutual_info = normalized_mutual_info_score(family_int, yhat)
-        #mutual_info_family_list.append(mutual_info)
-        #mutual_info = completeness_score(solver_int, yhat)
-        #mutual_info_solver_comp_list.append(mutual_info)
-        #mutual_info = completeness_score(family_int, yhat)
-        #mutual_info_family_comp_list.append(mutual_info)
-        value = scoring.van_dongen_normalized(solver_int, yhat)
-        vd_solver.append(value)
-        value = scoring.van_dongen_normalized(family_int, yhat)
-        vd_family.append(value)
+        # value = adjusted_mutual_info_score(solver_int, yhat)
+        # solver_list.append(value)
+        # value = adjusted_mutual_info_score(family_int, yhat)
+        # family_list.append(value)
+        # value = completeness_score(solver_int, yhat)
+        # solver_list.append(value)
+        # value = completeness_score(family_int, yhat)
+        # family_list.append(value)
+        # value = scoring.van_dongen_normalized(solver_int, yhat)
+        # solver_list.append(value)
+        # value = scoring.van_dongen_normalized(family_int, yhat)
+        # family_list.append(value)
+        # value = min([scoring.score_solvers_on_linear_rank_cluster(yhat, i, db_instance, 5000)[1] for i in clusters])
+        # solver_list.append(value)
+        # value = max([scoring.score_solvers_on_linear_rank_cluster(yhat, i, db_instance, 5000)[1] for i in clusters])
+        # family_list.append(value)
+        value = mean([scoring.score_solvers_on_linear_rank_cluster(yhat, i, db_instance, 5000)[1] for i in clusters])
+        list_1.append(value)
 
-    fig_solver_vd.add_trace(go.Scatter(x=list(k_range), y=vd_solver, mode='lines', name=" ".join(str(x) for x in comb)))
-    fig_family_vd.add_trace(go.Scatter(x=list(k_range), y=vd_family, mode='lines', name=" ".join(str(x) for x in comb)))
+    # fig_1.add_trace(go.Scatter(x=list(k_range), y=solver_list, mode='lines', name=" ".join(str(x) for x in comb)))
+    # fig_2.add_trace(go.Scatter(x=list(k_range), y=family_list, mode='lines', name=" ".join(str(x) for x in comb)))
+    fig_3.add_trace(go.Scatter(x=list(k_range), y=list_1, mode='lines', name=" ".join(str(x) for x in comb)))
 
-exportFigure.export_plot_as_html(fig_family_vd, '005_kmeans_family_vd')
-exportFigure.export_plot_as_html(fig_solver_vd, '005_kmeans_solver_vd')
+# exportFigure.export_plot_as_html(fig_1, '007_kmeans_best_scale_solver')
+# exportFigure.export_plot_as_html(fig_2, '007_kmeans_worst_scale_solver')
+exportFigure.export_plot_as_html(fig_3, '007_kmeans_mean_scale_solver_normal')
 
-fig_solver_vd.show()
-fig_family_vd.show()
+# fig_1.show()
+# fig_2.show()
+fig_3.show()
 
 
 
