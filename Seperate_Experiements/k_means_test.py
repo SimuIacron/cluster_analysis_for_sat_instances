@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from numpy import mean
 from sklearn.metrics import normalized_mutual_info_score, adjusted_mutual_info_score, completeness_score
@@ -56,6 +57,7 @@ for comb in output[1:]:
     list_1 = []
     # k_range = [i * 5 for i in range(1, 100)]
     k_range = range(1, 50)
+    # eps_range = np.arange(0.05, 2, 0.05)
     for k in k_range:
 
         input_data_cluster = InputDataCluster(
