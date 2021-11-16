@@ -7,6 +7,21 @@ from collections import Counter
 from numpy import max
 
 
+# calculates the par2 score for a given cluster and solver
+def par2_cluster(solver, cluster_idx, yhat, db_instance: DbInstance, timeout):
+    solver_idx = db_instance.solver_f[solver]
+    cluster_size = 0
+    score = 0
+    for idx, inst in enumerate(db_instance.solver_wh):
+        if cluster_idx == yhat[idx]:
+            cluster_size = cluster_size + 1
+            running_time = inst[solver_idx]
+            if running_time >= timeout:
+                running_time = timeout * 2
+            score = score + running_time
+
+    return score / cluster_size
+
 # Calculates the following metric for the cluster given with cluster_idx:
 # 1. calculate the min running time over all cluster instances and solvers
 # 2. Divide all running times by the min running time to get relative running times
