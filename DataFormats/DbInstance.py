@@ -20,6 +20,17 @@ class DbInstance:
         (self.family, self.family_wh), self.family_f = DatabaseReader.read_family_from_db()
         print("Queries finished")
 
+        # -------------------------------------------------------------------
+        # This section is a quickfix for the glucose_syrup solver which is wrongly with four times the real running time
+        # section can be removed, after runtimes.db has been correctly updated
+
+        idx = self.solver_f.index('glucose_syrup')
+        for inst, inst_wh in zip(self.solver, self.solver_wh):
+            inst[idx] = inst[idx] / 4
+            inst_wh[idx] = inst_wh[idx] / 4
+
+        # --------------------------------------------------------------------
+
         self.solver, removed_array = DatabaseReader.remove_empties(self.solver)
 
         self.solver_wh = DatabaseReader.remove_with_index_array(self.solver_wh, removed_array)

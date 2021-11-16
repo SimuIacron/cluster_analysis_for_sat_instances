@@ -7,6 +7,57 @@ from collections import Counter
 from numpy import max
 
 
+# Calculates the following metric for the cluster given with cluster_idx:
+# 1. calculate the min running time over all cluster instances and solvers
+# 2. Divide all running times by the min running time to get relative running times
+# 3. Sort the relative running times into ranks, by factors 1,2,3, etc...
+# 4. Weigh timeouts with times 2 when sorting into ranks
+# 5. calculate score of each solver in the cluster by using the amounts of the solver in each cluster multiplied by the
+# multiplier of the rank
+# 6. normalize the scores
+# 7. return dict of each solver with score
+def score_solvers_on_relative_runtime_cluster(yhat, cluster_idx, db_instance: DbInstance, timeout):
+
+    # get instances of cluster and min running time
+    cluster_insts = []
+    min_running_time = timeout
+    for idx, inst in enumerate(db_instance.solver_wh):
+        if cluster_idx == yhat[idx]:
+            cluster_insts.append(inst)
+            current_min = min(inst)
+            if current_min < min_running_time:
+                min_running_time = current_min
+
+    # make sure min running time is not zero
+    if min_running_time == 0:
+        min_running_time = 0.01
+
+    # sort solvers into ranks
+    rank_amount = 3
+    ranks = [[] for _ in range(rank_amount)]
+    for i, inst in enumerate(cluster_insts):
+        for j, item in enumerate(inst):
+            factor = cluster_insts[i][j] / min_running_time
+            if cluster_insts[i][j] == timeout:
+                factor = factor * 2
+            if int(factor) < rank_amount:
+                ranks[factor].append(db_instance.solver_f[j])
+            else:
+                ranks[-1].append(db_instance.solver_f[j])
+
+    # create dict of every solver with score
+    solver_dict = {}
+    for i in range(len(ranks)):
+        count = Counter(ranks[i])
+        for key, value in count.items():
+            if key not in solver_dict:
+                solver_dict[key] = 0
+
+            # score calculation            use the rank index as factor   use the rank_amount*amount of instances to normalize
+            solver_dict[key] = solver_dict[key] + ((rank_amount-i) * value) / (rank_amount * len(cluster_insts))
+
+    return solver_dict
+
 # gets for the given instance (only an array of solver times of the instance)
 # the best k solvers, which get determined by the shortest running time
 def get_k_best_solvers_for_instance(instance_solver_times, k):
