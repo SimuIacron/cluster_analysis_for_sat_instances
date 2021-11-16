@@ -7,9 +7,39 @@ from collections import Counter
 from numpy import max
 
 
+# calculates par2 score of the best solvers of each cluster for the whole clustering
+# clusters: A list of cluster indexes
+# the clustering given by an array of cluster indexes so that each instances gets mapped to one cluster
+# db_instance: Stores all data form the db files
+# the timeout value
+def score_clustering_par2(clusters, yhat, db_instance:DbInstance, timeout):
+    score = 0
+    cluster_scores = []
+    cluster_sizes = Counter(yhat)
+    # iterate through each cluster
+    for cluster in clusters:
+
+        # get the solver scores by the relative runtime and find the solver with the best score
+        solver_dict = score_solvers_on_relative_runtime_cluster(yhat, cluster, db_instance, timeout)
+        best_solver = ''
+        best_score = 0
+        for solver, solver_score in solver_dict.items():
+            if score >= best_score:
+                best_solver = solver
+                best_score = solver_score
+
+        # calculate the score of the best solver with the par2 score
+        cluster_score = par2_cluster(best_solver, cluster, yhat, db_instance, timeout)
+        cluster_scores.append(cluster_score)
+        score = score + cluster_score * cluster_sizes[cluster]
+
+    final_score = score / len(yhat)
+    return final_score, cluster_scores
+
+
 # calculates the par2 score for a given cluster and solver
 def par2_cluster(solver, cluster_idx, yhat, db_instance: DbInstance, timeout):
-    solver_idx = db_instance.solver_f[solver]
+    solver_idx = db_instance.solver_f.index(solver)
     cluster_size = 0
     score = 0
     for idx, inst in enumerate(db_instance.solver_wh):
@@ -21,6 +51,7 @@ def par2_cluster(solver, cluster_idx, yhat, db_instance: DbInstance, timeout):
             score = score + running_time
 
     return score / cluster_size
+
 
 # Calculates the following metric for the cluster given with cluster_idx:
 # 1. calculate the min running time over all cluster instances and solvers
@@ -56,7 +87,7 @@ def score_solvers_on_relative_runtime_cluster(yhat, cluster_idx, db_instance: Db
             if cluster_insts[i][j] == timeout:
                 factor = factor * 2
             if int(factor) < rank_amount:
-                ranks[factor].append(db_instance.solver_f[j])
+                ranks[int(factor)].append(db_instance.solver_f[j])
             else:
                 ranks[-1].append(db_instance.solver_f[j])
 
@@ -68,10 +99,12 @@ def score_solvers_on_relative_runtime_cluster(yhat, cluster_idx, db_instance: Db
             if key not in solver_dict:
                 solver_dict[key] = 0
 
-            # score calculation            use the rank index as factor   use the rank_amount*amount of instances to normalize
+            # score calculation            use the rank index as factor   use the rank_amount*amount of instances to
+            # normalize
             solver_dict[key] = solver_dict[key] + ((rank_amount-i) * value) / (rank_amount * len(cluster_insts))
 
     return solver_dict
+
 
 # gets for the given instance (only an array of solver times of the instance)
 # the best k solvers, which get determined by the shortest running time
@@ -185,6 +218,7 @@ def create_contingency_matrix(labels_pred, labels_true):
         contingency_matrix[i][j] = contingency_matrix[i][j] + 1
 
     return contingency_matrix
+
 
 # creates one sum row of the contingency tables of a clustering
 # this is just a list which counts how many of each cluster occur in the given clustering

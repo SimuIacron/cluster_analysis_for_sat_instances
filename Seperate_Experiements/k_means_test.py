@@ -1,3 +1,5 @@
+from collections import Counter
+
 import numpy as np
 import pandas as pd
 from numpy import mean
@@ -28,9 +30,11 @@ fig_2 = go.Figure(layout=go.Layout(
         title=go.layout.Title(text="007_kmeans_worst_scale_solver")
     ))
 fig_3 = go.Figure(layout=go.Layout(
-        title=go.layout.Title(text="007_kmeans_mean_scale_solver")
+        title=go.layout.Title(text="007_kmeans_par2")
     ))
+legendCounter = -1
 for comb in output[1:]:
+    legendCounter = legendCounter + 1
     print(comb)
 
     db_instance.generate_dataset(comb)
@@ -42,7 +46,7 @@ for comb in output[1:]:
     )
 
     input_data_feature_selection = InputDataFeatureSelection(
-        selection_algorithm='MUTUALINFO',
+        selection_algorithm='NONE',
         seed=0,
         percentile_best=30)
 
@@ -55,6 +59,9 @@ for comb in output[1:]:
     solver_list = []
     family_list = []
     list_1 = []
+    keys_1 = []
+    values_1 = []
+    sizes_1 = []
     # k_range = [i * 5 for i in range(1, 100)]
     k_range = range(1, 50)
     # eps_range = np.arange(0.05, 2, 0.05)
@@ -85,16 +92,22 @@ for comb in output[1:]:
         # solver_list.append(value)
         # value = max([scoring.score_solvers_on_linear_rank_cluster(yhat, i, db_instance, 5000)[1] for i in clusters])
         # family_list.append(value)
-        value = mean([scoring.score_solvers_on_linear_rank_cluster(yhat, i, db_instance, 5000)[1] for i in clusters])
+        # value = mean([scoring.score_solvers_on_linear_rank_cluster(yhat, i, db_instance, 5000)[1] for i in clusters])
+        # list_1.append(value)
+        value, scores_clusters = scoring.score_clustering_par2(clusters, yhat, db_instance, 5000)
         list_1.append(value)
+        keys_1 = keys_1 + ([k] * len(scores_clusters))
+        values_1 = values_1 + scores_clusters
+        sizes_1 = sizes_1 + [item for keys, item in Counter(yhat).items()]
 
     # fig_1.add_trace(go.Scatter(x=list(k_range), y=solver_list, mode='lines', name=" ".join(str(x) for x in comb)))
     # fig_2.add_trace(go.Scatter(x=list(k_range), y=family_list, mode='lines', name=" ".join(str(x) for x in comb)))
-    fig_3.add_trace(go.Scatter(x=list(k_range), y=list_1, mode='lines', name=" ".join(str(x) for x in comb)))
+    fig_3.add_trace(go.Scatter(x=list(k_range), y=list_1, mode='lines', name=" ".join(str(x) for x in comb), legendgroup=legendCounter))
+    fig_3.add_trace(go.Scatter(x=keys_1, y=values_1, mode='markers', marker=dict(size=[np.sqrt(item/np.pi)*2 for item in sizes_1]), text=sizes_1, name=" ".join(str(x) for x in comb), legendgroup=legendCounter))
 
 # exportFigure.export_plot_as_html(fig_1, '007_kmeans_best_scale_solver')
 # exportFigure.export_plot_as_html(fig_2, '007_kmeans_worst_scale_solver')
-exportFigure.export_plot_as_html(fig_3, '007_kmeans_mean_scale_solver_normal_r_mut')
+exportFigure.export_plot_as_html(fig_3, '007_kmeans_par2')
 
 # fig_1.show()
 # fig_2.show()
