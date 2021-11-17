@@ -61,6 +61,7 @@ FEATURES_SOLVER = ['cadical_elimfalse', 'cadical', 'cadical_pripro', 'cadical_st
                    'relaxed', 'yalsat']
 
 FEATURES_FAMILY = ['family']
+FEATURES_RESULT = ['result']
 
 
 def remove_keywords_from_query_with_hash(query, features):
@@ -173,3 +174,7 @@ def read_gate_from_db():
 
 def read_base_from_db():
     return read_from_db(FEATURES_BASE), FEATURES_BASE
+
+
+def read_result_from_db():
+    return read_from_db(FEATURES_RESULT), FEATURES_RESULT

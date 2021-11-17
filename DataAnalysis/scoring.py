@@ -207,6 +207,18 @@ def convert_families_to_int(instance_family):
     return instance_family_int
 
 
+def convert_sat_unsat_to_int(instance_result):
+    instance_result_int = []
+    for item in instance_result:
+        if item[0] == 'sat':
+            instance_result_int.append(0)
+        else:
+            instance_result_int.append(1)
+
+    return instance_result_int
+
+
+
 # creates a contingency matrix of the two given clusterings
 def create_contingency_matrix(labels_pred, labels_true):
     labels = list(zip(labels_pred, labels_true))

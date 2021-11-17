@@ -18,6 +18,7 @@ class DbInstance:
         (self.gate, self.gate_wh), self.gate_f = DatabaseReader.read_gate_from_db()
         (self.solver, self.solver_wh), self.solver_f, = DatabaseReader.read_solver_from_db()
         (self.family, self.family_wh), self.family_f = DatabaseReader.read_family_from_db()
+        (self.result, self.result_wh), self.result_f = DatabaseReader.read_result_from_db()
         print("Queries finished")
 
         # -------------------------------------------------------------------
@@ -40,6 +41,8 @@ class DbInstance:
         self.base_wh = DatabaseReader.remove_with_index_array(self.base_wh, removed_array)
         self.family = DatabaseReader.remove_with_index_array(self.family, removed_array)
         self.family_wh = DatabaseReader.remove_with_index_array(self.family_wh, removed_array)
+        self.result = DatabaseReader.remove_with_index_array(self.result, removed_array)
+        self.result_wh = DatabaseReader.remove_with_index_array(self.result_wh, removed_array)
 
         print("remaining instances: " + str(len(self.solver)))
 
