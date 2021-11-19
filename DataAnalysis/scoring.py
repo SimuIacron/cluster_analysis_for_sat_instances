@@ -7,14 +7,15 @@ from collections import Counter
 from numpy import max
 
 
-# calculates par2 score of the best solvers of each cluster for the whole clustering
+# calculates par2 score of the best solvers of relative runtime of each cluster for the whole clustering
 # clusters: A list of cluster indexes
 # the clustering given by an array of cluster indexes so that each instances gets mapped to one cluster
 # db_instance: Stores all data form the db files
 # the timeout value
-def score_clustering_par2(clusters, yhat, db_instance:DbInstance, timeout):
+def score_clustering_par2_relative(clusters, yhat, db_instance:DbInstance, timeout):
     score = 0
     cluster_scores = []
+    cluster_algo = []
     cluster_sizes = Counter(yhat)
     # iterate through each cluster
     for cluster in clusters:
@@ -24,17 +25,47 @@ def score_clustering_par2(clusters, yhat, db_instance:DbInstance, timeout):
         best_solver = ''
         best_score = 0
         for solver, solver_score in solver_dict.items():
-            if score >= best_score:
+            if solver_score >= best_score:
                 best_solver = solver
                 best_score = solver_score
 
         # calculate the score of the best solver with the par2 score
         cluster_score = par2_cluster(best_solver, cluster, yhat, db_instance, timeout)
+
         cluster_scores.append(cluster_score)
+        cluster_algo.append(best_solver)
         score = score + cluster_score * cluster_sizes[cluster]
 
     final_score = score / len(yhat)
-    return final_score, cluster_scores
+    return final_score, cluster_scores, cluster_algo
+
+
+# calculates par2 score of the best solvers of par2 score of each cluster for the whole clustering
+# clusters: A list of cluster indexes
+# the clustering given by an array of cluster indexes so that each instances gets mapped to one cluster
+# db_instance: Stores all data form the db files
+# the timeout value
+def score_clustering_par2(clusters, yhat, db_instance:DbInstance, timeout):
+    score = 0
+    cluster_scores = []
+    cluster_algo = []
+    cluster_sizes = Counter(yhat)
+    # iterate through each cluster
+    for cluster in clusters:
+        best_solver = db_instance.solver_f[0]
+        best_score = par2_cluster(db_instance.solver_f[0], cluster, yhat, db_instance, timeout)
+        for solver in db_instance.solver_f[1:]:
+            current_score = par2_cluster(solver, cluster, yhat, db_instance, timeout)
+            if current_score < best_score:
+                best_score = current_score
+                best_solver = solver
+
+        cluster_scores.append(best_score)
+        cluster_algo.append(best_solver)
+        score = score + best_score * cluster_sizes[cluster]
+
+    final_score = score / len(yhat)
+    return final_score, cluster_scores, cluster_algo
 
 
 # calculates the par2 score for a given cluster and solver
@@ -71,7 +102,7 @@ def score_solvers_on_relative_runtime_cluster(yhat, cluster_idx, db_instance: Db
         if cluster_idx == yhat[idx]:
             cluster_insts.append(inst)
             current_min = min(inst)
-            if current_min < min_running_time:
+            if current_min < min_running_time and current_min != 0:
                 min_running_time = current_min
 
     # make sure min running time is not zero
@@ -79,7 +110,7 @@ def score_solvers_on_relative_runtime_cluster(yhat, cluster_idx, db_instance: Db
         min_running_time = 0.01
 
     # sort solvers into ranks
-    rank_amount = 3
+    rank_amount = 5
     ranks = [[] for _ in range(rank_amount)]
     for i, inst in enumerate(cluster_insts):
         for j, item in enumerate(inst):
@@ -101,7 +132,7 @@ def score_solvers_on_relative_runtime_cluster(yhat, cluster_idx, db_instance: Db
 
             # score calculation            use the rank index as factor   use the rank_amount*amount of instances to
             # normalize
-            solver_dict[key] = solver_dict[key] + ((rank_amount-i) * value) / (rank_amount * len(cluster_insts))
+            solver_dict[key] = solver_dict[key] + ((rank_amount-i-1) * value) / (rank_amount * len(cluster_insts))
 
     return solver_dict
 
