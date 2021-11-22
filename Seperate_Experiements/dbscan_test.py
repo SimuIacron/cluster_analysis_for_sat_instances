@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 import exportFigure
-from DataAnalysis import feature_reduction, scaling, clustering, scoring
+from DataAnalysis import feature_reduction, scaling, clustering, scoring, scoring_util
 from DataFormats.DbInstance import DbInstance
 from DataFormats.InputData import InputDataCluster, InputDataScaling, InputDataFeatureSelection
 
@@ -17,8 +17,8 @@ output = sum([list(map(list, combinations(input, i))) for i in range(len(input) 
 
 db_instance = DbInstance()
 
-family_int = scoring.convert_families_to_int(db_instance.family_wh)
-solver_int = scoring.get_best_solver_int(db_instance)
+family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
+solver_int = scoring_util.get_best_solver_int(db_instance)
 
 surface_family = []
 surface_solver = []

@@ -8,7 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 import exportFigure
-from DataAnalysis import feature_reduction, scaling, clustering, scoring
+from DataAnalysis import feature_reduction, scaling, clustering, scoring, scoring_util
 from DataFormats.DbInstance import DbInstance
 from DataFormats.InputData import InputDataCluster, InputDataScaling, InputDataFeatureSelection
 
@@ -20,11 +20,11 @@ output = sum([list(map(list, combinations(input_dbs, i))) for i in range(len(inp
 
 db_instance = DbInstance()
 
-family_int = scoring.convert_families_to_int(db_instance.family_wh)
-solver_int = scoring.get_best_solver_int(db_instance)
-unsat_sat_int = scoring.convert_sat_unsat_to_int(db_instance.result_wh)
+family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
+solver_int = scoring_util.get_best_solver_int(db_instance)
+unsat_sat_int = scoring_util.convert_sat_unsat_to_int(db_instance.result_wh)
 
-plot_name_1 = "012_kmeans_par2_10_best"
+plot_name_1 = "014_kmeans_par2_realtive_scale01_div_10"
 
 fig_1 = go.Figure(layout=go.Layout(
         title=go.layout.Title(text=plot_name_1)
@@ -41,11 +41,12 @@ for comb in output[1:]:
     print(comb)
 
     db_instance.generate_dataset(comb)
+    db_instance.generate_dataset(comb)
 
     input_data_scaling = InputDataScaling(
         scaling_algorithm='SCALEMINUSPLUS1',
-        scaling_technique='TIMESELECTBEST',
-        scaling_k_best=10
+        scaling_technique='SCALE01',
+        scaling_k_best=1
     )
 
     input_data_feature_selection = InputDataFeatureSelection(
@@ -98,7 +99,7 @@ for comb in output[1:]:
         # family_list.append(value)
         # value = mean([scoring.score_solvers_on_linear_rank_cluster(yhat, i, db_instance, 5000)[1] for i in clusters])
         # list_1.append(value)
-        value, scores_clusters, cluster_algo = scoring.score_clustering_par2(clusters, yhat, db_instance, 5000)
+        value, scores_clusters, cluster_algo = scoring.score_clustering_par2_relative(clusters, yhat, db_instance, 5000)
         list_1.append(value)
         keys_1 = keys_1 + ([k] * len(scores_clusters))
         values_1 = values_1 + scores_clusters

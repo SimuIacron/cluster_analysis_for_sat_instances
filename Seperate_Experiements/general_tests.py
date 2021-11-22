@@ -1,7 +1,7 @@
 from itertools import combinations
 
 import exportFigure
-from DataAnalysis import scoring, feature_reduction, scaling
+from DataAnalysis import scoring, feature_reduction, scaling, scoring_util
 from DataFormats.DbInstance import DbInstance
 from sklearn.metrics import normalized_mutual_info_score, adjusted_mutual_info_score
 
@@ -9,8 +9,8 @@ from DataFormats.InputData import InputDataScaling, InputDataFeatureSelection
 
 db_instance = DbInstance()
 
-family_int = scoring.convert_families_to_int(db_instance.family_wh)
-solver_int = scoring.get_best_solver_int(db_instance)
+family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
+solver_int = scoring_util.get_best_solver_int(db_instance)
 
 print(adjusted_mutual_info_score(family_int, solver_int))
 

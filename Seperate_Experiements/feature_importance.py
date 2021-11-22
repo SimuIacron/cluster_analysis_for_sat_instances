@@ -1,7 +1,7 @@
 from sklearn.metrics import normalized_mutual_info_score
 
 import exportFigure
-from DataAnalysis import scaling, feature_reduction, clustering, scoring
+from DataAnalysis import scaling, feature_reduction, clustering, scoring, scoring_util
 from DataFormats.DbInstance import DbInstance
 from DataFormats.InputData import InputDataCluster, InputDataScaling, InputDataFeatureSelection
 import plotly.graph_objects as go
@@ -22,9 +22,9 @@ input = ['base', 'gate', 'solver']
 db_instance = DbInstance()
 db_instance.generate_dataset(input)
 
-family_int = scoring.convert_families_to_int(db_instance.family_wh)
-solver_int = scoring.get_best_solver_int(db_instance)
-unsat_sat_int = scoring.convert_sat_unsat_to_int(db_instance.result_wh)
+family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
+solver_int = scoring_util.get_best_solver_int(db_instance)
+unsat_sat_int = scoring_util.convert_sat_unsat_to_int(db_instance.result_wh)
 
 plot_name_1 = "011_feature_importance_family"
 plot_name_2 = "011_feature_importance_solver"
