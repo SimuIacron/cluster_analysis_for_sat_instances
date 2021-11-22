@@ -106,21 +106,25 @@ def score_solvers_on_relative_runtime_cluster(yhat, cluster_idx, db_instance: Db
                 min_running_time = current_min
 
     # make sure min running time is not zero
-    if min_running_time == 0:
-        min_running_time = 0.01
+    # if min_running_time == 0:
+    #    min_running_time = 0.01
 
     # sort solvers into ranks
     rank_amount = 5
+    factor_divider = 1
     ranks = [[] for _ in range(rank_amount)]
     for i, inst in enumerate(cluster_insts):
         for j, item in enumerate(inst):
-            factor = cluster_insts[i][j] / min_running_time
             if cluster_insts[i][j] == timeout:
-                factor = factor * 2
-            if int(factor) < rank_amount:
-                ranks[int(factor)].append(db_instance.solver_f[j])
-            else:
                 ranks[-1].append(db_instance.solver_f[j])
+            else:
+
+                factor = cluster_insts[i][j] / min_running_time
+                factor = factor / factor_divider
+                if int(factor)-1 < rank_amount:
+                    ranks[int(factor)-1].append(db_instance.solver_f[j])
+                else:
+                    ranks[-2].append(db_instance.solver_f[j])
 
     # create dict of every solver with score
     solver_dict = {}
