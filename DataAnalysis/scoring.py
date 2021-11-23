@@ -29,7 +29,7 @@ def score_clustering_par2_relative(clusters, yhat, db_instance:DbInstance, timeo
                 best_score = solver_score
 
         # calculate the score of the best solver with the par2 score
-        cluster_score = scoring_modular.f2_par2_cluster(best_solver, cluster, yhat, db_instance, timeout)
+        cluster_score = scoring_modular.f2_par2_cluster(yhat, cluster, db_instance, timeout, best_solver)
 
         cluster_scores.append(cluster_score)
         cluster_algo.append(best_solver)
@@ -52,9 +52,9 @@ def score_clustering_par2(clusters, yhat, db_instance:DbInstance, timeout):
     # iterate through each cluster
     for cluster in clusters:
         best_solver = db_instance.solver_f[0]
-        best_score = scoring_modular.f2_par2_cluster(db_instance.solver_f[0], cluster, yhat, db_instance, timeout)
+        best_score = scoring_modular.f2_par2_cluster(yhat, cluster, db_instance, timeout, db_instance.solver_f[0])
         for solver in db_instance.solver_f[1:]:
-            current_score = scoring_modular.f2_par2_cluster(solver, cluster, yhat, db_instance, timeout)
+            current_score = scoring_modular.f2_par2_cluster(yhat, cluster, db_instance, timeout, solver)
             if current_score < best_score:
                 best_score = current_score
                 best_solver = solver
