@@ -18,8 +18,8 @@ SCALINGTECHNIQUES = [
 ]
 
 
-def scaling(data, features, params: InputDataScaling):
-    algorithm = params.scaling_algorithm
+def scaling(data, features, params_dict):
+    algorithm = params_dict['scaling_algorithm']
 
     # it is assumed that the solver_time features are the last ones in the data set
     solver_start_index = -1
@@ -33,7 +33,7 @@ def scaling(data, features, params: InputDataScaling):
     elif algorithm == "SCALEMINUSPLUS1":
         # scale the instance features (gate and base) per feature from [-1,1] and
         # scale the solver time per instance form [-1, 1]
-        if params.scaling_technique == 'TIMESCALE' and solver_start_index != -1:
+        if params_dict['scaling_technique'] == 'TIMESCALE' and solver_start_index != -1:
             scaled_data = scale_only_instances_features(solver_start_index, data)
 
             finished = []
@@ -46,7 +46,7 @@ def scaling(data, features, params: InputDataScaling):
 
         # scale the instance features (gate and base) per feature form [-1,1] and
         # set the k best solvers for each instance to 1 and all other to 0
-        elif params.scaling_technique == 'TIMESELECTBEST' and solver_start_index != -1:
+        elif params_dict['scaling_technique'] == 'TIMESELECTBEST' and solver_start_index != -1:
             scaled_data = scale_only_instances_features(solver_start_index, data)
 
             finished = []

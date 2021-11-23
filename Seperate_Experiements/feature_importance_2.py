@@ -1,7 +1,7 @@
 from sklearn.metrics import normalized_mutual_info_score
 
 import exportFigure
-from DataAnalysis import scaling, feature_reduction, clustering, scoring, scoring_util
+from DataAnalysis import scaling, feature_selection, clustering, scoring, scoring_util
 from DataFormats.DbInstance import DbInstance
 from DataFormats.InputData import InputDataCluster, InputDataScaling, InputDataFeatureSelection
 import plotly.graph_objects as go
@@ -45,7 +45,7 @@ for feature1 in db_instance.dataset_f:
         input_data_feature_selection = InputDataFeatureSelection(
             selection_algorithm='NONE')
 
-        reduced_instance_list = feature_reduction.feature_reduction(
+        reduced_instance_list = feature_selection.feature_selection(
             feature_list, [feature1, feature2], db_instance.solver_wh, input_data_feature_selection
         )
 

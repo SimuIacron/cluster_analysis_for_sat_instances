@@ -28,33 +28,32 @@ CLUSTERALGORITHMS = [
 # clusters the given data with the select algorithm and display a plot of two features
 # instance_list: The data to cluster
 # params: Parameters for the clustering algorithms
-def cluster(instances_list, params: InputDataCluster):
-    print("Starting clustering...")
+def cluster(instances_list, params_dict):
 
-    algorithm = params.cluster_algorithm
+    algorithm = params_dict['cluster_algorithm']
 
     # select clustering algorithm
     if algorithm == "KMEANS":
-        model = KMeans(random_state=params.seed, n_clusters=params.n_clusters_k_means)
+        model = KMeans(random_state=params_dict['seed'], n_clusters=params_dict['n_clusters_k_means'])
     elif algorithm == "AFFINITY":
-        model = AffinityPropagation(random_state=params.seed, damping=params.damping_aff,
-                                    preference=params.preference_aff, affinity=params.affinity_aff)
+        model = AffinityPropagation(random_state=params_dict['seed'], damping=params_dict['damping_aff'],
+                                    preference=params_dict['preference_aff'], affinity=params_dict['affinity_aff'])
     elif algorithm == "MEANSHIFT":
-        model = MeanShift(bandwidth=params.bandwidth_mean)
+        model = MeanShift(bandwidth=params_dict['bandwidth_mean'])
     elif algorithm == "SPECTRAL":
-        model = SpectralClustering(random_state=params.seed, n_clusters=params.n_clusters_spectral)
+        model = SpectralClustering(random_state=params_dict['seed'], n_clusters=params_dict['n_clusters_spectral'])
     elif algorithm == "AGGLOMERATIVE":
-        model = AgglomerativeClustering(n_clusters=params.n_clusters_agg, affinity=params.affinity_agg,
-                                        linkage=params.linkage_agg, distance_threshold=params.distance_threshold)
+        model = AgglomerativeClustering(n_clusters=params_dict['n_clusters_agg'], affinity=params_dict['affinity_agg'],
+                                        linkage=params_dict['linkage_agg'], distance_threshold=params_dict['distance_threshold'])
     elif algorithm == "OPTICS":
-        model = OPTICS(min_samples=params.min_samples_opt, min_cluster_size=params.min_clusters_opt)
+        model = OPTICS(min_samples=params_dict['min_samples_opt'], min_cluster_size=params_dict['min_clusters_opt'])
     elif algorithm == "GAUSSIAN":
-        model = GaussianMixture(random_state=params.seed, n_components=params.n_components_gauss)
+        model = GaussianMixture(random_state=params_dict['seed'], n_components=params_dict['n_components_gauss'])
     elif algorithm == "BIRCH":
-        model = Birch(threshold=params.threshold_birch, branching_factor=params.branching_factor_birch,
-                      n_clusters=params.n_clusters_birch)
+        model = Birch(threshold=params_dict['threshold_birch'], branching_factor=params_dict['branching_factor_birch'],
+                      n_clusters=params_dict['n_clusters_birch'])
     else:  # algorithm == "DBSCAN":
-        model = DBSCAN(eps=params.eps_dbscan, min_samples=params.min_samples_dbscan)
+        model = DBSCAN(eps=params_dict['eps_dbscan'], min_samples=params_dict['min_samples_dbscan'])
 
     # fit model and extract clusters
     model.fit(instances_list)

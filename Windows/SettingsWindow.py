@@ -10,7 +10,7 @@ from numpy import argmin
 import DatabaseReader
 import JsonExport
 import util
-from DataAnalysis import scaling, feature_reduction, clustering, evaluation
+from DataAnalysis import scaling, feature_selection, clustering, evaluation
 from DataFormats.InputData import InputDataScaling, InputDataCluster, InputDataFeatureSelection
 from DataFormats.DbInstance import DbInstance
 from Windows import ClusterStatisticsWindow, ScoringWindow
@@ -88,8 +88,8 @@ def create_layout():
         html.H2('Feature Filtering'),
         dcc.Dropdown(
             id='dropdown-feature-selection-algorithm',
-            options=create_dropdown(feature_reduction.FEATURESELECTIONALGORITHMS),
-            value=create_dropdown(feature_reduction.FEATURESELECTIONALGORITHMS)[0]['value']
+            options=create_dropdown(feature_selection.FEATURESELECTIONALGORITHMS),
+            value=create_dropdown(feature_selection.FEATURESELECTIONALGORITHMS)[0]['value']
         ),
 
         html.Label('Seed Filtering'),
@@ -114,8 +114,8 @@ def create_layout():
         html.Label('Variance ignore'),
         dcc.Dropdown(
             id='dropdown-feature-selection-var-ignore',
-            options=create_dropdown(feature_reduction.FEATURESELECTIONIGNORE),
-            value=create_dropdown(feature_reduction.FEATURESELECTIONIGNORE)[0]['value']
+            options=create_dropdown(feature_selection.FEATURESELECTIONIGNORE),
+            value=create_dropdown(feature_selection.FEATURESELECTIONIGNORE)[0]['value']
         ),
 
         html.H4('PCA'),
@@ -509,7 +509,7 @@ def run(db_instance: DbInstance, input_data_cluster: InputDataCluster,
 
     # feature reduction
     reduced_instance_list = \
-        feature_reduction.feature_reduction(db_instance.dataset_wh, db_instance.dataset_f, db_instance.solver_wh, input_data_feature_selection)
+        feature_selection.feature_selection(db_instance.dataset_wh, db_instance.dataset_f, db_instance.solver_wh, input_data_feature_selection)
 
     # scaling
     instances_list_s = scaling.scaling(reduced_instance_list, db_instance.dataset_f, input_data_scaling)

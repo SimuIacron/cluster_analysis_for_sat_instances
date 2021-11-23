@@ -31,17 +31,17 @@ def get_best_solver_per_instance(solvers):
     return best_list
 
 
-def feature_reduction(data, features, solvers, params: InputDataFeatureSelection):
-    algorithm = params.selection_algorithm
+def feature_selection(data, features, solvers, params_dict):
+    algorithm = params_dict['selection_algorithm']
 
     ignore_solver_time = True
 
     if algorithm == "SPARSE":
-        model = SparseRandomProjection(random_state=params.seed, n_components=params.n_components_sparse)
+        model = SparseRandomProjection(random_state=params_dict['seed'], n_components=params_dict['n_components_sparse'])
     elif algorithm == "MUTUALINFO":
 
         best_solver = get_best_solver_per_instance(solvers)
-        sel = SelectPercentile(mutual_info_classif, percentile=params.percentile_best)
+        sel = SelectPercentile(mutual_info_classif, percentile=params_dict['percentile_best'])
         reduced = sel.fit_transform(data, best_solver)
 
         print("Remaining features: " + str(len(reduced[0])))
@@ -51,7 +51,7 @@ def feature_reduction(data, features, solvers, params: InputDataFeatureSelection
 
     elif algorithm == "MUTUALINFOK":
         best_solver = get_best_solver_per_instance(solvers)
-        sel = SelectKBest(mutual_info_classif, k=params.percentile_best)
+        sel = SelectKBest(mutual_info_classif, k=params_dict['percentile_best'])
         reduced = sel.fit_transform(data, best_solver)
 
         print("Remaining features: " + str(len(reduced[0])))
@@ -60,7 +60,7 @@ def feature_reduction(data, features, solvers, params: InputDataFeatureSelection
         return reduced
 
     elif algorithm == "GAUSSIAN":
-        model = GaussianRandomProjection(random_state=params.seed, n_components=params.n_components_gaussian)
+        model = GaussianRandomProjection(random_state=params_dict['seed'], n_components=params_dict['n_components_gaussian'])
     elif algorithm == "NONE":
         return data
     elif algorithm == "VARIANCE":
@@ -81,7 +81,7 @@ def feature_reduction(data, features, solvers, params: InputDataFeatureSelection
             if solver_start_index != -1:
                 calc_data = [item[:solver_start_index] for item in data]
 
-            sel = VarianceThreshold(threshold=(params.variance_var * (1 - params.variance_var)))
+            sel = VarianceThreshold(threshold=(params_dict['variance_var'] * (1 - params_dict['variance_var'])))
 
             reduced = sel.fit_transform(calc_data)
             finished = reduced
@@ -99,7 +99,7 @@ def feature_reduction(data, features, solvers, params: InputDataFeatureSelection
 
             # this section calculates the variance for all features including the solver time
 
-            sel = VarianceThreshold(threshold=(params.variance_var * (1 - params.variance_var)))
+            sel = VarianceThreshold(threshold=(params_dict['variance_var'] * (1 - params_dict['variance_var'])))
             finished = sel.fit_transform(data)
             print('Remaining features:')
             print(sel.get_feature_names_out(features))
@@ -108,10 +108,10 @@ def feature_reduction(data, features, solvers, params: InputDataFeatureSelection
         return finished
 
     else:  # algorithm == "PCA
-        if params.n_features_pca == 0:
+        if params_dict['n_features_pca'] == 0:
             model = PCA(n_components="mle", svd_solver="full")
         else:
-            model = PCA(n_components=params.n_features_pca)
+            model = PCA(n_components=params_dict['n_features_pca'])
 
     model.fit(data)
     return model.transform(data)

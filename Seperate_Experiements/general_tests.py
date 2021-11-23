@@ -1,7 +1,7 @@
 from itertools import combinations
 
 import exportFigure
-from DataAnalysis import scoring, feature_reduction, scaling, scoring_util
+from DataAnalysis import scoring, feature_selection, scaling, scoring_util
 from DataFormats.DbInstance import DbInstance
 from sklearn.metrics import normalized_mutual_info_score, adjusted_mutual_info_score
 
@@ -35,7 +35,7 @@ for comb in output[1:]:
         percentile_best=30)
 
     instances_list_s = scaling.scaling(db_instance.dataset_wh, db_instance.dataset_f, input_data_scaling)
-    reduced_instance_list = feature_reduction.feature_reduction(
+    reduced_instance_list = feature_selection.feature_selection(
             instances_list_s, db_instance.dataset_f, db_instance.solver_wh, input_data_feature_selection
         )
 

@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 import exportFigure
-from DataAnalysis import feature_reduction, scaling, clustering, scoring, scoring_util
+from DataAnalysis import feature_selection, scaling, clustering, scoring, scoring_util
 from DataFormats.DbInstance import DbInstance
 from DataFormats.InputData import InputDataCluster, InputDataScaling, InputDataFeatureSelection
 
@@ -40,7 +40,7 @@ for comb in output[1:]:
         seed=0,
         percentile_best=10)
 
-    reduced_instance_list = feature_reduction.feature_reduction(
+    reduced_instance_list = feature_selection.feature_selection(
             db_instance.dataset_wh, db_instance.dataset_f, db_instance.solver_wh, input_data_feature_selection
         )
 
