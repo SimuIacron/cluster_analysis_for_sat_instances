@@ -10,14 +10,14 @@ cluster_result_path = os.environ['EXPPATH']
 
 
 # writes one result as a line to the specified file
-def write_cluster_results_to_json(filename, result):
+def append_to_json(filename, result):
     with open(cluster_result_path + filename + '.txt', 'a') as file:
         json_result = json.dumps(result)
         file.write(json_result + '\n')
 
 
 # reads all results from the given file and returns a list with dictionaries for each result
-def read_json_file(filename):
+def read_json(filename):
     results = []
     with open(cluster_result_path + filename + '.txt', 'r') as file:
         lines = file.readlines()
@@ -62,7 +62,7 @@ def run_experiments(experiment_list, filename):
             # write the result together with the parameters of the combination into the given file as json
             result = {'id': id_counter, 'settings': comb_dict, 'clusters': clusters.tolist(), 'clustering': yhat.tolist()}
             id_counter = id_counter + 1
-            write_cluster_results_to_json(filename, result)
+            append_to_json(filename, result)
 
 
 # test code
