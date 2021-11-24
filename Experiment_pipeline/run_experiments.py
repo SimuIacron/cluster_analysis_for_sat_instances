@@ -44,6 +44,7 @@ def run_experiments(experiment_list, filename):
 
         # generate every combination of given parameter values of the experiment
         combinations = list(itertools.product(*param_ranges))
+        id_counter = 0
         for comb in combinations:
             print(comb)
             # create a dictionary of the current combination of parameters that is passed to the algorithms
@@ -59,7 +60,8 @@ def run_experiments(experiment_list, filename):
             (clusters, yhat) = clustering.cluster(scaled_data, comb_dict)
 
             # write the result together with the parameters of the combination into the given file as json
-            result = {'settings': comb, 'clusters': clusters.tolist(), 'clustering': yhat.tolist()}
+            result = {'id': id_counter, 'settings': comb_dict, 'clusters': clusters.tolist(), 'clustering': yhat.tolist()}
+            id_counter = id_counter + 1
             write_cluster_results_to_json(filename, result)
 
 
@@ -85,7 +87,7 @@ exp_affinity = standard_settings + \
 
 exp_meanshift = standard_settings + \
                 [('cluster_algorithm', ['MEANSHIFT']),
-                 ('bandwidth_mean', list(range(1, 10)) + [None])] # not clear what values are useful
+                 ('bandwidth_mean', list(range(1, 10)) + [None])]  # not clear what values are useful
 
 exp_spectral = standard_settings + \
                [('cluster_algorithm', ['SPECTRAL']),
@@ -93,16 +95,16 @@ exp_spectral = standard_settings + \
                 ('n_clusters_spectral', range(1, 10))]
 
 exp_agg = standard_settings + \
-               [('cluster_algorithm', ['AGGLOMERATIVE']),
-                ('n_clusters_agg', range(1, 10)),
-                ('affinity_agg', ['euclidean']),
-                ('linkage_agg', ['ward', 'complete', 'average', 'single']),
-                ('distance_threshold', [None])]  # not clear what float values useful
+          [('cluster_algorithm', ['AGGLOMERATIVE']),
+           ('n_clusters_agg', range(1, 10)),
+           ('affinity_agg', ['euclidean']),
+           ('linkage_agg', ['ward', 'complete', 'average', 'single']),
+           ('distance_threshold', [None])]  # not clear what float values useful
 
 exp_optics = standard_settings + \
-               [('cluster_algorithm', ['OPTICS']),
-                ('min_samples_opt', range(1, 10)),
-                ('min_clusters_opt', list(range(1, 10)) + [None])]
+             [('cluster_algorithm', ['OPTICS']),
+              ('min_samples_opt', range(1, 10)),
+              ('min_clusters_opt', list(range(1, 10)) + [None])]
 
 exp_gaussian = standard_settings + \
                [('cluster_algorithm', ['GAUSSIAN']),
@@ -110,15 +112,15 @@ exp_gaussian = standard_settings + \
                 ('n_components_gauss', range(1, 10))]
 
 exp_birch = standard_settings + \
-               [('cluster_algorithm', ['BIRCH']),
-                ('threshold_birch', np.arange(0.1, 1, 0.1)),
-                ('branching_factor_birch', range(10, 100, 10)),
-                ('n_clusters_birch', range(1, 10))]
+            [('cluster_algorithm', ['BIRCH']),
+             ('threshold_birch', np.arange(0.1, 1, 0.1)),
+             ('branching_factor_birch', range(10, 100, 10)),
+             ('n_clusters_birch', range(1, 10))]
 
 exp_dbscan = standard_settings + \
-               [('cluster_algorithm', ['DBSCAN']),
-                ('eps_dbscan', np.arange(0.1, 1, 0.1)),
-                ('min_samples_dbscan', range(1, 10, 1))]
+             [('cluster_algorithm', ['DBSCAN']),
+              ('eps_dbscan', np.arange(0.1, 1, 0.1)),
+              ('min_samples_dbscan', range(1, 10, 1))]
 
 # run_experiments([exp_kmeans, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian,
-#                  exp_birch, exp_dbscan], 'param_test_1')
+#                  exp_birch, exp_dbscan], 'basic_search_all_cluster_algorithms')
