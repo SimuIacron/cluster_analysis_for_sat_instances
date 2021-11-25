@@ -17,7 +17,7 @@ def append_to_json(filename, result):
 
 
 # reads all results from the given file and returns a list with dictionaries for each result
-def read_json(filename):
+def read_experiment_json(filename):
     results = []
     with open(cluster_result_path + filename + '.txt', 'r') as file:
         lines = file.readlines()
@@ -25,6 +25,12 @@ def read_json(filename):
             results.append(json.loads(line))
 
     return results
+
+
+def read_evaluation_json(filename):
+    with open(cluster_result_path + filename + '.txt', 'r') as file:
+        lines = file.readline()
+        return json.loads(lines)
 
 
 # runs the feature selection, selection and clustering algorithm with the given experiments

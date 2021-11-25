@@ -1,9 +1,10 @@
 from sklearn.metrics import normalized_mutual_info_score
 
 from DataAnalysis.Evaluation import scoring_util
-from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size
+from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
+    score_single_best_solver
 from DataFormats.DbInstance import DbInstance
-from Experiment_pipeline.run_experiments import read_json, append_to_json
+from Experiment_pipeline.run_experiments import read_experiment_json, append_to_json
 import multiprocessing as mp
 
 
@@ -17,7 +18,7 @@ import multiprocessing as mp
 # args: Extra arguments given to the func_eval. Note: Func_eval can only have 2 params, entry and args,
 # however args can be any datatype
 def run_evaluation(input_file, output_file, func_eval, dict_name, args):
-    cluster_results = read_json(input_file)
+    cluster_results = read_experiment_json(input_file)
     pool = mp.Pool(mp.cpu_count())
 
     evaluation_result = [dict(entry, **{dict_name: pool.apply(func_eval, args=(entry, args))})
@@ -67,32 +68,16 @@ def run_evaluation_par2_score(input_file, output_file):
     run_evaluation(input_file, output_file, eval_par2_score, 'par2', (db_instance, 5000))
 
 
+def run_evaluation_par2_bss(output_file):
+    db_instance = DbInstance()
+    final_score, cluster_score_dict = score_single_best_solver(db_instance, 5000, f1_par2, f2_par2_cluster,
+                                                               f3_weigh_with_cluster_size)
+    append_to_json(output_file, [final_score, cluster_score_dict])
+
 # ----------------------------------------------------------------------------------------------------------------------
 
+
 if __name__ == '__main__':
-    run_evaluation_par2_score('basic_search_all_cluster_algorithms_id', 'test2')
-
-    # run_evaluation_score('basic_search_all_cluster_algorithms_id')
-    # result = par2_sort('par2_score')
-    # result_bss = score_single_best_solver(DbInstance(), 5000, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size)
-
-    # best_solver = []
-    # for key, item in result_bss[1].items():
-    #     best_solver.append(item[0][0][0])
-
-    #  counter = Counter(best_solver)
-
-    # keys = []
-    # values = []
-    # for key, value in counter.items():
-    #     keys.append(key)
-    #     values.append(value)
-
-    # fig = go.Figure(data=[go.Pie(labels=keys,
-    #                              values=values)],
-    #                 layout=go.Layout(
-    #                     title=go.layout.Title(
-    #                        text='Distributions of solvers if each instance uses the best single solver'))
-    #                 )
-    # exportFigure.export_plot_as_html(fig, 'bss_dist')
-    # fig.show()
+    # run_evaluation_par2_score('basic_search_all_cluster_algorithms_id', 'test2')
+    # run_evaluation_par2_bss('bss')
+    pass
