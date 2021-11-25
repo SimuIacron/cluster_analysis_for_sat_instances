@@ -75,7 +75,7 @@ def run_experiments(experiment_list, filename):
 input_dbs = ['base', 'gate', 'solver']
 output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
 standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),
-                     ('scaling_technique', ['SCALE01']),
+                     ('scaling_technique', ['NORMALSCALE']),
                      ('selection_algorithm', ['NONE']),
                      ('selected_data', output[1:])]
 

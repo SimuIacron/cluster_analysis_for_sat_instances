@@ -15,7 +15,7 @@ from Experiment_pipeline.run_experiments import read_experiment_json, read_evalu
 # however instead of values, for each settings list of settings is used, to enable the usage of "or"
 # example: In the file the structure of the problem is given as {settings: {"scaling_algorithm": "SCALEMINUSPLUS1" }}
 # then the settings dict needs to hve the structure: {"scaling_algorithm": ["SCALEMINUSPLUS1"] }, we can especially use
-# {"scaling_algorithm": ["SCALEMINUSPLUS1", "SCALE01"] } to select evaluations with different scaling algorithm
+# {"scaling_algorithm": ["SCALEMINUSPLUS1", "NORMALSCALE"] } to select evaluations with different scaling algorithm
 
 # returns the list of evaluations that fit the dict and a diff which contains all keys, that where missing in the
 # settings_dict, but where present in at least one selected evaluation
@@ -45,7 +45,6 @@ def collect_evaluation(input_file, settings_dict):
 # output_file: The filename of the exported html (no export if equal to '')
 # show_plot: If the plot should be opened in the browser after running the function
 def plot_par2_bss_distribution(input_file_bss, output_file='', show_plot=False):
-
     result_bss = read_evaluation_json(input_file_bss)
     best_solver = []
     for key, item in result_bss[1].items():
@@ -63,7 +62,7 @@ def plot_par2_bss_distribution(input_file_bss, output_file='', show_plot=False):
                                  values=values)],
                     layout=go.Layout(
                         title=go.layout.Title(
-                           text='Distributions of solvers if each instance uses the best single solver'))
+                            text='Distributions of solvers if each instance uses the best single solver'))
                     )
 
     if output_file != '':
@@ -88,7 +87,8 @@ def plot_par2_bss_distribution(input_file_bss, output_file='', show_plot=False):
 # cutoff: How many evaluation instances should be maximal shown
 # output_file: The filename of the exported html (no export if equal to '')
 # show_plot: If the plot should be opened in the browser after running the function
-def plot_par2_best(input_file_par2_scores, input_file_bss, plot_description, max_cluster_amount, cutoff, output_file='', show_plot=False):
+def plot_par2_best(input_file_par2_scores, input_file_bss, plot_description, max_cluster_amount, cutoff, output_file='',
+                   show_plot=False):
     data = read_evaluation_json(input_file_par2_scores)
     bss = read_evaluation_json(input_file_bss)
     sorted_data = sorted(data, key=lambda d: d['par2'][0])
@@ -114,7 +114,7 @@ def plot_par2_best(input_file_par2_scores, input_file_bss, plot_description, max
         text.append(str(evaluation['settings']) + ' cluster count: ' + str(len(evaluation['clusters'])))
 
     fig = go.Figure(layout=go.Layout(
-        title=go.layout.Title(text=plot_description)
+        title=go.layout.Title(text=plot_description + ' of ' + str(cutoff) + ' best evaluations')
     ),
         data=[
             go.Bar(name='Par2 Score <' + str(max_cluster_amount) + ' clusters', x=keys, y=values, hovertext=text),
@@ -135,7 +135,8 @@ def plot_par2_best(input_file_par2_scores, input_file_bss, plot_description, max
 
 # Example:
 
-# plot_par2_best('par2', 'bss', 'best par2 scores', 50, 150, show_plot=True)
+# plot_par2_best('par2', 'bss', 'Par 2 scores', 50, 150, show_plot=True)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -200,17 +201,69 @@ def plot_par2(input_file, plot_description, settings_dict, iter_param, iter_para
     if show_plot:
         fig.show()
 
+
 # Examples
 
 # plot_par2('par2', 'Par2 scores for each k in [1,9] with kmeans using base.db.',
-#           {"scaling_algorithm": ["SCALEMINUSPLUS1"], "scaling_technique": ["SCALE01"],
+#           {"scaling_algorithm": ["SCALEMINUSPLUS1"], "scaling_technique": ["NORMALSCALE"],
 #            "selection_algorithm": ["NONE"],
 #            "selected_data": [["base"]], "cluster_algorithm": ["KMEANS"], "seed": [0]}, "n_clusters_k_means", 'k',
 #           show_plot=True)
 #
 # plot_par2('par2', 'Par2 scores for each eps with dbscan using base.db.',
-#           {"scaling_algorithm": ["SCALEMINUSPLUS1"], "scaling_technique": ["SCALE01"],
+#           {"scaling_algorithm": ["SCALEMINUSPLUS1"], "scaling_technique": ["NORMALSCALE"],
 #            "selection_algorithm": ["NONE"],
 #            "selected_data": [["base"]], "cluster_algorithm": ["DBSCAN"], 'min_samples_dbscan': [3]},
 #            "eps_dbscan", 'eps',
 #           show_plot=True)
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+
+def plot_mutual_info(input_file, plot_description, settings_dict, iter_param, iter_param_label, mutual_info_param,
+                     mutual_info_label, output_file='',
+                     show_plot=False):
+    data, diff = collect_evaluation(input_file, settings_dict)
+    if iter_param not in diff:
+        raise AssertionError('Iteration Parameter not in selected evaluations')
+
+    combinations = settings_dict['selected_data']
+
+    fig = go.Figure(layout=go.Layout(
+        title=go.layout.Title(text=plot_description)
+    ))
+    fig.update_xaxes(title_text=iter_param_label)
+    fig.update_yaxes(title_text=mutual_info_label)
+
+    for comb in combinations:
+        comb_data = []
+        for evaluation in data:
+            if evaluation['settings']['selected_data'] == comb:
+                comb_data.append(evaluation)
+
+        comb_data = sorted(comb_data, key=lambda d: d['settings'][iter_param])
+        keys = []
+        value = []
+        for evaluation in comb_data:
+            keys.append(evaluation['settings'][iter_param])
+            value.append(evaluation[mutual_info_param])
+
+        fig.add_trace(go.Scatter(x=keys, y=value, mode='lines', name=" ".join(str(x) for x in comb)))
+
+    if output_file != '':
+        exportFigure.export_plot_as_html(fig, output_file)
+
+    if show_plot:
+        fig.show()
+
+
+plot_mutual_info('normalized_mututal_information_family',
+                 'Normalized mutual information between clustering and the cluster induced by the families',
+                 {"scaling_algorithm": ["SCALEMINUSPLUS1"], "scaling_technique": ["NORMALSCALE"],
+                  "selection_algorithm": ["NONE"],
+                  "selected_data": [["base"], ['gate'], ['solver'], ['base', 'gate'], ['base', 'solver'], ['gate', 'solver'],
+                                    ['base', 'gate', 'solver']],
+                  "cluster_algorithm": ["KMEANS"], "seed": [0]}, "n_clusters_k_means", 'k',
+                 'normalized_mutual_information_family', 'Normalized Mutual Information',
+                 show_plot=True
+                 )
