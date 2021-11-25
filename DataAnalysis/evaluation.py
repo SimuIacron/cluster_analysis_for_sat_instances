@@ -4,7 +4,7 @@ import plotly.express as px
 import util
 import plotly.graph_objects as go
 
-from DataAnalysis import scoring
+from DataAnalysis.Evaluation import scoring
 from DataFormats.DbInstance import DbInstance
 
 
@@ -31,7 +31,7 @@ def solver_score_cluster_linear(clusters, yhat, db_instance: DbInstance):
     solver_scores = []
     for cluster_idx in clusters:
         best_solver, best_solver_score = scoring.score_solvers_on_linear_rank_cluster(yhat, cluster_idx, db_instance,
-                                                                               5000)
+                                                                                      5000)
 
         solvers.append(best_solver)
         solver_scores.append(best_solver_score)

@@ -1,4 +1,4 @@
-from DataAnalysis import scoring_util, scoring_modular
+from DataAnalysis.Evaluation import scoring_modular, scoring_util
 from DataFormats.DbInstance import DbInstance
 from sklearn.metrics import adjusted_mutual_info_score, adjusted_rand_score, completeness_score, fowlkes_mallows_score, \
     homogeneity_score, mutual_info_score, normalized_mutual_info_score, rand_score, v_measure_score
@@ -206,7 +206,8 @@ def van_dongen_normalized(labels_pred, labels_true):
     for j in range(len(set(labels_true))):
         sum2 = sum2 + max(c_t[j])
 
-    vd = (2 * n - sum1 - sum2) / (2 * n - max(scoring_util.create_contingency_row(labels_pred)) - max(scoring_util.create_contingency_row(labels_true)))
+    vd = (2 * n - sum1 - sum2) / (2 * n - max(scoring_util.create_contingency_row(labels_pred)) - max(
+        scoring_util.create_contingency_row(labels_true)))
     return vd
 
 

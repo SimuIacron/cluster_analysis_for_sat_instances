@@ -1,12 +1,7 @@
-from collections import Counter
-
 from sklearn.metrics import normalized_mutual_info_score
-import plotly.graph_objects as go
 
-import exportFigure
-from DataAnalysis import scoring_util
-from DataAnalysis.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
-    score_single_best_solver
+from DataAnalysis.Evaluation import scoring_util
+from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size
 from DataFormats.DbInstance import DbInstance
 from Experiment_pipeline.run_experiments import read_json, append_to_json
 import multiprocessing as mp
@@ -36,11 +31,27 @@ def eval_normalized_mutual_info(entry, args):
     return normalized_mutual_info_score(args, entry['clustering'])
 
 
-def run_evaluation_normalized_mutual_info(input_file, output_file):
+def run_evaluation_normalized_mutual_info_family(input_file, output_file):
     db_instance = DbInstance()
     family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
 
     run_evaluation(input_file, output_file, eval_normalized_mutual_info, 'normalized_mutual_information_family',
+                   family_int)
+
+
+def run_evaluation_normalized_mutual_info_solver(input_file, output_file):
+    db_instance = DbInstance()
+    family_int = scoring_util.convert_best_solver_int(db_instance.family_wh)
+
+    run_evaluation(input_file, output_file, eval_normalized_mutual_info, 'normalized_mutual_information_solver',
+                   family_int)
+
+
+def run_evaluation_normalized_mutual_info_un_sat(input_file, output_file):
+    db_instance = DbInstance()
+    family_int = scoring_util.convert_sat_unsat_to_int(db_instance.family_wh)
+
+    run_evaluation(input_file, output_file, eval_normalized_mutual_info, 'normalized_mutual_information_un_sat',
                    family_int)
 
 

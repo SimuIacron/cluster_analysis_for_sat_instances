@@ -1,10 +1,10 @@
 from sklearn.metrics import normalized_mutual_info_score
 
 import exportFigure
-from DataAnalysis import scaling, feature_selection, clustering, scoring, scoring_util
+from DataAnalysis import scaling, feature_selection, clustering
+from DataAnalysis.Evaluation import scoring_util
 from DataFormats.DbInstance import DbInstance
 from DataFormats.InputData import InputDataCluster, InputDataScaling, InputDataFeatureSelection
-import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 
@@ -23,7 +23,7 @@ db_instance = DbInstance()
 db_instance.generate_dataset(input)
 
 family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
-solver_int = scoring_util.get_best_solver_int(db_instance)
+solver_int = scoring_util.convert_best_solver_int(db_instance)
 unsat_sat_int = scoring_util.convert_sat_unsat_to_int(db_instance.result_wh)
 
 plot_name_1 = "011_feature_importance_family"

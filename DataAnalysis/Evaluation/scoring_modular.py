@@ -1,8 +1,7 @@
 from collections import Counter
 
-from DataAnalysis import scoring
+from DataAnalysis.Evaluation import scoring
 from DataFormats.DbInstance import DbInstance
-from numpy import argmin
 
 
 # General function to score clusterings, where the parameters are useful

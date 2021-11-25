@@ -1,14 +1,11 @@
 from collections import Counter
 
 import numpy as np
-import pandas as pd
-from numpy import mean
-from sklearn.metrics import normalized_mutual_info_score, adjusted_mutual_info_score, completeness_score
-import plotly.express as px
 import plotly.graph_objects as go
 
 import exportFigure
-from DataAnalysis import feature_selection, scaling, clustering, scoring, scoring_util
+from DataAnalysis import feature_selection, scaling, clustering
+from DataAnalysis.Evaluation import scoring_util, scoring
 from DataFormats.DbInstance import DbInstance
 from DataFormats.InputData import InputDataCluster, InputDataScaling, InputDataFeatureSelection
 
@@ -21,7 +18,7 @@ output = sum([list(map(list, combinations(input_dbs, i))) for i in range(len(inp
 db_instance = DbInstance()
 
 family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
-solver_int = scoring_util.get_best_solver_int(db_instance)
+solver_int = scoring_util.convert_best_solver_int(db_instance)
 unsat_sat_int = scoring_util.convert_sat_unsat_to_int(db_instance.result_wh)
 
 plot_name_1 = "014_kmeans_par2_realtive_scale01_div_10"

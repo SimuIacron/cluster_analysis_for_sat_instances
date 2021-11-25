@@ -1,12 +1,10 @@
-import pandas as pd
 from numpy import mean
-from sklearn.metrics import normalized_mutual_info_score, adjusted_mutual_info_score
-import plotly.express as px
+from sklearn.metrics import adjusted_mutual_info_score
 import plotly.graph_objects as go
-import numpy as np
 
 import exportFigure
-from DataAnalysis import feature_selection, scaling, clustering, scoring, scoring_util
+from DataAnalysis import feature_selection, scaling, clustering
+from DataAnalysis.Evaluation import scoring_util, scoring
 from DataFormats.DbInstance import DbInstance
 from DataFormats.InputData import InputDataCluster, InputDataScaling, InputDataFeatureSelection
 
@@ -19,7 +17,7 @@ output = sum([list(map(list, combinations(input, i))) for i in range(len(input) 
 db_instance = DbInstance()
 
 family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
-solver_int = scoring_util.get_best_solver_int(db_instance)
+solver_int = scoring_util.convert_best_solver_int(db_instance)
 
 surface_1 = []
 surface_2 = []
@@ -80,7 +78,7 @@ for comb in output[1:]:
             value = mean([scoring.score_solvers_on_linear_rank_cluster(yhat, i, db_instance, 5000)[1] for i in clusters])
             current_list_3.append(value)
             value = mean(
-                [scoring.score_solvers_on_rank_cluster(yhat, i, db_instance, [1000,2000,3000,4000,5000],[5,4,3,2,1])[1] for i in clusters])
+                [scoring.score_solvers_on_rank_cluster(yhat, i, db_instance, [1000, 2000, 3000, 4000, 5000], [5, 4, 3, 2, 1])[1] for i in clusters])
             current_list_4.append(value)
 
         list_1.append(current_list_1)

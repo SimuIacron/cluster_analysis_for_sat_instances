@@ -40,7 +40,7 @@ def get_k_best_solvers_for_instance(instance_solver_times, k):
 # returns a clustering which uses the best solvers as each cluster
 # this means every instance which have the same best solver
 # are considered to be in a cluster
-def get_best_solver_int(db_instance: DbInstance):
+def convert_best_solver_int(db_instance: DbInstance):
     solver_features = DatabaseReader.FEATURES_SOLVER
     final = []
     for inst in db_instance.solver_wh:

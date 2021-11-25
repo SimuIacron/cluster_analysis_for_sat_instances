@@ -1,8 +1,8 @@
 
 # creates layout with statistics
-from dash import html, dcc
+from dash import dcc
 
-from DataAnalysis import evaluation, scoring
+from DataAnalysis import evaluation
 from DataFormats.DbInstance import DbInstance
 
 
