@@ -1,6 +1,7 @@
 import itertools
 import json
 import os
+from pathlib import Path
 from time import time
 
 import numpy as np
@@ -9,25 +10,49 @@ import multiprocessing as mp
 from DataAnalysis import feature_selection, scaling, clustering
 from DataFormats.DbInstance import DbInstance
 
+
+# - Reading/Writing Json Files -----------------------------------------------------------------------------------------
+
+# the path where the input/output json files are stored
 cluster_result_path = os.environ['EXPPATH']
 
 
+# Writes the inputted data as a json file and appends a next highest number, if file already exists in directory to
+# avoid accidentally overwriting old results
+# filename: The name of the file to be written
+# result: The data structure that is saved in json format (must only contain json convertible data structures!)
 def write_json(filename, result):
-    with open(cluster_result_path + filename + '.txt', 'w') as file:
+    path = cluster_result_path + filename + '.txt'
+    counter = 0
+    # make sure to not overwrite a file
+    while Path(path).is_file():
+        path = cluster_result_path + filename + '_' + str(counter) + '.html'
+        counter = counter + 1
+
+    with open(path, 'w') as file:
         json.dump(result, file)
 
 
+# Reads the given file and returns the data structure stored in it
+# filename: The file to be read
 def read_json(filename):
     with open(cluster_result_path + filename + '.txt', 'r') as file:
         lines = file.readline()
         return json.loads(lines)
 
 
+# - run experiments ----------------------------------------------------------------------------------------------------
+
+# WARNING: Needs to execute in __main__ because it contains multithreading
 # runs the feature selection, selection and clustering algorithm with the given experiments
 # and writes the result as a new line (json) into the file given with 'filename'
 # the experiment list contains experiments, an experiment is a list of tuples structured as follows:
 # [(parameter name, list of possible parameter values)]
 # e.g. [('cluster_algorithm', ['KMEANS']), ('seed', [0]), ('n_clusters_k_means', range(1, 10))]
+# experiment_list: Contains all experiment setups and their parameters
+# filename: The name of the file where the finished clustering are stored
+# cores: Number of cpu cores that should be used in parallel
+# (uses max available cores, if cores is higher than available cores)
 def run_experiments(experiment_list, filename, cores):
     t_start = time()
 
@@ -64,7 +89,12 @@ def run_experiments(experiment_list, filename, cores):
     print('Experiments took %f' % (t_stop - t_start))
 
 
-def run_single_experiment(comb, id, db_instance, params):
+# eval function to run a single experiment for the parallel runner
+# comb: The values of the current experiment
+# exp_id: The id of the experiment
+# db_instance: A DbInstance
+# params: The parameter names of the current experiment
+def run_single_experiment(comb, exp_id, db_instance, params):
     print(str(id) + ' ' + str(comb))
     # create a dictionary of the current combination of parameters that is passed to the algorithms
     comb_dict = {}
@@ -79,11 +109,14 @@ def run_single_experiment(comb, id, db_instance, params):
     (clusters, yhat) = clustering.cluster(scaled_data, comb_dict)
 
     # write the result together with the parameters of the combination into the given file as json
-    result = {'id': id, 'settings': comb_dict, 'clusters': clusters.tolist(), 'clustering': yhat.tolist()}
+    result = {'id': exp_id, 'settings': comb_dict, 'clusters': clusters.tolist(), 'clustering': yhat.tolist()}
     return result
 
 
-# test code
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Example
+
 input_dbs = ['base', 'gate', 'solver']
 output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
 standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),

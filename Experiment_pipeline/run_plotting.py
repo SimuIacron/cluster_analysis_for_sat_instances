@@ -220,6 +220,16 @@ def plot_par2(input_file, plot_description, settings_dict, iter_param, iter_para
 # ----------------------------------------------------------------------------------------------------------------------
 
 
+# plots the mutual information of the different db combinations
+# input_file: the file containing the mutual information data
+# plot_description: The title/description of the plot
+# settings_dict: The experiments settings that should be used
+# iter_param: The parameter name that should be iterated on the x axis
+# iter_param_label: The label of the x axis
+# mutual_info_param: The parameter name of the mutual information in the input_file
+# mutual_info_label: The label of the y axis (mutual info)
+# output_file: The filename of the exported html (no export if equal to '')
+# show_plot: If the plot should be opened in the browser after running the function
 def plot_mutual_info(input_file, plot_description, settings_dict, iter_param, iter_param_label, mutual_info_param,
                      mutual_info_label, output_file='',
                      show_plot=False):
@@ -256,14 +266,17 @@ def plot_mutual_info(input_file, plot_description, settings_dict, iter_param, it
     if show_plot:
         fig.show()
 
+# Example:
 
-plot_mutual_info('normalized_mututal_information_family',
-                 'Normalized mutual information between clustering and the cluster induced by the families',
-                 {"scaling_algorithm": ["SCALEMINUSPLUS1"], "scaling_technique": ["NORMALSCALE"],
-                  "selection_algorithm": ["NONE"],
-                  "selected_data": [["base"], ['gate'], ['solver'], ['base', 'gate'], ['base', 'solver'], ['gate', 'solver'],
-                                    ['base', 'gate', 'solver']],
-                  "cluster_algorithm": ["KMEANS"], "seed": [0]}, "n_clusters_k_means", 'k',
-                 'normalized_mutual_information_family', 'Normalized Mutual Information',
-                 show_plot=True
-                 )
+# plot_mutual_info('normalized_mututal_information_family',
+#                  'Normalized mutual information between clustering and the cluster induced by the families',
+#                  {"scaling_algorithm": ["SCALEMINUSPLUS1"], "scaling_technique": ["NORMALSCALE"],
+#                   "selection_algorithm": ["NONE"],
+#                   "selected_data": [["base"], ['gate'], ['solver'], ['base', 'gate'], ['base', 'solver'],
+#                                     ['gate', 'solver'], ['base', 'gate', 'solver']],
+#                   "cluster_algorithm": ["KMEANS"], "seed": [0]}, "n_clusters_k_means", 'k',
+#                  'normalized_mutual_information_family', 'Normalized Mutual Information',
+#                  show_plot=True
+#                  )
+
+# ----------------------------------------------------------------------------------------------------------------------
