@@ -24,7 +24,7 @@ db_instance.generate_dataset(input)
 
 family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
 solver_int = scoring_util.convert_best_solver_int(db_instance)
-unsat_sat_int = scoring_util.convert_sat_unsat_to_int(db_instance.result_wh)
+unsat_sat_int = scoring_util.convert_un_sat_to_int(db_instance.un_sat_wh)
 
 plot_name_1 = "011_feature_importance_family"
 plot_name_2 = "011_feature_importance_solver"

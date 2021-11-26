@@ -7,7 +7,7 @@ import exportFigure
 from DataAnalysis.Evaluation.scoring_modular import score_single_best_solver, f2_par2_cluster, f1_par2, \
     f3_weigh_with_cluster_size
 from DataFormats.DbInstance import DbInstance
-from Experiment_pipeline.run_experiments import read_experiment_json, read_evaluation_json
+from Experiment_pipeline.run_experiments import read_json
 
 
 # gets the evaluations (or experiments) depending on the given settings_dict from the input_file
@@ -20,7 +20,7 @@ from Experiment_pipeline.run_experiments import read_experiment_json, read_evalu
 # returns the list of evaluations that fit the dict and a diff which contains all keys, that where missing in the
 # settings_dict, but where present in at least one selected evaluation
 def collect_evaluation(input_file, settings_dict):
-    data = read_evaluation_json(input_file)
+    data = read_json(input_file)
     collected_evaluation = []
     diff_set = set()
     for evaluation in data:
@@ -45,7 +45,7 @@ def collect_evaluation(input_file, settings_dict):
 # output_file: The filename of the exported html (no export if equal to '')
 # show_plot: If the plot should be opened in the browser after running the function
 def plot_par2_bss_distribution(input_file_bss, output_file='', show_plot=False):
-    result_bss = read_evaluation_json(input_file_bss)
+    result_bss = read_json(input_file_bss)
     best_solver = []
     for key, item in result_bss[1].items():
         best_solver.append(item[0][0][0])
@@ -89,8 +89,8 @@ def plot_par2_bss_distribution(input_file_bss, output_file='', show_plot=False):
 # show_plot: If the plot should be opened in the browser after running the function
 def plot_par2_best(input_file_par2_scores, input_file_bss, plot_description, max_cluster_amount, cutoff, output_file='',
                    show_plot=False):
-    data = read_evaluation_json(input_file_par2_scores)
-    bss = read_evaluation_json(input_file_bss)
+    data = read_json(input_file_par2_scores)
+    bss = read_json(input_file_bss)
     sorted_data = sorted(data, key=lambda d: d['par2'][0])
     keys = [-1]
     values = [0]

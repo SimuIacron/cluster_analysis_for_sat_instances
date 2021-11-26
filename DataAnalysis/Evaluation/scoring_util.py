@@ -18,7 +18,7 @@ def convert_families_to_int(instance_family):
     return instance_family_int
 
 
-def convert_sat_unsat_to_int(instance_result):
+def convert_un_sat_to_int(instance_result):
     instance_result_int = []
     for item in instance_result:
         if item[0] == 'sat':
@@ -27,14 +27,6 @@ def convert_sat_unsat_to_int(instance_result):
             instance_result_int.append(1)
 
     return instance_result_int
-
-
-# gets for the given instance (only an array of solver times of the instance)
-# the best k solvers, which get determined by the shortest running time
-def get_k_best_solvers_for_instance(instance_solver_times, k):
-    solver_features = DatabaseReader.FEATURES_SOLVER
-    sorted_features = [x for _, x in sorted(zip(instance_solver_times, solver_features))]
-    return sorted_features[:k]
 
 
 # returns a clustering which uses the best solvers as each cluster
@@ -48,6 +40,14 @@ def convert_best_solver_int(db_instance: DbInstance):
         final.append(solver_features.index(sorted_features[0]))
 
     return final
+
+
+# gets for the given instance (only an array of solver times of the instance)
+# the best k solvers, which get determined by the shortest running time
+def get_k_best_solvers_for_instance(instance_solver_times, k):
+    solver_features = DatabaseReader.FEATURES_SOLVER
+    sorted_features = [x for _, x in sorted(zip(instance_solver_times, solver_features))]
+    return sorted_features[:k]
 
 
 # creates a contingency matrix of the two given clusterings
