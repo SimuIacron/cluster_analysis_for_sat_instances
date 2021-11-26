@@ -1,7 +1,10 @@
 import itertools
 import json
 import os
+from time import time
+
 import numpy as np
+import multiprocessing as mp
 
 from DataAnalysis import feature_selection, scaling, clustering
 from DataFormats.DbInstance import DbInstance
@@ -9,25 +12,12 @@ from DataFormats.DbInstance import DbInstance
 cluster_result_path = os.environ['EXPPATH']
 
 
-# writes one result as a line to the specified file
-def append_to_json(filename, result):
-    with open(cluster_result_path + filename + '.txt', 'a') as file:
-        json_result = json.dumps(result)
-        file.write(json_result + '\n')
+def write_json(filename, result):
+    with open(cluster_result_path + filename + '.txt', 'w') as file:
+        json.dump(result, file)
 
 
-# reads all results from the given file and returns a list with dictionaries for each result
-def read_experiment_json(filename):
-    results = []
-    with open(cluster_result_path + filename + '.txt', 'r') as file:
-        lines = file.readlines()
-        for line in lines:
-            results.append(json.loads(line))
-
-    return results
-
-
-def read_evaluation_json(filename):
+def read_json(filename):
     with open(cluster_result_path + filename + '.txt', 'r') as file:
         lines = file.readline()
         return json.loads(lines)
@@ -38,9 +28,20 @@ def read_evaluation_json(filename):
 # the experiment list contains experiments, an experiment is a list of tuples structured as follows:
 # [(parameter name, list of possible parameter values)]
 # e.g. [('cluster_algorithm', ['KMEANS']), ('seed', [0]), ('n_clusters_k_means', range(1, 10))]
-def run_experiments(experiment_list, filename):
+def run_experiments(experiment_list, filename, cores):
+    t_start = time()
+
     db_instance = DbInstance()
 
+    if cores > mp.cpu_count():
+        cores = mp.cpu_count()
+
+    print('Available cores: ' + str(mp.cpu_count()))
+    print('Cores used: ' + str(cores))
+
+    pool = mp.Pool(cores)
+    result_objects = []
+    id_counter = 0
     for experiment_param_list in experiment_list:
         params = []
         param_ranges = []
@@ -50,25 +51,36 @@ def run_experiments(experiment_list, filename):
 
         # generate every combination of given parameter values of the experiment
         combinations = list(itertools.product(*param_ranges))
-        id_counter = 0
+
         for comb in combinations:
-            print(comb)
-            # create a dictionary of the current combination of parameters that is passed to the algorithms
-            comb_dict = {}
-            for idx, param in enumerate(params):
-                comb_dict[param] = comb[idx]
-
-            # execute the algorithms
-            db_instance.generate_dataset(comb_dict['selected_data'])
-            feature_selected_data = feature_selection.feature_selection(db_instance.dataset_wh, db_instance.dataset_f,
-                                                                        db_instance.solver_wh, comb_dict)
-            scaled_data = scaling.scaling(feature_selected_data, db_instance.dataset_f, comb_dict)
-            (clusters, yhat) = clustering.cluster(scaled_data, comb_dict)
-
-            # write the result together with the parameters of the combination into the given file as json
-            result = {'id': id_counter, 'settings': comb_dict, 'clusters': clusters.tolist(), 'clustering': yhat.tolist()}
+            result = pool.apply_async(run_single_experiment, args=(comb, id_counter, db_instance, params))
+            result_objects.append(result)
             id_counter = id_counter + 1
-            append_to_json(filename, result)
+
+    experiment_result = [result.get() for result in result_objects]
+    write_json(filename, sorted(experiment_result, key=lambda d: d['id']))
+
+    t_stop = time()
+    print('Experiments took %f' % (t_stop - t_start))
+
+
+def run_single_experiment(comb, id, db_instance, params):
+    print(str(id) + ' ' + str(comb))
+    # create a dictionary of the current combination of parameters that is passed to the algorithms
+    comb_dict = {}
+    for idx, param in enumerate(params):
+        comb_dict[param] = comb[idx]
+
+    # execute the algorithms
+    db_instance.generate_dataset(comb_dict['selected_data'])
+    feature_selected_data = feature_selection.feature_selection(db_instance.dataset_wh, db_instance.dataset_f,
+                                                                db_instance.solver_wh, comb_dict)
+    scaled_data = scaling.scaling(feature_selected_data, db_instance.dataset_f, comb_dict)
+    (clusters, yhat) = clustering.cluster(scaled_data, comb_dict)
+
+    # write the result together with the parameters of the combination into the given file as json
+    result = {'id': id, 'settings': comb_dict, 'clusters': clusters.tolist(), 'clustering': yhat.tolist()}
+    return result
 
 
 # test code
@@ -128,5 +140,6 @@ exp_dbscan = standard_settings + \
               ('eps_dbscan', np.arange(0.1, 1, 0.1)),
               ('min_samples_dbscan', range(1, 10, 1))]
 
-# run_experiments([exp_kmeans, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian,
-#                  exp_birch, exp_dbscan], 'basic_search_all_cluster_algorithms')
+if __name__ == '__main__':
+    run_experiments([exp_kmeans, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian,
+                     exp_birch, exp_dbscan], 'basic_search_all_cluster_algorithms', 20)
