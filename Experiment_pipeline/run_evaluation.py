@@ -20,17 +20,19 @@ import multiprocessing as mp
 # dict_name: Name of the key, the result value should have in the output file
 # args: Extra arguments given to the func_eval. Note: Func_eval can only have 2 params, entry and args,
 # however args can be any datatype
-def run_evaluation(input_file, output_file, func_eval, dict_name, args, cores):
+# num_cores: Number of cpu cores that should be used in parallel
+# (uses max available cores, if cores is higher than available cores)
+def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_cores):
     t_start = time()
     cluster_results = read_json(input_file)
 
-    if cores > mp.cpu_count():
-        cores = mp.cpu_count()
+    if num_cores > mp.cpu_count():
+        num_cores = mp.cpu_count()
 
     print('Available cores: ' + str(mp.cpu_count()))
-    print('Cores used: ' + str(cores))
+    print('Cores used: ' + str(num_cores))
 
-    pool = mp.Pool(cores)
+    pool = mp.Pool(num_cores)
 
     result_objects = []
     # asynchronous evaluation of experiments (order is restored with sorting afterwards)
@@ -74,12 +76,12 @@ def run_evaluation_normalized_mutual_info_family(input_file, output_file, cores)
 # output_file: The file to write the results to
 # cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_evaluation_normalized_mutual_info_solver(input_file, output_file, cores):
+def run_evaluation_normalized_mutual_info_best_solver(input_file, output_file, cores):
     db_instance = DbInstance()
-    solver_int = scoring_util.convert_best_solver_int(db_instance)
+    best_solver_int = scoring_util.convert_best_solver_int(db_instance)
 
-    run_evaluation(input_file, output_file, eval_normalized_mutual_info, 'normalized_mutual_information_solver',
-                   solver_int, cores)
+    run_evaluation(input_file, output_file, eval_normalized_mutual_info, 'normalized_mutual_information_best_solver',
+                   best_solver_int, cores)
 
 
 # Calculates the normalized mutual information of the clustering and the cluster induced by sat/unsat of all given
@@ -131,6 +133,7 @@ if __name__ == '__main__':
     run_evaluation_par2_score('basic_search_all_cluster_algorithms', 'par2', cores)
     run_evaluation_par2_bss('bss')
     run_evaluation_normalized_mutual_info_family('basic_search_all_cluster_algorithms', 'mutual_info_family', cores)
-    run_evaluation_normalized_mutual_info_solver('basic_search_all_cluster_algorithms', 'mutual_info_solver', cores)
+    run_evaluation_normalized_mutual_info_best_solver('basic_search_all_cluster_algorithms', 'mutual_info_best_solver',
+                                                      cores)
     run_evaluation_normalized_mutual_info_un_sat('basic_search_all_cluster_algorithms', 'mutual_info_un_sat', cores)
     pass

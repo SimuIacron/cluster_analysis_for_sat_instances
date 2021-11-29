@@ -51,20 +51,20 @@ def read_json(filename):
 # e.g. [('cluster_algorithm', ['KMEANS']), ('seed', [0]), ('n_clusters_k_means', range(1, 10))]
 # experiment_list: Contains all experiment setups and their parameters
 # filename: The name of the file where the finished clustering are stored
-# cores: Number of cpu cores that should be used in parallel
+# num_cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_experiments(experiment_list, filename, cores):
+def run_experiments(experiment_list, filename, num_cores):
     t_start = time()
 
     db_instance = DbInstance()
 
-    if cores > mp.cpu_count():
-        cores = mp.cpu_count()
+    if num_cores > mp.cpu_count():
+        num_cores = mp.cpu_count()
 
     print('Available cores: ' + str(mp.cpu_count()))
-    print('Cores used: ' + str(cores))
+    print('Cores used: ' + str(num_cores))
 
-    pool = mp.Pool(cores)
+    pool = mp.Pool(num_cores)
     result_objects = []
     id_counter = 0
     for experiment_param_list in experiment_list:
