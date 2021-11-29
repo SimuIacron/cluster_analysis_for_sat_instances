@@ -1,6 +1,8 @@
 import pandas as pd
 from numpy import argmin, min, median, mean
 import plotly.express as px
+
+import DatabaseReader
 import util
 import plotly.graph_objects as go
 
@@ -14,7 +16,7 @@ def solver_score_cluster(clusters, yhat, db_instance: DbInstance):
     solver_scores = []
     for cluster_idx in clusters:
         best_solver, best_solver_score = scoring.score_solvers_on_rank_cluster(yhat, cluster_idx, db_instance,
-                                                                               [500, 1000, 2500, 5000],
+                                                                               [500, 1000, 2500, DatabaseReader.TIMEOUT],
                                                                                [4, 3, 2, 1])
 
         solvers.append(best_solver)
@@ -31,7 +33,7 @@ def solver_score_cluster_linear(clusters, yhat, db_instance: DbInstance):
     solver_scores = []
     for cluster_idx in clusters:
         best_solver, best_solver_score = scoring.score_solvers_on_linear_rank_cluster(yhat, cluster_idx, db_instance,
-                                                                                      5000)
+                                                                                      DatabaseReader.TIMEOUT)
 
         solvers.append(best_solver)
         solver_scores.append(best_solver_score)

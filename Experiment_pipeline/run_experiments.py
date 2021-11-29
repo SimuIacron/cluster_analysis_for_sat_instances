@@ -95,7 +95,7 @@ def run_experiments(experiment_list, filename, num_cores):
 # db_instance: A DbInstance
 # params: The parameter names of the current experiment
 def run_single_experiment(comb, exp_id, db_instance, params):
-    print(str(id) + ' ' + str(comb))
+    print(str(exp_id) + ' ' + str(comb))
     # create a dictionary of the current combination of parameters that is passed to the algorithms
     comb_dict = {}
     for idx, param in enumerate(params):
@@ -120,9 +120,10 @@ def run_single_experiment(comb, exp_id, db_instance, params):
 input_dbs = ['base', 'gate', 'solver']
 output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
 standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),
-                     ('scaling_technique', ['NORMALSCALE']),
+                     ('scaling_technique', ['NORMALSCALE', 'TIMESCALE', 'TIMESELECTBEST']),
                      ('selection_algorithm', ['NONE']),
-                     ('selected_data', output[1:])]
+                     ('selected_data', output[1:]),
+                     ('scaling_k_best', [3])]
 
 exp_kmeans = standard_settings + \
              [('cluster_algorithm', ['KMEANS']),

@@ -100,7 +100,6 @@ def combine_queries(queries, queries_without_hash):
     final_query = []
     for i in range(len(queries[0])):
 
-
         instance_without_hash = []
         instance = [queries[0][i][0]]
         for j in range(len(queries_without_hash)):
@@ -133,6 +132,7 @@ def remove_empties(dataset):
             removed_indexes.append(0)
 
     return result, removed_indexes
+
 
 # reads the given features from the db and returns a query with and without the instance hashes
 def read_from_db(features):

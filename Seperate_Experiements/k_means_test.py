@@ -3,6 +3,7 @@ from collections import Counter
 import numpy as np
 import plotly.graph_objects as go
 
+import DatabaseReader
 import exportFigure
 from DataAnalysis import feature_selection, scaling, clustering
 from DataAnalysis.Evaluation import scoring_util, scoring
@@ -96,7 +97,8 @@ for comb in output[1:]:
         # family_list.append(value)
         # value = mean([scoring.score_solvers_on_linear_rank_cluster(yhat, i, db_instance, 5000)[1] for i in clusters])
         # list_1.append(value)
-        value, scores_clusters, cluster_algo = scoring.score_clustering_par2_relative(clusters, yhat, db_instance, 5000)
+        value, scores_clusters, cluster_algo = scoring.score_clustering_par2_relative(clusters, yhat, db_instance,
+                                                                                      DatabaseReader.TIMEOUT)
         list_1.append(value)
         keys_1 = keys_1 + ([k] * len(scores_clusters))
         values_1 = values_1 + scores_clusters

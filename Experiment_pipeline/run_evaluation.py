@@ -2,6 +2,7 @@ from time import time
 
 from sklearn.metrics import normalized_mutual_info_score
 
+import DatabaseReader
 from DataAnalysis.Evaluation import scoring_util
 from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
     score_single_best_solver
@@ -62,40 +63,37 @@ def eval_normalized_mutual_info(entry, args):
 # output_file: The file to write the results to
 # cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_evaluation_normalized_mutual_info_family(input_file, output_file, cores):
-    db_instance = DbInstance()
+def run_evaluation_normalized_mutual_info_family(input_file, output_file, db_instance: DbInstance, num_cores):
     family_int = scoring_util.convert_families_to_int(db_instance.family_wh)
 
     run_evaluation(input_file, output_file, eval_normalized_mutual_info, 'normalized_mutual_information_family',
-                   family_int, cores)
+                   family_int, num_cores)
 
 
 # Calculates the normalized mutual information of the clustering and the cluster induced by the best solvers of all
 # given experiments
 # input_file: The file with the experiments to calculate the par2 score of
 # output_file: The file to write the results to
-# cores: Number of cpu cores that should be used in parallel
+# num_cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_evaluation_normalized_mutual_info_best_solver(input_file, output_file, cores):
-    db_instance = DbInstance()
+def run_evaluation_normalized_mutual_info_best_solver(input_file, output_file, db_instance: DbInstance, num_cores):
     best_solver_int = scoring_util.convert_best_solver_int(db_instance)
 
     run_evaluation(input_file, output_file, eval_normalized_mutual_info, 'normalized_mutual_information_best_solver',
-                   best_solver_int, cores)
+                   best_solver_int, num_cores)
 
 
 # Calculates the normalized mutual information of the clustering and the cluster induced by sat/unsat of all given
 # experiments
 # input_file: The file with the experiments to calculate the par2 score of
 # output_file: The file to write the results to
-# cores: Number of cpu cores that should be used in parallel
+# num_cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_evaluation_normalized_mutual_info_un_sat(input_file, output_file, cores):
-    db_instance = DbInstance()
+def run_evaluation_normalized_mutual_info_un_sat(input_file, output_file, db_instance: DbInstance, num_cores):
     un_sat_int = scoring_util.convert_un_sat_to_int(db_instance.un_sat_wh)
 
     run_evaluation(input_file, output_file, eval_normalized_mutual_info, 'normalized_mutual_information_un_sat',
-                   un_sat_int, cores)
+                   un_sat_int, num_cores)
 
 
 # -- Par2 score --------------------------------------------------------------------------------------------------------
@@ -109,19 +107,17 @@ def eval_par2_score(entry, args):
 # Calculates the par2 score of all given experiments
 # input_file: The file with the experiments to calculate the par2 score of
 # output_file: The file to write the results to
-# cores: Number of cpu cores that should be used in parallel
+# num_cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_evaluation_par2_score(input_file, output_file, cores):
-    db_instance = DbInstance()
-    run_evaluation(input_file, output_file, eval_par2_score, 'par2', (db_instance, 5000), cores)
+def run_evaluation_par2_score(input_file, output_file, db_instance: DbInstance, num_cores):
+    run_evaluation(input_file, output_file, eval_par2_score, 'par2', (db_instance, DatabaseReader.TIMEOUT), num_cores)
 
 
 # Calculates the Par2 score if the best solver would be used for each instance
 # output_file: The file to write the results to
-def run_evaluation_par2_bss(output_file):
-    db_instance = DbInstance()
-    final_score, cluster_score_dict = score_single_best_solver(db_instance, 5000, f1_par2, f2_par2_cluster,
-                                                               f3_weigh_with_cluster_size)
+def run_evaluation_par2_bss(output_file, db_instance: DbInstance):
+    final_score, cluster_score_dict = score_single_best_solver(db_instance, DatabaseReader.TIMEOUT, f1_par2,
+                                                               f2_par2_cluster, f3_weigh_with_cluster_size)
     write_json(output_file, [final_score, cluster_score_dict])
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -129,11 +125,12 @@ def run_evaluation_par2_bss(output_file):
 
 if __name__ == '__main__':
     cores = 20
+    db = DbInstance()
 
-    run_evaluation_par2_score('basic_search_all_cluster_algorithms', 'par2', cores)
-    run_evaluation_par2_bss('bss')
-    run_evaluation_normalized_mutual_info_family('basic_search_all_cluster_algorithms', 'mutual_info_family', cores)
+    run_evaluation_par2_score('basic_search_all_cluster_algorithms', 'par2', db, cores)
+    run_evaluation_par2_bss('bss', db)
+    run_evaluation_normalized_mutual_info_family('basic_search_all_cluster_algorithms', 'mutual_info_family', db, cores)
     run_evaluation_normalized_mutual_info_best_solver('basic_search_all_cluster_algorithms', 'mutual_info_best_solver',
-                                                      cores)
-    run_evaluation_normalized_mutual_info_un_sat('basic_search_all_cluster_algorithms', 'mutual_info_un_sat', cores)
+                                                      db, cores)
+    run_evaluation_normalized_mutual_info_un_sat('basic_search_all_cluster_algorithms', 'mutual_info_un_sat', db, cores)
     pass

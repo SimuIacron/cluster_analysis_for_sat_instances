@@ -53,7 +53,7 @@ def scaling(data, features, params_dict):
             for instance in scaled_data:
                 instance_features = instance[:solver_start_index]
                 solver_times = instance[solver_start_index:]
-                new_instance = instance_features + util.select_k_best_mins(solver_times, params.scaling_k_best)
+                new_instance = instance_features + util.select_k_best_mins(solver_times, params_dict['scaling_k_best'])
                 finished.append(new_instance)
             return finished
 
