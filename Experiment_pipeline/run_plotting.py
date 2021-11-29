@@ -1,11 +1,13 @@
 from collections import Counter
 
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
+from numpy import argmin
+import plotly.express as px
 
 import exportFigure
-from DataAnalysis.Evaluation.scoring_modular import score_single_best_solver, f2_par2_cluster, f1_par2, \
-    f3_weigh_with_cluster_size
+import util
 from DataFormats.DbInstance import DbInstance
 from Experiment_pipeline.run_experiments import read_json
 
@@ -266,6 +268,7 @@ def plot_mutual_info(input_file, plot_description, settings_dict, iter_param, it
     if show_plot:
         fig.show()
 
+
 # Example:
 
 # plot_mutual_info('normalized_mututal_information_family',
@@ -280,3 +283,67 @@ def plot_mutual_info(input_file, plot_description, settings_dict, iter_param, it
 #                  )
 
 # ----------------------------------------------------------------------------------------------------------------------
+
+
+# Creates a scatter plot of the selected plot, where the size of the points is the cluster size and the color
+# shows to which cluster it belongs.
+# Additional information are the value of the two selected parameters for x and y as well as the best solver and it's
+# time to solver the particular instance
+# input_file: The file which contains the clustering
+# db_instance: A DbInstance,
+# plot_description: The description/title of the plot
+# settings_dict: Used to select the clustering you want to plot. If there are multiple clusterings that fit the
+# settings the first one is used
+# x_param: The parameter of x-axis. Must be a parameter of base.db, gate.db or runtimes.db
+# x_param_label: What name the x_param should be given in the plot
+# y_param: The parameter of y-axis. Must be a parameter of base.db, gate.db or runtimes.db
+# y_param_label: What name the y_param should be given in the plot
+# output_file: The filename of the exported html (no export if equal to '')
+# show_plot: If the plot should be opened in the browser after running the function
+def plot_clustering(input_file, db_instance: DbInstance, plot_description, settings_dict, x_param, x_param_label,
+                    y_param,
+                    y_param_label, output_file='',
+                    show_plot=False):
+    collected, diff = collect_evaluation(input_file, settings_dict)
+    selected_cluster = collected[0]
+
+    dataset, dataset_wh, dataset_f = db_instance.get_complete_dataset()
+    x_param_idx = dataset_f.index(x_param)
+    y_param_idx = dataset_f.index(y_param)
+
+    best_solver_time = [min(elem) for elem in db_instance.solver_wh]
+    best_solver = [db_instance.solver_f[argmin(elem)] for elem in db_instance.solver_wh]
+
+    scatter_values = util.rotateNestedLists(dataset_wh)
+
+    dataframe_dict = {
+        x_param_label: scatter_values[x_param_idx],
+        y_param_label: scatter_values[y_param_idx],
+        'cluster': selected_cluster['clustering'],
+        'best_solver_time': best_solver_time,
+        'best_solver': best_solver
+    }
+
+    df = pd.DataFrame(dataframe_dict)
+    df["cluster"] = df["cluster"].astype(str)
+    fig = px.scatter(df, x=x_param_label, y=y_param_label, color='cluster', size='best_solver_time',
+                     hover_data=['best_solver'], title=plot_description)
+
+    fig.update_xaxes(title_text=x_param_label)
+    fig.update_yaxes(title_text=y_param_label)
+
+    if output_file != '':
+        exportFigure.export_plot_as_html(fig, output_file)
+
+    if show_plot:
+        fig.show()
+
+
+# Example:
+
+# plot_clustering('basic_search_all_cluster_algorithms', DbInstance(),
+#                 'Clustering',
+#                 {"scaling_algorithm": ["SCALEMINUSPLUS1"], "scaling_technique": ["NORMALSCALE"],
+#                  "selection_algorithm": ["NONE"], "selected_data": [["base"]], "scaling_k_best": [3],
+#                  "cluster_algorithm": ["KMEANS"], "seed": [0], "n_clusters_k_means": [5]},
+#                 'n_vars', 'n_vars', 'n_gates', 'n_gates', '', show_plot=True)

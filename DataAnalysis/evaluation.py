@@ -27,6 +27,7 @@ def solver_score_cluster(clusters, yhat, db_instance: DbInstance):
     fig.update_layout(title='Family Scores')
     return fig
 
+
 # draws plot for linear score evaluation of clusters
 def solver_score_cluster_linear(clusters, yhat, db_instance: DbInstance):
     solvers = []

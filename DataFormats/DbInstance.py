@@ -72,3 +72,24 @@ class DbInstance:
             self.dataset_f = self.dataset_f + self.solver_f
 
         self.dataset, self.dataset_wh = DatabaseReader.combine_queries(data, data_wh)
+
+    def get_complete_dataset(self):
+        data = []
+        data_wh = []
+        dataset_f = []
+        data.append(self.base)
+        data_wh.append(self.base_wh)
+        dataset_f = dataset_f + self.base_f
+
+        data.append(self.gate)
+        data_wh.append(self.gate_wh)
+        dataset_f = dataset_f + self.gate_f
+
+        # IMPORTANT: Solver data should always be the last data in the dataset,
+        # otherwise some algorithms could break!
+        data.append(self.solver)
+        data_wh.append(self.solver_wh)
+        dataset_f = dataset_f + self.solver_f
+
+        dataset, dataset_wh = DatabaseReader.combine_queries(data, data_wh)
+        return dataset, dataset_wh, dataset_f
