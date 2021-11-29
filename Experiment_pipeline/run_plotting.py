@@ -137,7 +137,7 @@ def plot_par2_best(input_file_par2_scores, input_file_bss, plot_description, max
 
 # Example:
 
-# plot_par2_best('par2', 'bss', 'Par 2 scores', 50, 150, show_plot=True)
+# plot_par2_best('par2', 'bss', 'Par 2 scores', 50, 300, output_file='best_par2', show_plot=True)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

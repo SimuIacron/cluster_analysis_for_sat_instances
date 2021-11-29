@@ -26,7 +26,7 @@ def write_json(filename, result):
     counter = 0
     # make sure to not overwrite a file
     while Path(path).is_file():
-        path = cluster_result_path + filename + '_' + str(counter) + '.html'
+        path = cluster_result_path + filename + '_' + str(counter) + '.txt'
         counter = counter + 1
 
     with open(path, 'w') as file:
