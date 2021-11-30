@@ -5,7 +5,7 @@ from sklearn.metrics import normalized_mutual_info_score
 import DatabaseReader
 from DataAnalysis.Evaluation import scoring_util
 from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
-    score_single_best_solver
+    score_virtual_best_solver
 from DataFormats.DbInstance import DbInstance
 from Experiment_pipeline.run_experiments import read_json, write_json
 import multiprocessing as mp
@@ -115,9 +115,9 @@ def run_evaluation_par2_score(input_file, output_file, db_instance: DbInstance, 
 
 # Calculates the Par2 score if the best solver would be used for each instance
 # output_file: The file to write the results to
-def run_evaluation_par2_bss(output_file, db_instance: DbInstance):
-    final_score, cluster_score_dict = score_single_best_solver(db_instance, DatabaseReader.TIMEOUT, f1_par2,
-                                                               f2_par2_cluster, f3_weigh_with_cluster_size)
+def run_evaluation_par2_vbs(output_file, db_instance: DbInstance):
+    final_score, cluster_score_dict = score_virtual_best_solver(db_instance, DatabaseReader.TIMEOUT, f1_par2,
+                                                                f2_par2_cluster, f3_weigh_with_cluster_size)
     write_json(output_file, [final_score, cluster_score_dict])
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     db = DbInstance()
 
     run_evaluation_par2_score('basic_search_all_cluster_algorithms', 'par2', db, cores)
-    run_evaluation_par2_bss('bss', db)
+    run_evaluation_par2_vbs('vbs', db)
     run_evaluation_normalized_mutual_info_family('basic_search_all_cluster_algorithms', 'mutual_info_family', db, cores)
     run_evaluation_normalized_mutual_info_best_solver('basic_search_all_cluster_algorithms', 'mutual_info_best_solver',
                                                       db, cores)

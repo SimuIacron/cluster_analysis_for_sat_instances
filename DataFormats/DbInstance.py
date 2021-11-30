@@ -3,7 +3,14 @@ import DatabaseReader
 
 class DbInstance:
 
-    def __init__(self):
+    def __init__(self, features=None):
+
+        if features is None:
+            features = []
+            features = features + DatabaseReader.FEATURES_BASE
+            features = features + DatabaseReader.FEATURES_GATE
+            features = features + DatabaseReader.FEATURES_SOLVER
+
         # stores the values of the constructed set of features
         self.dataset = []
         # stores the values without the hash of the constructed set of features
@@ -32,6 +39,9 @@ class DbInstance:
 
         # --------------------------------------------------------------------
 
+        self.dataset_f, self.base_f, self.gate_f, self.solver_f, self.dataset, self.dataset_wh, self.base, self.base_wh,\
+        self.gate, self.gate_wh, self.solver, self.solver_wh = self.generate_dataset(features)
+
         self.solver, removed_array = DatabaseReader.remove_empties(self.solver)
 
         self.solver_wh = DatabaseReader.remove_with_index_array(self.solver_wh, removed_array)
@@ -50,28 +60,66 @@ class DbInstance:
     # the dataset that is used for clustering is constructed and stored
     # in the self.dataset, self.dataset_wh and self.dataset_f variables
     # for later use
-    def generate_dataset(self, selected_data):
+    def generate_dataset(self, features):
+
+        dataset_f = features
+
+        base_f = []
+        gate_f = []
+        solver_f = []
+
+        for feature in features:
+            if feature in DatabaseReader.FEATURES_BASE:
+                base_f.append(feature)
+            elif feature in DatabaseReader.FEATURES_GATE:
+                gate_f.append(feature)
+            elif feature in DatabaseReader.FEATURES_SOLVER:
+                solver_f.append(feature)
+
         data = []
         data_wh = []
-        self.dataset_f = []
-        if 'base' in selected_data:
-            data.append(self.base)
-            data_wh.append(self.base_wh)
-            self.dataset_f = self.dataset_f + self.base_f
+        base = []
+        base_wh = []
+        gate = []
+        gate_wh = []
+        solver = []
+        solver_wh = []
+        for idx, value in enumerate(self.base):
+            data_wh.append([])
+            data.append([self.base[idx][0]])
+            base_wh.append([])
+            base.append([self.base[idx][0]])
+            gate_wh.append([])
+            gate.append([self.base[idx][0]])
+            solver_wh.append([])
+            solver.append([self.base[idx][0]])
 
-        if 'gate' in selected_data:
-            data.append(self.gate)
-            data_wh.append(self.gate_wh)
-            self.dataset_f = self.dataset_f + self.gate_f
+            for feature in features:
+                if feature in DatabaseReader.FEATURES_BASE:
+                    feature_idx = self.base_f.index(feature)
+                    value = self.base_wh[idx][feature_idx]
+                    data[idx].append(value)
+                    data_wh[idx].append(value)
+                    base[idx].append(value)
+                    base_wh[idx].append(value)
 
-        # IMPORTANT: Solver data should always be the last data in the dataset,
-        # otherwise some algorithms could break!
-        if 'solver' in selected_data:
-            data.append(self.solver)
-            data_wh.append(self.solver_wh)
-            self.dataset_f = self.dataset_f + self.solver_f
+                elif feature in DatabaseReader.FEATURES_GATE:
+                    feature_idx = self.gate_f.index(feature)
+                    value = self.gate_wh[idx][feature_idx]
+                    data[idx].append(value)
+                    data_wh[idx].append(value)
+                    gate[idx].append(value)
+                    gate_wh[idx].append(value)
 
-        self.dataset, self.dataset_wh = DatabaseReader.combine_queries(data, data_wh)
+                elif feature in DatabaseReader.FEATURES_SOLVER:
+                    feature_idx = self.solver_f.index(feature)
+                    value = self.solver_wh[idx][feature_idx]
+                    data[idx].append(value)
+                    data_wh[idx].append(value)
+                    solver[idx].append(value)
+                    solver_wh[idx].append(value)
+
+        return dataset_f, base_f, gate_f, solver_f, data, data_wh, base, base_wh, gate, gate_wh, solver, solver_wh
 
     def get_complete_dataset(self):
         data = []
