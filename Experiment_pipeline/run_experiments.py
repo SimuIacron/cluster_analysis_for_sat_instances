@@ -54,7 +54,7 @@ def read_json(filename):
 # filename: The name of the file where the finished clustering are stored
 # num_cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_experiments(experiment_list, general_features, filename, num_cores):
+def run_experiments(experiment_list, general_features, filename, num_cores, start_id=0):
     t_start = time()
 
     db_instance = DbInstance(general_features)
@@ -67,7 +67,7 @@ def run_experiments(experiment_list, general_features, filename, num_cores):
 
     pool = mp.Pool(num_cores)
     result_objects = []
-    id_counter = 0
+    id_counter = start_id
     for experiment_param_list in experiment_list:
         params = []
         param_ranges = []
@@ -103,10 +103,8 @@ def run_single_experiment(comb, exp_id, db_instance, params):
         comb_dict[param] = comb[idx]
 
     # execute the algorithms
-    features = []
-    for feature_comb in comb_dict['selected_data']:
-        features = features + feature_comb
-    dataset_f, base_f, gate_f, solver_f, dataset, dataset_wh, base, base_wh, gate, gate_wh, solver, solver_wh = db_instance.generate_dataset(features)
+    current_features = comb_dict['selected_data']
+    dataset_f, base_f, gate_f, solver_f, dataset, dataset_wh, base, base_wh, gate, gate_wh, solver, solver_wh = db_instance.generate_dataset(current_features)
     feature_selected_data = feature_selection.feature_selection(dataset_wh, dataset_f, solver_wh, comb_dict)
     scaled_data = scaling.scaling(feature_selected_data, dataset_f, comb_dict)
     (clusters, yhat) = clustering.cluster(scaled_data, comb_dict)
@@ -125,12 +123,25 @@ if __name__ == '__main__':
     temp_solver_features.pop(14)
     temp_solver_features.pop(7)
 
+
+    single_features = []
+    prep_list = temp_solver_features
+    for elem in prep_list:
+        single_features.append([elem])
+
     input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
     output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
-    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),
-                         ('scaling_technique', ['NORMALSCALE', 'TIMESCALE', 'TIMESELECTBEST']),
+    output_merged = []
+    for combination in output:
+        comb = []
+        for elem in combination:
+            comb = comb + elem
+        output_merged.append(comb)
+
+    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1', 'NORMALISATION']),
+                         ('scaling_technique', ['NORMALSCALE']),
                          ('selection_algorithm', ['NONE']),
-                         ('selected_data', output[1:]),
+                         ('selected_data', output_merged[1:]),
                          ('scaling_k_best', [3])]
 
     exp_kmeans = standard_settings + \
@@ -152,7 +163,7 @@ if __name__ == '__main__':
     exp_spectral = standard_settings + \
                    [('cluster_algorithm', ['SPECTRAL']),
                     ('seed', [0]),
-                    ('n_clusters_spectral', range(1, 10))]
+                    ('n_clusters_spectral', range(2, 5))]
 
     exp_agg = standard_settings + \
               [('cluster_algorithm', ['AGGLOMERATIVE']),
@@ -186,6 +197,5 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian,
-                     exp_birch, exp_dbscan], features,
-                    'basic_search_all_cluster_algorithms_new', 20)
+    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
+                    'clustering_scale_vs_normalisation', 10, 0)

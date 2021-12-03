@@ -1,3 +1,4 @@
+from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import StandardScaler
 
 import DatabaseReader
@@ -25,6 +26,11 @@ def scaling(data, features, params_dict):
     solver_start_index = -1
     if DatabaseReader.FEATURES_SOLVER[0] in features:
         solver_start_index = features.index(DatabaseReader.FEATURES_SOLVER[0])
+
+    if algorithm == 'NORMALISATION':
+        scaler = Normalizer()
+        data_rot = util.rotateNestedLists(data)
+        return util.rotateNestedLists(scaler.transform(data_rot))
 
     if algorithm == "STANDARDSCALER":
         scaler = StandardScaler()

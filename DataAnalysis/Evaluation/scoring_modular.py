@@ -36,6 +36,14 @@ def score_virtual_best_solver(db_instance: DbInstance, timeout,
                  func_sort_solvers_after_best, func_score_single_cluster, func_score_complete_clustering)
 
 
+# wrapper method to score single best solver
+def score_single_best_solver(db_instance: DbInstance, timeout,
+                             func_sort_solvers_after_best, func_score_single_cluster, func_score_complete_clustering):
+    instance_amount = len(db_instance.solver_wh)
+    return score([0], [0] * instance_amount, db_instance, timeout,
+                 func_sort_solvers_after_best, func_score_single_cluster, func_score_complete_clustering)
+
+
 # -- func_sort_solvers_after_best(yhat, cluster, db_instance, timeout) -------------------------------------------------
 
 
