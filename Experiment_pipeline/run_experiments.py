@@ -124,14 +124,12 @@ if __name__ == '__main__':
     temp_solver_features.pop(14)
     temp_solver_features.pop(7)
 
-
     single_features = []
     prep_list = temp_solver_features
     for elem in prep_list:
         single_features.append([elem])
 
-    input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['candy', 'glucose_chanseok',
-                   'glucose', 'glucose_var_decay099']]
+    input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
     output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
     output_merged = []
     for combination in output:
@@ -199,7 +197,7 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
-                    'solver_groups/clustering_glucose', 10, 0)
+    run_experiments([exp_dbscan], features,
+                    'db_scan_test', 10, 0)
 
     WindowsSound.make_noise()
