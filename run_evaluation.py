@@ -3,12 +3,11 @@ from time import time
 from sklearn.metrics import normalized_mutual_info_score
 
 import DatabaseReader
-import WindowsSound
 from DataAnalysis.Evaluation import scoring_util
 from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
     score_virtual_best_solver, score_single_best_solver
 from DataFormats.DbInstance import DbInstance
-from Experiment_pipeline.run_experiments import read_json, write_json
+from run_experiments import read_json, write_json
 import multiprocessing as mp
 
 
@@ -153,5 +152,3 @@ if __name__ == '__main__':
     # run_evaluation_normalized_mutual_info_best_solver('basic_search_all_cluster_algorithms', 'mutual_info_best_solver',
     #                                                   db, cores)
     # run_evaluation_normalized_mutual_info_un_sat('basic_search_all_cluster_algorithms', 'mutual_info_un_sat', db, cores)
-
-    WindowsSound.make_noise()
