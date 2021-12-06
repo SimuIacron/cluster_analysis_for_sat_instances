@@ -3,6 +3,7 @@ from time import time
 from sklearn.metrics import normalized_mutual_info_score
 
 import DatabaseReader
+import WindowsSound
 from DataAnalysis.Evaluation import scoring_util
 from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
     score_virtual_best_solver, score_single_best_solver
@@ -138,18 +139,19 @@ if __name__ == '__main__':
     temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
     temp_solver_features.pop(14)
     temp_solver_features.pop(7)
-    input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
+    input_dbs = [temp_solver_features]
     features = []
     for feature_vector in input_dbs:
         features = features + feature_vector
 
     db = DbInstance(features)
 
-    run_evaluation_par2_score('clustering_scale_vs_normalisation', 'clustering_scale_vs_normalisation_par2', db, cores)
-    # run_evaluation_par2_vbs('vbs', db)
-    run_evaluation_par2_bss('bss', db)
+    # run_evaluation_par2_score('solver_groups/clustering_cadical', 'solver_groups/clustering_cadical_par2', db, cores)
+    run_evaluation_par2_vbs('vbs_without_glucose_syrup_yalsat', db)
+    # run_evaluation_par2_bss('bss', db)
     # run_evaluation_normalized_mutual_info_family('basic_search_all_cluster_algorithms', 'mutual_info_family', db, cores)
     # run_evaluation_normalized_mutual_info_best_solver('basic_search_all_cluster_algorithms', 'mutual_info_best_solver',
     #                                                   db, cores)
     # run_evaluation_normalized_mutual_info_un_sat('basic_search_all_cluster_algorithms', 'mutual_info_un_sat', db, cores)
-    pass
+
+    WindowsSound.make_noise()

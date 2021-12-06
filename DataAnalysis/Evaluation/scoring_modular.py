@@ -85,6 +85,8 @@ def f2_par2_cluster(yhat, cluster, db_instance: DbInstance, timeout, best_solver
                 running_time = timeout * 2
             score = score + running_time
 
+    if cluster_size == 0:
+        return 0
     return score / cluster_size
 
 

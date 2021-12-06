@@ -1,3 +1,4 @@
+import itertools
 from collections import Counter
 
 import numpy as np
@@ -43,11 +44,11 @@ def collect_evaluation(input_file, settings_dict):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-# Plots a circle diagram of the distribution of the best single solver
-# input_file_bss: The file to read the beast single solver data from
+# Plots a circle diagram of the distribution of the virtual best solver
+# input_file_bss: The file to read the virtual best solver data from
 # output_file: The filename of the exported html (no export if equal to '')
 # show_plot: If the plot should be opened in the browser after running the function
-def plot_par2_bss_distribution(input_file_bss, output_file='', show_plot=False):
+def plot_par2_vbs_distribution(input_file_bss, output_file='', show_plot=False):
     result_bss = read_json(input_file_bss)
     best_solver = []
     for key, item in result_bss[1].items():
@@ -65,7 +66,7 @@ def plot_par2_bss_distribution(input_file_bss, output_file='', show_plot=False):
                                  values=values)],
                     layout=go.Layout(
                         title=go.layout.Title(
-                            text='Distributions of solvers if each instance uses the best single solver'))
+                            text='Distributions of solvers if each instance uses the virtual best solver'))
                     )
 
     if output_file != '':
@@ -77,7 +78,7 @@ def plot_par2_bss_distribution(input_file_bss, output_file='', show_plot=False):
 
 # Example
 
-# plot_par2_bss_distribution('bss', show_plot=True)
+plot_par2_vbs_distribution('vbs_without_glucose_syrup_yalsat', 'vbs_without_glucose_syrup_yalsat', show_plot=True)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -119,14 +120,16 @@ def plot_par2_best(input_files_par2_scores, input_file_bss, plot_description, ma
 
             bss.append(0)
             keys.append(idx)
-            text.append(str(evaluation['settings']) + ' cluster count: ' + str(len(evaluation['clusters'])))
+            text_string = util.add_line_breaks_to_text(str(evaluation['settings']), ',', 5)
+            text.append(text_string + ' cluster count: ' + str(len(evaluation['clusters'])))
         else:
             if len(evaluation['clusters']) <= max_cluster_amount:
                 values.append(evaluation['par2'][0])
                 bss.append(0)
                 keys.append(counter)
                 counter = counter + 1
-                text.append(str(evaluation['settings']) + ' cluster count: ' + str(len(evaluation['clusters'])))
+                text_string = util.add_line_breaks_to_text(str(evaluation['settings']), ',', 5)
+                text.append(text_string + ' cluster count: ' + str(len(evaluation['clusters'])))
 
     chart_data = [
         go.Bar(name='Par2 Score <' + str(max_cluster_amount) + ' clusters', x=keys, y=values, hovertext=text),
@@ -162,11 +165,11 @@ def plot_par2_best(input_files_par2_scores, input_file_bss, plot_description, ma
 #                output_file='Single_feature_clustering/single_feature_clustering_all_features_par2_plot',
 #                show_plot=False)
 
-# plot_par2_best(['Single_feature_clustering/single_feature_clustering_base_par2'], 'vbs',
-#                'Par 2 scores with combination of dbs with only clusterings with less than 50 clusters', 20, 4500,
-#                output_file='Single_feature_clustering/single_feature_clustering_base_par2_plot', show_plot=False,
-#                show_max_cluster_amount=True)
-
+# plot_par2_best(['Single_feature_clustering/single_feature_clustering_gate_par2'], 'vbs',
+#                'Par 2 scores of gate with less than 20 clusters', 20, 300,
+#                output_file='Single_feature_clustering/single_feature_clustering_gate_par2_plot_less20', show_plot=False,
+#                show_max_cluster_amount=False)
+#
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -178,7 +181,7 @@ def plot_par2_best(input_files_par2_scores, input_file_bss, plot_description, ma
 # cutoff: How many evaluation instances should be maximal shown
 # output_file: The filename of the exported html (no export if equal to '')
 # show_plot: If the plot should be opened in the browser after running the function
-def plot_par2_comparison(input_files_par2_scores, input_file_vbs, input_file_bss,  plot_description, param_name, value_list,
+def plot_par2_comparison(input_files_par2_scores, input_file_vbs, input_file_bss,  plot_description, param_name, value_list, label_list,
                          max_cluster_amount, cutoff, output_file='', show_plot=False):
     data = []
     for input_file in input_files_par2_scores:
@@ -187,6 +190,9 @@ def plot_par2_comparison(input_files_par2_scores, input_file_vbs, input_file_bss
     vbs_data = read_json(input_file_vbs)
     sorted_data = sorted(data, key=lambda d: d['par2'][0])
     keys = [-1]
+
+    # for idx, item in enumerate(value_list):
+    #    value_list[idx] = str(item)
 
     value_dict = {}
     for elem in value_list:
@@ -213,19 +219,7 @@ def plot_par2_comparison(input_files_par2_scores, input_file_vbs, input_file_bss
             keys.append(counter)
             counter = counter + 1
 
-            replace_n = 5
-            text_string = ''
-            n_counter = 0
-            for letter in str(evaluation['settings']):
-                if letter == ',':
-                    n_counter = n_counter + 1
-                    if replace_n == n_counter:
-                        n_counter = 0
-                        text_string = text_string + ',<br>'
-                    else:
-                        text_string = text_string + ','
-                else:
-                    text_string = text_string + letter
+            text_string = util.add_line_breaks_to_text(str(evaluation['settings']), ',', 5)
 
             text.append(text_string + ' cluster count: ' + str(len(evaluation['clusters'])))
 
@@ -241,9 +235,9 @@ def plot_par2_comparison(input_files_par2_scores, input_file_vbs, input_file_bss
         go.Bar(name='Best single solver', x=keys, y=bss, hovertext=text)
     ]
 
-    for key, value in value_dict.items():
+    for idx, key in enumerate(value_list):
         chart_data.append(
-            go.Bar(name=key, x=keys, y=value, hovertext=text)
+            go.Bar(name=label_list[idx], x=keys, y=value_dict[str(key)], hovertext=text)
         )
 
     fig = go.Figure(layout=go.Layout(
@@ -262,12 +256,39 @@ def plot_par2_comparison(input_files_par2_scores, input_file_vbs, input_file_bss
         fig.show()
 
 
-plot_par2_comparison(['Sclaing_Normalisation/clustering_scale_vs_normalisation_par2'], 'vbs', 'bss',
-                     'Par 2 scores with comparision of normalisation and scaleminusplus1',
-                     'scaling_algorithm',
-                     ['NORMALISATION', 'SCALEMINUSPLUS1'], 20, 300,
-                     output_file='Sclaing_Normalisation/clustering_scale_vs_normalisation_par2_plot', show_plot=False)
+# temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
+# temp_solver_features.pop(14)
+# temp_solver_features.pop(7)
+# input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical_elimfalse', 'cadical', 'cadical_pripro', 'cadical_stability']]
+# output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+# output_merged = []
+# for combination in output:
+#     comb = []
+#     for elem in combination:
+#         comb = comb + elem
+#     output_merged.append(comb)
+#
+# plot_par2_comparison(['solver_groups/clustering_cadical_par2'], 'vbs', 'bss',
+#                      'Par 2 scores cadical',
+#                      'selected_data',
+#                      output_merged[1:], ['base', 'gate', 'solver', 'base gate', 'base solver', 'gate solver', 'base, gate, solver'], 20, 300,
+#                      output_file='solver_groups/clustering_cadical_par2_plot', show_plot=False)
 
+# plot_par2_comparison(['Scaling_Norm/clustering_scale_vs_normalisation_par2'], 'vbs', 'bss',
+#                      'Par 2 scores for clustering with less than 20 clusters',
+#                      'scaling_algorithm',
+#                      ['SCALEMINUSPLUS1', 'NORMALISATION'], ['scale [-1,+1]', 'normalisation'], 20, 300,
+#                      output_file='Scaling_Norm/clustering_scale_vs_normalisation_par2_plot', show_plot=False)
+
+# features = [[item] for item in DatabaseReader.FEATURES_SOLVER]
+# plot_par2_comparison(['Single_feature_clustering/single_feature_clustering_runtimes_par2'], 'vbs', 'bss',
+#                      'Par 2 scores of runtimes with less than 20 clusters',
+#                      'selected_data',
+#                      features, DatabaseReader.FEATURES_SOLVER,
+#                      # ['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN'],
+#                      # ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS', 'Gaussian', 'DBSCAN'],
+#                      20, 300,
+#                      output_file='Single_feature_clustering/single_feature_clustering_runtimes_par2_plot_features', show_plot=False)
 
 # ----------------------------------------------------------------------------------------------------------------------
 

@@ -20,7 +20,7 @@ CLUSTERALGORITHMS = [
     ('Agglomerative', 'AGGLOMERATIVE'),
     ('OPTICS', 'OPTICS'),
     ('BIRCH', 'BIRCH'),
-    ('Guassian', 'GAUSSIAN'),
+    ('Gaussian', 'GAUSSIAN'),
     ('DBSCAN', 'DBSCAN')
 ]
 

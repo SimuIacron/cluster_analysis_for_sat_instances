@@ -60,4 +60,24 @@ def flatten(t):
 
     return final_list
 
+# Replaces every nth occurrence of letter in text with line break
+# text: The inpout text to add breaks to
+# letter_to_break_at: The letter that is replaced by the break
+# replace_n: Every nth letter gets replaced by a break
+def add_line_breaks_to_text(text, letter_to_break_at, replace_n):
+    text_string = ''
+    n_counter = 0
+    for letter in text:
+        if letter == letter_to_break_at:
+            n_counter = n_counter + 1
+            if replace_n == n_counter:
+                n_counter = 0
+                text_string = text_string + ',<br>'
+            else:
+                text_string = text_string + ','
+        else:
+            text_string = text_string + letter
+
+    return text_string
+
 

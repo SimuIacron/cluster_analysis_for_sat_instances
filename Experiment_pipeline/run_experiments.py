@@ -8,6 +8,7 @@ import numpy as np
 import multiprocessing as mp
 
 import DatabaseReader
+import WindowsSound
 from DataAnalysis import feature_selection, scaling, clustering
 from DataFormats.DbInstance import DbInstance
 
@@ -129,7 +130,8 @@ if __name__ == '__main__':
     for elem in prep_list:
         single_features.append([elem])
 
-    input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
+    input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['candy', 'glucose_chanseok',
+                   'glucose', 'glucose_var_decay099']]
     output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
     output_merged = []
     for combination in output:
@@ -138,7 +140,7 @@ if __name__ == '__main__':
             comb = comb + elem
         output_merged.append(comb)
 
-    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1', 'NORMALISATION']),
+    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),
                          ('scaling_technique', ['NORMALSCALE']),
                          ('selection_algorithm', ['NONE']),
                          ('selected_data', output_merged[1:]),
@@ -198,4 +200,6 @@ if __name__ == '__main__':
         features = features + feature_vector
 
     run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
-                    'clustering_scale_vs_normalisation', 10, 0)
+                    'solver_groups/clustering_glucose', 10, 0)
+
+    WindowsSound.make_noise()
