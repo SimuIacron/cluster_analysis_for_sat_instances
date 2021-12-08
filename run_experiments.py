@@ -137,7 +137,7 @@ if __name__ == '__main__':
             comb = comb + elem
         output_merged.append(comb)
 
-    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),
+    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1', 'STANDARDSCALER']),
                          ('scaling_technique', ['NORMALSCALE']),
                          ('selection_algorithm', ['NONE']),
                          ('selected_data', output_merged[1:]),
@@ -196,5 +196,5 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_dbscan], features,
-                    'db_scan_test', 10, 0)
+    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
+                    'standardscaler_linearscaler_clustering', 32, 0)
