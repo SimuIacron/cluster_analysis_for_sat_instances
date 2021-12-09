@@ -97,7 +97,7 @@ def run_experiments(experiment_list, general_features, filename, num_cores, star
             params.append(param)
             param_ranges.append(param_range)
 
-            # generate every combination of given parameter values of the experiment
+        # generate every combination of given parameter values of the experiment
         combinations = list(itertools.product(*param_ranges))
 
         for c in combinations:
@@ -150,7 +150,6 @@ if __name__ == '__main__':
     temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
     temp_solver_features.pop(14)
     temp_solver_features.pop(7)
-
 
     single_features = []
     prep_list = temp_solver_features
@@ -224,8 +223,6 @@ if __name__ == '__main__':
     features = []
     for feature_vector in input_dbs:
         features = features + feature_vector
-    run_experiments(
-        [exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan],
-        features,
-        'standardscaler_Linearscaler_clustering', 10, 0, True)
 
+    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
+                    'standardscaler_linearscaler_clustering', 32, 0)
