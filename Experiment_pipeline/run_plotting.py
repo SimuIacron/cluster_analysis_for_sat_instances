@@ -1,5 +1,7 @@
 import itertools
+import os
 from collections import Counter
+import matplotlib.pyplot as plt
 
 import numpy as np
 import pandas as pd
@@ -78,7 +80,7 @@ def plot_par2_vbs_distribution(input_file_bss, output_file='', show_plot=False):
 
 # Example
 
-plot_par2_vbs_distribution('vbs_without_glucose_syrup_yalsat', 'vbs_without_glucose_syrup_yalsat', show_plot=True)
+# plot_par2_vbs_distribution('vbs_without_glucose_syrup_yalsat', 'vbs_without_glucose_syrup_yalsat', show_plot=True)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -151,6 +153,7 @@ def plot_par2_best(input_files_par2_scores, input_file_bss, plot_description, ma
 
     if output_file != '':
         exportFigure.export_plot_as_html(fig, output_file)
+        fig.write_image(output_file + '_img.png')
 
     if show_plot:
         fig.show()
@@ -200,7 +203,7 @@ def plot_par2_comparison(input_files_par2_scores, input_file_vbs, input_file_bss
 
     vbs = [vbs_data[0]]
     bss = [0]
-    text = ['Best Single Solver']
+    text = ['Virtual Best Solver']
     counter = 0
     for idx, evaluation in enumerate(sorted_data):
         if len(keys) >= cutoff:
@@ -230,30 +233,46 @@ def plot_par2_comparison(input_files_par2_scores, input_file_vbs, input_file_bss
     vbs.append(0)
     text.append('Best Single Solver ')
 
-    chart_data = [
-        go.Bar(name='Virtual best solver', x=keys, y=vbs, hovertext=text),
-        go.Bar(name='Best single solver', x=keys, y=bss, hovertext=text)
-    ]
+    plt.bar(keys, vbs, label='Virtual Best Solver')
+    plt.bar(keys, bss, label='Single Best Solver')
+    for idx, elem in enumerate(value_list):
+        plt.bar(keys, value_dict[str(elem)], label=label_list[idx])
 
-    for idx, key in enumerate(value_list):
-        chart_data.append(
-            go.Bar(name=label_list[idx], x=keys, y=value_dict[str(key)], hovertext=text)
-        )
+    plt.xlabel('Best Instances sorted by CPar2')
+    plt.ylabel('CPar2 Score')
+    ax = plt.subplot(111)
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.title(plot_description)
 
-    fig = go.Figure(layout=go.Layout(
-        title=go.layout.Title(text=plot_description)
-    ),
-        data=chart_data)
+    plt.show()
 
-    fig.update_layout(barmode='stack', bargap=0)
-    fig.update_xaxes(title_text='Instances sorted by best par2 score')
-    fig.update_yaxes(title_text='par2 score')
-
-    if output_file != '':
-        exportFigure.export_plot_as_html(fig, output_file)
-
-    if show_plot:
-        fig.show()
+    #  chart_data = [
+    #      go.Bar(name='Virtual best solver', x=keys, y=vbs, hovertext=text),
+    #      go.Bar(name='Best single solver', x=keys, y=bss, hovertext=text)
+    #  ]
+    #
+    #  for idx, key in enumerate(value_list):
+    #      chart_data.append(
+    #          go.Bar(name=label_list[idx], x=keys, y=value_dict[str(key)], hovertext=text)
+    #      )
+    #
+    #  fig = go.Figure(layout=go.Layout(
+    #      title=go.layout.Title(text=plot_description)
+    #  ),
+    #      data=chart_data)
+    #
+    #  fig.update_layout(barmode='stack', bargap=0)
+    #  fig.update_xaxes(title_text='Instances sorted by best par2 score')
+    #  fig.update_yaxes(title_text='par2 score')
+    #
+    #  if output_file != '':
+    #      # exportFigure.export_plot_as_html(fig, output_file)
+    #      fig.write_image(os.environ['EXPPATH'] + output_file + '_img.png', width=1920, height=1080, scale=1)
+    #
+    #  if show_plot:
+    #      fig.show()
 
 
 # temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
@@ -280,15 +299,15 @@ def plot_par2_comparison(input_files_par2_scores, input_file_vbs, input_file_bss
 #                      ['SCALEMINUSPLUS1', 'NORMALISATION'], ['scale [-1,+1]', 'normalisation'], 20, 300,
 #                      output_file='Scaling_Norm/clustering_scale_vs_normalisation_par2_plot', show_plot=False)
 
-# features = [[item] for item in DatabaseReader.FEATURES_SOLVER]
-# plot_par2_comparison(['Single_feature_clustering/single_feature_clustering_runtimes_par2'], 'vbs', 'bss',
-#                      'Par 2 scores of runtimes with less than 20 clusters',
-#                      'selected_data',
-#                      features, DatabaseReader.FEATURES_SOLVER,
-#                      # ['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN'],
-#                      # ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS', 'Gaussian', 'DBSCAN'],
-#                      20, 300,
-#                      output_file='Single_feature_clustering/single_feature_clustering_runtimes_par2_plot_features', show_plot=False)
+features = [[item] for item in DatabaseReader.FEATURES_SOLVER]
+plot_par2_comparison(['Single_feature_clustering/single_feature_clustering_runtimes_par2'], 'vbs', 'bss',
+                     'Par 2 scores of runtimes with less than 20 clusters',
+                     'selected_data',
+                     features, DatabaseReader.FEATURES_SOLVER,
+                     # ['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN'],
+                     # ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS', 'Gaussian', 'DBSCAN'],
+                     20, 200,
+                     output_file='Single_feature_clustering/single_feature_clustering_runtimes_par2_plot_features', show_plot=False)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
