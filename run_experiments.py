@@ -69,9 +69,11 @@ def read_json(filename):
 # filename: The name of the file where the finished clustering are stored
 # num_cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_experiments(experiment_list, general_features, filename, num_cores, start_id=0, continue_evaluation=False):
+def run_experiments(experiment_list, general_features, filename, num_cores, start_id=0):
     t_start = time()
     temp_filename = filename + '_temp'
+
+    continue_evaluation = os.path.exists(cluster_result_path + temp_filename + '.txt')
 
     db_instance = DbInstance(general_features)
 
@@ -225,4 +227,4 @@ if __name__ == '__main__':
         features = features + feature_vector
 
     run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
-                    'standardscaler_linearscaler_clustering', 32, 0)
+                    'standardscaler_linearscaler_clustering', 20, 0)
