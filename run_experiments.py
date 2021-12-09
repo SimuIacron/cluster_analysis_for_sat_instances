@@ -11,7 +11,6 @@ import DatabaseReader
 from DataAnalysis import feature_selection, scaling, clustering
 from DataFormats.DbInstance import DbInstance
 
-
 # - Reading/Writing Json Files -----------------------------------------------------------------------------------------
 
 # the path where the input/output json files are stored
@@ -34,6 +33,22 @@ def write_json(filename, result):
         json.dump(result, file)
 
 
+def append_json_temp(filename, result):
+    with open(cluster_result_path + filename + '.txt', 'a') as file:
+        json_result = json.dumps(result)
+        file.write(json_result + '\n')
+
+
+def read_json_temp(filename):
+    results = []
+    with open(cluster_result_path + filename + '.txt', 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            results.append(json.loads(line))
+
+    return results
+
+
 # Reads the given file and returns the data structure stored in it
 # filename: The file to be read
 def read_json(filename):
@@ -54,8 +69,9 @@ def read_json(filename):
 # filename: The name of the file where the finished clustering are stored
 # num_cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_experiments(experiment_list, general_features, filename, num_cores, start_id=0):
+def run_experiments(experiment_list, general_features, filename, num_cores, start_id=0, continue_evaluation=False):
     t_start = time()
+    temp_filename = filename + '_temp'
 
     db_instance = DbInstance(general_features)
 
@@ -64,6 +80,12 @@ def run_experiments(experiment_list, general_features, filename, num_cores, star
 
     print('Available cores: ' + str(mp.cpu_count()))
     print('Cores used: ' + str(num_cores))
+    callback_function = lambda r: append_json_temp(temp_filename, r)
+
+    id_list = []
+    if continue_evaluation:
+        current_result_list = read_json_temp(temp_filename)
+        id_list = [item['id'] for item in current_result_list]
 
     pool = mp.Pool(num_cores)
     result_objects = []
@@ -75,16 +97,21 @@ def run_experiments(experiment_list, general_features, filename, num_cores, star
             params.append(param)
             param_ranges.append(param_range)
 
-        # generate every combination of given parameter values of the experiment
+            # generate every combination of given parameter values of the experiment
         combinations = list(itertools.product(*param_ranges))
 
-        for comb in combinations:
-            result = pool.apply_async(run_single_experiment, args=(comb, id_counter, db_instance, params))
+        for c in combinations:
+            if continue_evaluation and id_counter in id_list:
+                id_counter = id_counter + 1
+                continue
+
+            result = pool.apply_async(run_single_experiment, args=(c, id_counter, db_instance, params), callback=callback_function)
             result_objects.append(result)
             id_counter = id_counter + 1
 
-    experiment_result = [result.get() for result in result_objects]
-    write_json(filename, sorted(experiment_result, key=lambda d: d['id']))
+    [result.wait() for result in result_objects]
+    finished = read_json_temp(temp_filename)
+    write_json(filename, sorted(finished, key=lambda d: d['id']))
 
     t_stop = time()
     print('Experiments took %f' % (t_stop - t_start))
@@ -104,7 +131,8 @@ def run_single_experiment(comb, exp_id, db_instance, params):
 
     # execute the algorithms
     current_features = comb_dict['selected_data']
-    dataset_f, base_f, gate_f, solver_f, dataset, dataset_wh, base, base_wh, gate, gate_wh, solver, solver_wh = db_instance.generate_dataset(current_features)
+    dataset_f, base_f, gate_f, solver_f, dataset, dataset_wh, base, base_wh, gate, gate_wh, solver, solver_wh = db_instance.generate_dataset(
+        current_features)
     feature_selected_data = feature_selection.feature_selection(dataset_wh, dataset_f, solver_wh, comb_dict)
     scaled_data = scaling.scaling(feature_selected_data, dataset_f, comb_dict)
     (clusters, yhat) = clustering.cluster(scaled_data, comb_dict)
@@ -123,6 +151,7 @@ if __name__ == '__main__':
     temp_solver_features.pop(14)
     temp_solver_features.pop(7)
 
+
     single_features = []
     prep_list = temp_solver_features
     for elem in prep_list:
@@ -137,7 +166,7 @@ if __name__ == '__main__':
             comb = comb + elem
         output_merged.append(comb)
 
-    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),
+    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1', 'STANDARDSCALER']),
                          ('scaling_technique', ['NORMALSCALE']),
                          ('selection_algorithm', ['NONE']),
                          ('selected_data', output_merged[1:]),
@@ -195,6 +224,8 @@ if __name__ == '__main__':
     features = []
     for feature_vector in input_dbs:
         features = features + feature_vector
+    run_experiments(
+        [exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan],
+        features,
+        'standardscaler_Linearscaler_clustering', 10, 0, True)
 
-    run_experiments([exp_dbscan], features,
-                    'db_scan_test', 10, 0)
