@@ -226,5 +226,5 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
+    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
                     'standardscaler_linearscaler_clustering', 20, 0)
