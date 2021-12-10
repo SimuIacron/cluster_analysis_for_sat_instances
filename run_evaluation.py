@@ -1,13 +1,15 @@
+import os
 from time import time
 
 from sklearn.metrics import normalized_mutual_info_score
 
 import DatabaseReader
+import run_experiments
 from DataAnalysis.Evaluation import scoring_util
 from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
     score_virtual_best_solver, score_single_best_solver
 from DataFormats.DbInstance import DbInstance
-from run_experiments import read_json, write_json
+from run_experiments import read_json, write_json, read_json_temp, append_json_temp
 import multiprocessing as mp
 
 
@@ -27,24 +29,41 @@ def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_core
     t_start = time()
     cluster_results = read_json(input_file)
 
+    temp_filename = output_file + '_temp'
+
+    continue_evaluation = os.path.exists(run_experiments.cluster_result_path + temp_filename + '.txt')
+
     if num_cores > mp.cpu_count():
         num_cores = mp.cpu_count()
 
     print('Available cores: ' + str(mp.cpu_count()))
     print('Cores used: ' + str(num_cores))
 
+    id_list = []
+    if continue_evaluation:
+        current_result_list = read_json_temp(temp_filename)
+        id_list = [item['id'] for item in current_result_list]
+
     pool = mp.Pool(num_cores)
 
     result_objects = []
     # asynchronous evaluation of experiments (order is restored with sorting afterwards)
     for entry in cluster_results:
-        result = pool.apply_async(func_eval, args=(entry, args))
-        result_objects.append((entry, result))
 
-    evaluation_result = [dict(entry, **{dict_name: result.get()}) for (entry, result) in result_objects]
+        if continue_evaluation and entry['id'] in id_list:
+            continue
+
+        callback_function = lambda r: append_json_temp(temp_filename, dict(entry, **{dict_name: r}))
+        result = pool.apply_async(func_eval, args=(entry, args), callback=callback_function)
+        result_objects.append(result)
+
+    [result.wait() for result in result_objects]
+    finished = read_json_temp(temp_filename)
+
+    # evaluation_result = [dict(entry, **{dict_name: result.get()}) for (entry, result) in result_objects]
 
     # sort evaluation after id before writing it to file
-    write_json(output_file, sorted(evaluation_result, key=lambda d: d['id']))
+    write_json(output_file, sorted(finished, key=lambda d: d['id']))
 
     t_stop = time()
     print('Evaluation took %f' % (t_stop - t_start))
@@ -133,7 +152,7 @@ def run_evaluation_par2_bss(output_file, db_instance: DbInstance):
 
 
 if __name__ == '__main__':
-    cores = 12
+    cores = 20
 
     temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
     temp_solver_features.pop(14)
@@ -145,8 +164,9 @@ if __name__ == '__main__':
 
     db = DbInstance(features)
 
-    # run_evaluation_par2_score('solver_groups/clustering_cadical', 'solver_groups/clustering_cadical_par2', db, cores)
-    run_evaluation_par2_vbs('vbs_without_glucose_syrup_yalsat', db)
+    run_evaluation_par2_score('standardscaler_linearscaler_clustering.txt', 'standardscaler_linearscaler_clustering.txt_par2', db, cores)
+
+    # run_evaluation_par2_vbs('vbs_without_glucose_syrup_yalsat', db)
     # run_evaluation_par2_bss('bss', db)
     # run_evaluation_normalized_mutual_info_family('basic_search_all_cluster_algorithms', 'mutual_info_family', db, cores)
     # run_evaluation_normalized_mutual_info_best_solver('basic_search_all_cluster_algorithms', 'mutual_info_best_solver',
