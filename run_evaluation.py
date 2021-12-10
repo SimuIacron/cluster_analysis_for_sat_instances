@@ -6,7 +6,6 @@ from time import time
 from sklearn.metrics import normalized_mutual_info_score
 
 import DatabaseReader
-import run_experiments
 from DataAnalysis.Evaluation import scoring_util
 from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
     score_virtual_best_solver, score_single_best_solver
