@@ -6,8 +6,7 @@ import plotly.graph_objects as go
 from numpy import argmin
 import plotly.express as px
 
-import exportFigure
-import util
+from util import util, exportFigure
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json
 

@@ -1,11 +1,8 @@
 from sklearn.decomposition import PCA
-from sklearn.feature_selection import VarianceThreshold, SelectPercentile, chi2, mutual_info_classif, SelectKBest
+from sklearn.feature_selection import VarianceThreshold, SelectPercentile, mutual_info_classif, SelectKBest
 from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
 
-import DatabaseReader
-import util
-from DataFormats.InputData import InputDataFeatureSelection
-import numpy as np
+from util import DatabaseReader
 from numpy import argmin
 
 FEATURESELECTIONALGORITHMS = [

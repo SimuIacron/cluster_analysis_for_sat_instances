@@ -1,16 +1,8 @@
-from numpy import where
 from numpy import unique
-import numpy as np
-from matplotlib import pyplot
-import pandas as pd
-import plotly.express as px
 from sklearn.mixture import GaussianMixture
 
-import util
 from sklearn.cluster import DBSCAN, KMeans, AffinityPropagation, MeanShift, SpectralClustering, AgglomerativeClustering, \
     OPTICS, Birch
-
-from DataFormats.InputData import InputDataCluster
 
 CLUSTERALGORITHMS = [
     ('K-Means', 'KMEANS'),

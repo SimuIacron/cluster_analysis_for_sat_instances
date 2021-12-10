@@ -3,8 +3,7 @@ from collections import Counter
 import numpy as np
 import plotly.graph_objects as go
 
-import DatabaseReader
-import exportFigure
+from util import exportFigure, DatabaseReader
 from DataAnalysis import feature_selection, scaling, clustering
 from DataAnalysis.Evaluation import scoring_util, scoring
 from DataFormats.DbInstance import DbInstance

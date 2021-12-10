@@ -2,8 +2,7 @@ from numpy import mean
 from sklearn.metrics import adjusted_mutual_info_score
 import plotly.graph_objects as go
 
-import DatabaseReader
-import exportFigure
+from util import exportFigure, DatabaseReader
 from DataAnalysis import feature_selection, scaling, clustering
 from DataAnalysis.Evaluation import scoring_util, scoring
 from DataFormats.DbInstance import DbInstance
@@ -80,7 +79,7 @@ for comb in output[1:]:
                           for i in clusters])
             current_list_3.append(value)
             value = mean(
-                [scoring.score_solvers_on_rank_cluster(yhat, i, db_instance, 
+                [scoring.score_solvers_on_rank_cluster(yhat, i, db_instance,
                                                        [1000, 2000, 3000, 4000, DatabaseReader.TIMEOUT],
                                                        [5, 4, 3, 2, 1])[1] for i in clusters])
             current_list_4.append(value)

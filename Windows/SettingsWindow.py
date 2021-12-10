@@ -1,15 +1,10 @@
 import base64
 
 import dash.exceptions
-import pandas as pd
-import plotly.express as px
 from dash import html, Input, Output, dcc, State
 import dash_daq.NumericInput as daq
-from numpy import argmin
 
-import DatabaseReader
-import JsonExport
-import util
+from util import JsonExport, DatabaseReader
 from DataAnalysis import scaling, feature_selection, clustering, evaluation
 from DataFormats.InputData import InputDataScaling, InputDataCluster, InputDataFeatureSelection
 from DataFormats.DbInstance import DbInstance

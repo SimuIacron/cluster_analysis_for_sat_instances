@@ -1,9 +1,7 @@
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import StandardScaler
 
-import DatabaseReader
-import util
-from DataFormats.InputData import InputDataScaling
+from util import util, DatabaseReader
 
 SCALINGALGORITHMS = [
     ('Scale to [-1,1]', 'SCALEMINUSPLUS1'),
@@ -66,7 +64,7 @@ def scaling(data, features, params_dict):
         # scale all features (base, gate, solver time) per feature form [-1,1]
         else:
             return util.rotateNestedLists([util.scale_array_to_minus_plus_1(feature) for feature in
-                                       util.rotateNestedLists(data)])
+                                           util.rotateNestedLists(data)])
     elif algorithm == "SCALE01":
         return util.rotateNestedLists([util.scale_array_to_01(feature) for feature in
                                        util.rotateNestedLists(data)])

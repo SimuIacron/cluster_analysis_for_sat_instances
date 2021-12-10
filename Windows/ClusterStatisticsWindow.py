@@ -1,6 +1,6 @@
-from dash import dcc, html
+from dash import dcc
 
-import DatabaseReader
+from util import DatabaseReader
 from DataAnalysis import evaluation
 from DataFormats.DbInstance import DbInstance
 

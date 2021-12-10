@@ -1,6 +1,6 @@
 from sklearn.metrics import normalized_mutual_info_score
 
-import exportFigure
+from util import exportFigure
 from DataAnalysis import scaling, feature_selection, clustering
 from DataAnalysis.Evaluation import scoring_util
 from DataFormats.DbInstance import DbInstance

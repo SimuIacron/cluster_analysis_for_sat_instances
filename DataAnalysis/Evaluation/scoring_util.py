@@ -1,6 +1,6 @@
 # returns a cluster by families
 # this means all instances that have the same family are considered to be in the same cluster
-import DatabaseReader
+from util import DatabaseReader
 from DataFormats.DbInstance import DbInstance
 
 
