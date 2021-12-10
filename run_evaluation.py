@@ -1,4 +1,6 @@
+import copy
 import os
+from functools import partial
 from time import time
 
 from sklearn.metrics import normalized_mutual_info_score
@@ -28,10 +30,12 @@ import multiprocessing as mp
 def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_cores):
     t_start = time()
     cluster_results = read_json(input_file)
+    print(len(cluster_results))
 
     temp_filename = output_file + '_temp'
 
     continue_evaluation = os.path.exists(run_experiments.cluster_result_path + temp_filename + '.txt')
+    print('Continuing: ' + str(continue_evaluation))
 
     if num_cores > mp.cpu_count():
         num_cores = mp.cpu_count()
@@ -48,17 +52,17 @@ def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_core
 
     result_objects = []
     # asynchronous evaluation of experiments (order is restored with sorting afterwards)
-    for entry in cluster_results:
-
+    for idx, entry in enumerate(cluster_results):
         if continue_evaluation and entry['id'] in id_list:
             continue
 
-        callback_function = lambda r: append_json_temp(temp_filename, dict(entry, **{dict_name: r}))
+        callback_function = partial(func_callback, filename=temp_filename, entry=entry, dict_name=dict_name)
         result = pool.apply_async(func_eval, args=(entry, args), callback=callback_function)
         result_objects.append(result)
 
     [result.wait() for result in result_objects]
     finished = read_json_temp(temp_filename)
+    print(len(finished))
 
     # evaluation_result = [dict(entry, **{dict_name: result.get()}) for (entry, result) in result_objects]
 
@@ -68,6 +72,9 @@ def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_core
     t_stop = time()
     print('Evaluation took %f' % (t_stop - t_start))
 
+
+def func_callback(result, filename, entry, dict_name):
+    append_json_temp(filename, dict(entry, **{dict_name: result}))
 
 # -- Normalized mutual information ------------------------------------------------------------------------------------
 
