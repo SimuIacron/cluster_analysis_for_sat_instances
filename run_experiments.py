@@ -167,8 +167,7 @@ if __name__ == '__main__':
             comb = comb + elem
         output_merged.append(comb)
 
-    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1', 'STANDARDSCALER']),
-                         ('scaling_technique', ['NORMALSCALE']),
+    standard_settings = [('scaling_algorithm', ['STANDARDSCALER']),
                          ('selection_algorithm', ['NONE']),
                          ('selected_data', output_merged[1:]),
                          ('scaling_k_best', [3])]
@@ -192,7 +191,7 @@ if __name__ == '__main__':
     exp_spectral = standard_settings + \
                    [('cluster_algorithm', ['SPECTRAL']),
                     ('seed', [0]),
-                    ('n_clusters_spectral', range(2, 5))]
+                    ('n_clusters_spectral', range(2, 4))]
 
     exp_agg = standard_settings + \
               [('cluster_algorithm', ['AGGLOMERATIVE']),
@@ -226,5 +225,5 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
+    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_agg, exp_optics, exp_gaussian, exp_dbscan, exp_spectral, exp_birch], features,
                     'standardscaler_linearscaler_clustering', 20, 0)

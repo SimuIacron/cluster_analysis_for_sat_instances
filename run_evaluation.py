@@ -30,7 +30,6 @@ import multiprocessing as mp
 def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_cores):
     t_start = time()
     cluster_results = read_json(input_file)
-    print(len(cluster_results))
 
     temp_filename = output_file + '_temp'
 
@@ -62,7 +61,6 @@ def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_core
 
     [result.wait() for result in result_objects]
     finished = read_json_temp(temp_filename)
-    print(len(finished))
 
     # evaluation_result = [dict(entry, **{dict_name: result.get()}) for (entry, result) in result_objects]
 
