@@ -1,6 +1,5 @@
 import itertools
 import json
-import multiprocessing
 import os
 from pathlib import Path
 from time import time
@@ -9,7 +8,6 @@ import numpy as np
 import multiprocessing as mp
 
 import DatabaseReader
-import WindowsSound
 from DataAnalysis import feature_selection, scaling, clustering
 from DataFormats.DbInstance import DbInstance
 
@@ -71,9 +69,11 @@ def read_json(filename):
 # filename: The name of the file where the finished clustering are stored
 # num_cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_experiments(experiment_list, general_features, filename, num_cores, start_id=0, continue_evaluation=False):
+def run_experiments(experiment_list, general_features, filename, num_cores, start_id=0):
     t_start = time()
     temp_filename = filename + '_temp'
+
+    continue_evaluation = os.path.exists(cluster_result_path + temp_filename + '.txt')
 
     db_instance = DbInstance(general_features)
 
@@ -99,7 +99,7 @@ def run_experiments(experiment_list, general_features, filename, num_cores, star
             params.append(param)
             param_ranges.append(param_range)
 
-            # generate every combination of given parameter values of the experiment
+        # generate every combination of given parameter values of the experiment
         combinations = list(itertools.product(*param_ranges))
 
         for c in combinations:
@@ -226,9 +226,5 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments(
-        [exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan],
-        features,
-        'scaling/standardscaler_Linearscaler_clustering', 10, 0, True)
-
-    WindowsSound.make_noise()
+    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
+                    'standardscaler_linearscaler_clustering', 20, 0)

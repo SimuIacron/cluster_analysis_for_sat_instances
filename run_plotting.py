@@ -1,4 +1,3 @@
-import itertools
 from collections import Counter
 
 import numpy as np
@@ -7,11 +6,10 @@ import plotly.graph_objects as go
 from numpy import argmin
 import plotly.express as px
 
-import DatabaseReader
 import exportFigure
 import util
 from DataFormats.DbInstance import DbInstance
-from Experiment_pipeline.run_experiments import read_json
+from run_experiments import read_json
 
 
 # gets the evaluations (or experiments) depending on the given settings_dict from the input_file
