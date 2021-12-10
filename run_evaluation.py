@@ -164,7 +164,7 @@ if __name__ == '__main__':
 
     db = DbInstance(features)
 
-    run_evaluation_par2_score('standardscaler_linearscaler_clustering.txt', 'standardscaler_linearscaler_clustering.txt_par2', db, cores)
+    run_evaluation_par2_score('standardscaler_linearscaler_clustering', 'standardscaler_linearscaler_clustering_par2', db, cores)
 
     # run_evaluation_par2_vbs('vbs_without_glucose_syrup_yalsat', db)
     # run_evaluation_par2_bss('bss', db)
