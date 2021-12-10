@@ -8,7 +8,6 @@ import numpy as np
 import multiprocessing as mp
 
 import DatabaseReader
-import WindowsSound
 from DataAnalysis import feature_selection, scaling, clustering
 from DataFormats.DbInstance import DbInstance
 
@@ -201,5 +200,3 @@ if __name__ == '__main__':
 
     run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_spectral, exp_agg, exp_optics, exp_gaussian, exp_dbscan], features,
                     'solver_groups/clustering_glucose', 10, 0)
-
-    WindowsSound.make_noise()
