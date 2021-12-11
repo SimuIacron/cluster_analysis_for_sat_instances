@@ -7,7 +7,7 @@ from time import time
 import numpy as np
 import multiprocessing as mp
 
-from util import DatabaseReader
+from util_scripts import DatabaseReader
 from DataAnalysis import feature_selection, scaling, clustering
 from DataFormats.DbInstance import DbInstance
 

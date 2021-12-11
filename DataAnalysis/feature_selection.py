@@ -2,7 +2,7 @@ from sklearn.decomposition import PCA
 from sklearn.feature_selection import VarianceThreshold, SelectPercentile, mutual_info_classif, SelectKBest
 from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
 
-from util import DatabaseReader
+from util_scripts import DatabaseReader
 from numpy import argmin
 
 FEATURESELECTIONALGORITHMS = [

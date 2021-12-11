@@ -1,7 +1,7 @@
 import os
 from gbd_tool.gbd_api import GBD
 
-import util
+from util_scripts import util
 
 DB_PATH = os.environ["DBPATH"] + "meta.db" + os.pathsep + \
           os.environ["DBPATH"] + "base.db" + os.pathsep + \

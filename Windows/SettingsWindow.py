@@ -4,7 +4,7 @@ import dash.exceptions
 from dash import html, Input, Output, dcc, State
 import dash_daq.NumericInput as daq
 
-from util import JsonExport, DatabaseReader
+from util_scripts import JsonExport, DatabaseReader
 from DataAnalysis import scaling, feature_selection, clustering, evaluation
 from DataFormats.InputData import InputDataScaling, InputDataCluster, InputDataFeatureSelection
 from DataFormats.DbInstance import DbInstance

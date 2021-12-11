@@ -2,7 +2,7 @@ import pandas as pd
 from numpy import argmin, min, median, mean
 import plotly.express as px
 
-from util import util, DatabaseReader
+from util_scripts import util, DatabaseReader
 import plotly.graph_objects as go
 
 from DataAnalysis.Evaluation import scoring

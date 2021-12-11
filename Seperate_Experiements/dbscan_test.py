@@ -2,7 +2,7 @@ from sklearn.metrics import adjusted_mutual_info_score
 import plotly.graph_objects as go
 import numpy as np
 
-from util import exportFigure
+from util_scripts import exportFigure
 from DataAnalysis import feature_selection, scaling, clustering
 from DataAnalysis.Evaluation import scoring_util
 from DataFormats.DbInstance import DbInstance

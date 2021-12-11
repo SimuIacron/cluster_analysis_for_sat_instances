@@ -1,4 +1,4 @@
-from util import DatabaseReader
+from util_scripts import DatabaseReader
 
 
 class DbInstance:
