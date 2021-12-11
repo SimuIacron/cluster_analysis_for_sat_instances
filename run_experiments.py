@@ -57,6 +57,12 @@ def read_json(filename):
         return json.loads(lines)
 
 
+def convert_temp(filename):
+    temp_filename = filename + '_temp'
+    finished = read_json_temp(temp_filename)
+    write_json(filename, sorted(finished, key=lambda d: d['id']))
+
+
 # - run experiments ----------------------------------------------------------------------------------------------------
 
 # WARNING: Needs to execute in __main__ because it contains multithreading
@@ -112,8 +118,7 @@ def run_experiments(experiment_list, general_features, filename, num_cores, star
             id_counter = id_counter + 1
 
     [result.wait() for result in result_objects]
-    finished = read_json_temp(temp_filename)
-    write_json(filename, sorted(finished, key=lambda d: d['id']))
+    convert_temp(filename)
 
     t_stop = time()
     print('Experiments took %f' % (t_stop - t_start))
