@@ -9,11 +9,9 @@ import plotly.graph_objects as go
 from numpy import argmin
 import plotly.express as px
 
-import DatabaseReader
-import exportFigure
-import util
+from util_scripts import DatabaseReader, exportFigure, util
 from DataFormats.DbInstance import DbInstance
-from Experiment_pipeline.run_experiments import read_json
+from run_experiments import read_json
 
 
 # gets the evaluations (or experiments) depending on the given settings_dict from the input_file
@@ -160,12 +158,14 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 
     if use_mat_plot:
 
-        dpi = 96
-        plt.figure(figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
-        plt.bar(keys, vbs, label=vbs_label, width=1.0)
-        plt.bar(keys, bss, label=sbs_label, width=1.0)
+        badwidth = 1.2
+
+        dpi = 150
+        plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
+        plt.bar(keys, vbs, label=vbs_label, width=badwidth)
+        plt.bar(keys, bss, label=sbs_label, width=badwidth)
         for idx, elem in enumerate(value_lists[highlight_index]):
-            plt.bar(keys, value_dict[str(elem)], label=label_list[idx], width=1.0)
+            plt.bar(keys, value_dict[str(elem)], label=label_list[idx], width=barwidth)
 
         plt.xlabel(x_label)
         plt.ylabel(y_label)
@@ -176,7 +176,7 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
         plt.title(plot_description)
 
         if output_file != '':
-            plt.savefig(os.environ['EXPPATH'] + output_file + '.png')
+            plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
         if show_plot:
             plt.show()
 
@@ -207,26 +207,26 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 
 
 
-temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
-temp_solver_features.pop(14)
-temp_solver_features.pop(7)
-input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
-output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
-output_merged = []
-for combination in output:
-    comb = []
-    for elem in combination:
-        comb = comb + elem
-    output_merged.append(comb)
-
-plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
-                      'CPar2 scores of different cluster algorithms using combinations of base, gate, runtimes',
-                      0, ['selected_data'],
-                      [output_merged[1:]],
-                      ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
-                      20, 200, output_file='clustering_general/clustering_general_plot_comb_base_gate_runtimes_best_cluster',
-                      show_plot=False,
-                      use_mat_plot=True, use_dash_plot=True)
+# temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
+# temp_solver_features.pop(14)
+# temp_solver_features.pop(7)
+# input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
+# output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+# output_merged = []
+# for combination in output:
+#     comb = []
+#     for elem in combination:
+#         comb = comb + elem
+#     output_merged.append(comb)
+# 
+# plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+#                       'CPar2 scores of different cluster algorithms using combinations of base, gate, runtimes',
+#                       0, ['selected_data'],
+#                       [output_merged[1:]],
+#                       ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
+#                       20, 200, output_file='clustering_general/clustering_general_plot_comb_base_gate_runtimes_best_cluster',
+#                       show_plot=False,
+#                       use_mat_plot=True, use_dash_plot=True)
 
 # plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       'CPar2 scores of different cluster algorithms using combinations of base, gate, runtimes',
