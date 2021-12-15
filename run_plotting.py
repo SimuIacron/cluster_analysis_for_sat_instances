@@ -9,11 +9,9 @@ import plotly.graph_objects as go
 from numpy import argmin
 import plotly.express as px
 
-import DatabaseReader
-import exportFigure
-import util
+from util_scripts import DatabaseReader, util, exportFigure
 from DataFormats.DbInstance import DbInstance
-from Experiment_pipeline.run_experiments import read_json
+from run_experiments import read_json
 
 
 # gets the evaluations (or experiments) depending on the given settings_dict from the input_file
@@ -274,35 +272,6 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 #                       output_file='scaling_standardscaler/standardscaler_linearscaler_clustering_par2', show_plot=True)
 
 # single feature clustering
-
-features = [[feature] for feature in DatabaseReader.FEATURES_BASE]
-plot_cpar2_comparison(['single_feature_clustering/single_feature_clustering_base_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
-                     'Best CPar2 scores for clusterings with single base features',
-                     0, ['selected_data'],
-                      [features],
-                      DatabaseReader.FEATURES_BASE, 20, 100,
-                      output_file='single_feature_clustering/single_feature_clustering_base_plot', show_plot=False,
-                      use_mat_plot=True, use_dash_plot=True)
-
-plot_cpar2_comparison(['single_feature_clustering/single_feature_clustering_gate_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
-                     'Best CPar2 scores for clusterings with single gate features',
-                     0, ['cluster_algorithm'],
-                      [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN',
-                        'BIRCH']],
-                      ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS',
-                       'Gaussian', 'DBSCAN', 'BIRCH'], 20, 100,
-                      output_file='single_feature_clustering/single_feature_clustering_gate_plot', show_plot=False,
-                      use_mat_plot=True, use_dash_plot=True)
-
-plot_cpar2_comparison(['single_feature_clustering/single_feature_clustering_runtimes_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
-                     'Best CPar2 scores for clusterings with single runtimes features',
-                     0, ['cluster_algorithm'],
-                      [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN',
-                        'BIRCH']],
-                      ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS',
-                       'Gaussian', 'DBSCAN', 'BIRCH'], 20, 100,
-                      output_file='single_feature_clustering/single_feature_clustering_runtimes_plot', show_plot=False,
-                      use_mat_plot=True, use_dash_plot=True)
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -362,10 +331,11 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description, high
 
     if use_mat_plot:
 
-        dpi = 96
+        dpi = 150
+        barwidth = 1.2
         plt.figure(figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
         for idx, elem in enumerate(value_lists[highlight_index]):
-            plt.bar(keys, value_dict[str(elem)], label=label_list[idx], width=1.0)
+            plt.bar(keys, value_dict[str(elem)], label=label_list[idx], width=barwidth)
 
         plt.xlabel(x_label)
         plt.ylabel(y_label)
@@ -376,7 +346,7 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description, high
         plt.title(plot_description)
 
         if output_file != '':
-            plt.savefig(os.environ['EXPPATH'] + output_file + '.png')
+            plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
         if show_plot:
             plt.show()
 
