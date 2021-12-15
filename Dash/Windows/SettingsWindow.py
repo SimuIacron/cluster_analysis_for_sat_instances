@@ -8,7 +8,7 @@ from util_scripts import JsonExport, DatabaseReader
 from DataAnalysis import scaling, feature_selection, clustering, evaluation
 from DataFormats.InputData import InputDataScaling, InputDataCluster, InputDataFeatureSelection
 from DataFormats.DbInstance import DbInstance
-from Windows import ClusterStatisticsWindow, ScoringWindow
+from Dash.Windows import ClusterStatisticsWindow, ScoringWindow
 
 
 def create_dropdown(dropdown_data):

@@ -1,9 +1,7 @@
-import sys
-
 import dash
-from dash import html, dcc, Input, Output
+from dash import html
 
-from App import LayoutMain
+from Dash.App import LayoutMain
 from DataFormats.DbInstance import DbInstance
 
 # ----------------------------------------------------------------------------------------------------------------------

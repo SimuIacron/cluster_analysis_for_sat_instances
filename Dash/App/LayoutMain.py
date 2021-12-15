@@ -1,8 +1,8 @@
-from dash import html, Output, Input
+from dash import html
 from dash import dcc
 
 from DataFormats.DbInstance import DbInstance
-from Windows import ClusteringGraphWindow, SettingsWindow
+from Dash.Windows import ClusteringGraphWindow, SettingsWindow
 
 
 # inits a layout with three tabs and calls the window files for the first two
