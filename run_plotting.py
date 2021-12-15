@@ -9,9 +9,11 @@ import plotly.graph_objects as go
 from numpy import argmin
 import plotly.express as px
 
-from util_scripts import DatabaseReader, exportFigure, util
+import DatabaseReader
+import exportFigure
+import util
 from DataFormats.DbInstance import DbInstance
-from run_experiments import read_json
+from Experiment_pipeline.run_experiments import read_json
 
 
 # gets the evaluations (or experiments) depending on the given settings_dict from the input_file
@@ -99,7 +101,7 @@ def plot_par2_vbs_distribution(input_file_vbs, output_file='', show_plot=False, 
 def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sbs, plot_description, highlight_index,
                           param_names,
                           value_lists, label_list, max_cluster_amount, cutoff, output_file='', show_plot=False,
-                          use_mat_plot=True, use_dash_plot=False):
+                          use_mat_plot=True, use_dash_plot=False, show_complete_legend=False):
     x_label = 'Best Instances sorted by CPar2'
     y_label = 'CPar2 Score (s)'
     vbs_label = 'Virtual Best Solver'
@@ -158,14 +160,22 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 
     if use_mat_plot:
 
-        badwidth = 1.2
+        barwidth = 1.2
 
         dpi = 150
         plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
-        plt.bar(keys, vbs, label=vbs_label, width=badwidth)
-        plt.bar(keys, bss, label=sbs_label, width=badwidth)
+        plt.bar(keys, vbs, label=vbs_label, width=barwidth)
+        plt.bar(keys, bss, label=sbs_label, width=barwidth)
         for idx, elem in enumerate(value_lists[highlight_index]):
-            plt.bar(keys, value_dict[str(elem)], label=label_list[idx], width=barwidth)
+
+            has_value_not_zero = False
+            for item in value_dict[str(elem)]:
+                if item != 0:
+                    has_value_not_zero = True
+                    break
+
+            if has_value_not_zero or show_complete_legend:
+                plt.bar(keys, value_dict[str(elem)], label=label_list[idx], width=barwidth)
 
         plt.xlabel(x_label)
         plt.ylabel(y_label)
@@ -187,9 +197,17 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
         ]
 
         for idx, key in enumerate(value_lists[highlight_index]):
-            chart_data.append(
-                go.Bar(name=label_list[idx], x=keys, y=value_dict[str(key)], hovertext=text)
-            )
+
+            has_value_not_zero = False
+            for item in value_dict[str(key)]:
+                if item != 0:
+                    has_value_not_zero = True
+                    break
+
+            if has_value_not_zero or show_complete_legend:
+                chart_data.append(
+                    go.Bar(name=label_list[idx], x=keys, y=value_dict[str(key)], hovertext=text)
+                )
 
         fig = go.Figure(layout=go.Layout(
             title=go.layout.Title(text=plot_description)
@@ -218,13 +236,13 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 #     for elem in combination:
 #         comb = comb + elem
 #     output_merged.append(comb)
-# 
+#
 # plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       'CPar2 scores of different cluster algorithms using combinations of base, gate, runtimes',
 #                       0, ['selected_data'],
 #                       [output_merged[1:]],
 #                       ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
-#                       20, 200, output_file='clustering_general/clustering_general_plot_comb_base_gate_runtimes_best_cluster',
+#                       20, 200, output_file='clustering_general_plot_comb_base_gate_runtimes_best_cluster',
 #                       show_plot=False,
 #                       use_mat_plot=True, use_dash_plot=True)
 
@@ -254,6 +272,158 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 #                      'scaling_algorithm',
 #                       ['SCALEMINUSPLUS1', 'STANDARDSCALER'], ['Linear Scaling to [-1,+1]', 'Standard Scaling'], 20, 100,
 #                       output_file='scaling_standardscaler/standardscaler_linearscaler_clustering_par2', show_plot=True)
+
+# single feature clustering
+
+features = [[feature] for feature in DatabaseReader.FEATURES_BASE]
+plot_cpar2_comparison(['single_feature_clustering/single_feature_clustering_base_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+                     'Best CPar2 scores for clusterings with single base features',
+                     0, ['selected_data'],
+                      [features],
+                      DatabaseReader.FEATURES_BASE, 20, 100,
+                      output_file='single_feature_clustering/single_feature_clustering_base_plot', show_plot=False,
+                      use_mat_plot=True, use_dash_plot=True)
+
+plot_cpar2_comparison(['single_feature_clustering/single_feature_clustering_gate_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+                     'Best CPar2 scores for clusterings with single gate features',
+                     0, ['cluster_algorithm'],
+                      [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN',
+                        'BIRCH']],
+                      ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS',
+                       'Gaussian', 'DBSCAN', 'BIRCH'], 20, 100,
+                      output_file='single_feature_clustering/single_feature_clustering_gate_plot', show_plot=False,
+                      use_mat_plot=True, use_dash_plot=True)
+
+plot_cpar2_comparison(['single_feature_clustering/single_feature_clustering_runtimes_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+                     'Best CPar2 scores for clusterings with single runtimes features',
+                     0, ['cluster_algorithm'],
+                      [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN',
+                        'BIRCH']],
+                      ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS',
+                       'Gaussian', 'DBSCAN', 'BIRCH'], 20, 100,
+                      output_file='single_feature_clustering/single_feature_clustering_runtimes_plot', show_plot=False,
+                      use_mat_plot=True, use_dash_plot=True)
+# ----------------------------------------------------------------------------------------------------------------------
+
+
+
+def plot_best_cluster_comparison(input_files_par2_scores, plot_description, highlight_index,
+                          param_names,
+                          value_lists, label_list, max_cluster_amount, min_cluster_amount, cutoff, output_file='', show_plot=False,
+                          use_mat_plot=True, use_dash_plot=False):
+    x_label = 'Best clusters sorted by Par2'
+    y_label = 'Par2 Score (s)'
+
+    data = []
+    for input_file in input_files_par2_scores:
+        data = data + read_json(input_file)
+
+    cluster_list = []
+    for evaluation in data:
+        cluster_size = Counter(evaluation['clustering'])
+        for cluster, size in cluster_size.items():
+            if size >= min_cluster_amount:
+                cluster_list.append(dict(evaluation, **{'cluster_idx': cluster,
+                                                        'cluster_cpar2': evaluation['par2'][1][str(cluster)][0][0][1],
+                                                        'cluster_size': size}))
+
+    sorted_cluster_list = sorted(cluster_list, key=lambda d: d['cluster_cpar2'])
+
+    text = []
+    keys = []
+    value_dict = {}
+    for elem in value_lists[highlight_index]:
+        value_dict[str(elem)] = []
+    counter = 0
+    for cluster_eval in sorted_cluster_list:
+        if len(keys) >= cutoff:
+            break
+
+        eval_is_in_graph = True
+        for idx, value in enumerate(param_names):
+            if cluster_eval['settings'][value] not in value_lists[idx]:
+                eval_is_in_graph = False
+                break
+
+        if eval_is_in_graph and len(cluster_eval['clusters']) <= max_cluster_amount:
+
+            for key, value in value_dict.items():
+                if str(key) == str(cluster_eval['settings'][param_names[highlight_index]]):
+                    value_dict[str(key)].append(cluster_eval['cluster_cpar2'])
+                else:
+                    value_dict[str(key)].append(0)
+            keys.append(counter)
+            counter = counter + 1
+
+            text_string = util.add_line_breaks_to_text(str(cluster_eval['settings']), ',', 5)
+
+            text.append(text_string + ' cluster idx: ' + str(cluster_eval['cluster_idx']) +
+                                                             ' cluster size: ' + str(cluster_eval['cluster_size']))
+
+    if use_mat_plot:
+
+        dpi = 96
+        plt.figure(figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
+        for idx, elem in enumerate(value_lists[highlight_index]):
+            plt.bar(keys, value_dict[str(elem)], label=label_list[idx], width=1.0)
+
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        ax = plt.subplot(111)
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.title(plot_description)
+
+        if output_file != '':
+            plt.savefig(os.environ['EXPPATH'] + output_file + '.png')
+        if show_plot:
+            plt.show()
+
+    if use_dash_plot:
+        chart_data = [
+        ]
+
+        for idx, key in enumerate(value_lists[highlight_index]):
+            chart_data.append(
+                go.Bar(name=label_list[idx], x=keys, y=value_dict[str(key)], hovertext=text)
+            )
+
+        fig = go.Figure(layout=go.Layout(
+            title=go.layout.Title(text=plot_description)
+        ),
+            data=chart_data)
+
+        fig.update_layout(barmode='stack', bargap=0)
+        fig.update_xaxes(title_text=x_label)
+        fig.update_yaxes(title_text=y_label)
+
+        if output_file != '':
+            exportFigure.export_plot_as_html(fig, output_file)
+        if show_plot:
+            fig.show()
+
+
+# temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
+# temp_solver_features.pop(14)
+# temp_solver_features.pop(7)
+# input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
+# output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+# output_merged = []
+# for combination in output:
+#     comb = []
+#     for elem in combination:
+#         comb = comb + elem
+#     output_merged.append(comb)
+#
+# plot_best_cluster_comparison(['clustering_general/clustering_general_par2'],
+#                       'Par2 scores of the best clusters in clusterings using combinations of base, gate, runtimes',
+#                       0, ['selected_data'],
+#                       [output_merged[1:]],
+#                       ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
+#                       100, 100, 5000, output_file='clustering_best_cluster/clustering_best_cluster_all_5000',
+#                       show_plot=False,
+#                       use_mat_plot=True, use_dash_plot=True)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
