@@ -1,4 +1,7 @@
+import itertools
+import os
 from collections import Counter
+import matplotlib.pyplot as plt
 
 import numpy as np
 import pandas as pd
@@ -6,9 +9,11 @@ import plotly.graph_objects as go
 from numpy import argmin
 import plotly.express as px
 
-from util_scripts import util, exportFigure
+import DatabaseReader
+import exportFigure
+import util
 from DataFormats.DbInstance import DbInstance
-from run_experiments import read_json
+from Experiment_pipeline.run_experiments import read_json
 
 
 # gets the evaluations (or experiments) depending on the given settings_dict from the input_file
@@ -93,9 +98,10 @@ def plot_par2_vbs_distribution(input_file_vbs, output_file='', show_plot=False, 
 # output_file: The filename of the exported html (no export if equal to '')
 # show_plot: If the plot should be opened in the browser after running the function
 # use_mat_plot: Whether to show the plot as a matplotlib plot or a plotly plot
-def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sbs, plot_description, param_name,
-                          value_list, label_list, max_cluster_amount, cutoff, output_file='', show_plot=False,
-                          use_mat_plot=True):
+def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sbs, plot_description, highlight_index,
+                          param_names,
+                          value_lists, label_list, max_cluster_amount, cutoff, output_file='', show_plot=False,
+                          use_mat_plot=True, use_dash_plot=False):
     x_label = 'Best Instances sorted by CPar2'
     y_label = 'CPar2 Score (s)'
     vbs_label = 'Virtual Best Solver'
@@ -106,25 +112,32 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
         data = data + read_json(input_file)
     bss_data = read_json(input_file_sbs)
     vbs_data = read_json(input_file_vbs)
+
     sorted_data = sorted(data, key=lambda d: d['par2'][0])
     keys = [0]
 
     value_dict = {}
-    for elem in value_list:
+    for elem in value_lists[highlight_index]:
         value_dict[str(elem)] = [0]
 
     vbs = [vbs_data[0]]
     bss = [0]
-    text = ['Best Single Solver']
-    counter = 0
-    for idx, evaluation in enumerate(sorted_data):
+    text = [vbs_label]
+    counter = 1
+    for evaluation in sorted_data:
         if len(keys) >= cutoff:
             break
 
-        if evaluation['settings'][param_name] in value_list and len(evaluation['clusters']) <= max_cluster_amount:
+        eval_is_in_graph = True
+        for idx, value in enumerate(param_names):
+            if evaluation['settings'][value] not in value_lists[idx]:
+                eval_is_in_graph = False
+                break
+
+        if eval_is_in_graph and len(evaluation['clusters']) <= max_cluster_amount:
 
             for key, value in value_dict.items():
-                if str(key) == str(evaluation['settings'][param_name]):
+                if str(key) == str(evaluation['settings'][param_names[highlight_index]]):
                     value_dict[str(key)].append(evaluation['par2'][0])
                 else:
                     value_dict[str(key)].append(0)
@@ -139,71 +152,108 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
             text.append(text_string + ' cluster count: ' + str(len(evaluation['clusters'])))
 
     keys.append(counter)
-    for elem in value_list:
+    for elem in value_lists[highlight_index]:
         value_dict[str(elem)].append(0)
     bss.append(bss_data[0])
     vbs.append(0)
-    text.append('Best Single Solver ')
+    text.append(sbs_label)
 
-    chart_data = [
-        go.Bar(name='Virtual best solver', x=keys, y=vbs, hovertext=text),
-        go.Bar(name='Best single solver', x=keys, y=bss, hovertext=text)
-    ]
+    if use_mat_plot:
 
-    for idx, key in enumerate(value_list):
-        chart_data.append(
-            go.Bar(name=label_list[idx], x=keys, y=value_dict[str(key)], hovertext=text)
-        )
+        dpi = 96
+        plt.figure(figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
+        plt.bar(keys, vbs, label=vbs_label, width=1.0)
+        plt.bar(keys, bss, label=sbs_label, width=1.0)
+        for idx, elem in enumerate(value_lists[highlight_index]):
+            plt.bar(keys, value_dict[str(elem)], label=label_list[idx], width=1.0)
 
-    fig = go.Figure(layout=go.Layout(
-        title=go.layout.Title(text=plot_description)
-    ),
-        data=chart_data)
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        ax = plt.subplot(111)
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.title(plot_description)
 
-    fig.update_layout(barmode='stack', bargap=0)
-    fig.update_xaxes(title_text='Instances sorted by best par2 score')
-    fig.update_yaxes(title_text='par2 score')
+        if output_file != '':
+            plt.savefig(os.environ['EXPPATH'] + output_file + '.png')
+        if show_plot:
+            plt.show()
 
-    if output_file != '':
-        exportFigure.export_plot_as_html(fig, output_file)
+    if use_dash_plot:
+        chart_data = [
+            go.Bar(name=vbs_label, x=keys, y=vbs, hovertext=text),
+            go.Bar(name=sbs_label, x=keys, y=bss, hovertext=text)
+        ]
 
-    if show_plot:
-        fig.show()
+        for idx, key in enumerate(value_lists[highlight_index]):
+            chart_data.append(
+                go.Bar(name=label_list[idx], x=keys, y=value_dict[str(key)], hovertext=text)
+            )
+
+        fig = go.Figure(layout=go.Layout(
+            title=go.layout.Title(text=plot_description)
+        ),
+            data=chart_data)
+
+        fig.update_layout(barmode='stack', bargap=0)
+        fig.update_xaxes(title_text=x_label)
+        fig.update_yaxes(title_text=y_label)
+
+        if output_file != '':
+            exportFigure.export_plot_as_html(fig, output_file)
+        if show_plot:
+            fig.show()
 
 
-# temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
-# temp_solver_features.pop(14)
-# temp_solver_features.pop(7)
-# input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical_elimfalse', 'cadical', 'cadical_pripro', 'cadical_stability']]
-# output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
-# output_merged = []
-# for combination in output:
-#     comb = []
-#     for elem in combination:
-#         comb = comb + elem
-#     output_merged.append(comb)
+
+temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
+temp_solver_features.pop(14)
+temp_solver_features.pop(7)
+input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
+output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+output_merged = []
+for combination in output:
+    comb = []
+    for elem in combination:
+        comb = comb + elem
+    output_merged.append(comb)
+
+plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+                      'CPar2 scores of different cluster algorithms using combinations of base, gate, runtimes',
+                      0, ['selected_data'],
+                      [output_merged[1:]],
+                      ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
+                      20, 200, output_file='clustering_general/clustering_general_plot_comb_base_gate_runtimes_best_cluster',
+                      show_plot=False,
+                      use_mat_plot=True, use_dash_plot=True)
+
+# plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+#                       'CPar2 scores of different cluster algorithms using combinations of base, gate, runtimes',
+#                       0, ['selected_data'],
+#                       [output_merged[1:]],
+#                       ['base', 'gate', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
+#                       20, 200, output_file='clustering_general/clustering_general_plot_comb_base_gate_runtimes_dec',
+#                       show_plot=False,
+#                       use_mat_plot=True, use_dash_plot=True)
 #
-# plot_par2_comparison(['solver_groups/clustering_cadical_par2'], 'vbs', 'bss',
-#                      'Par 2 scores cadical',
-#                      'selected_data',
-#                      output_merged[1:], ['base', 'gate', 'solver', 'base gate', 'base solver', 'gate solver', 'base, gate, solver'], 20, 300,
-#                      output_file='solver_groups/clustering_cadical_par2_plot', show_plot=False)
+# plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+#                       'CPar2 scores of different cluster algorithms using combinations of base, gate and runtimes',
+#                       0, ['cluster_algorithm', 'selected_data'],
+#                       [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN',
+#                         'BIRCH'], output_merged[1:]],
+#                       ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS',
+#                        'Gaussian', 'DBSCAN', 'BIRCH'],
+#                       20, 200, output_file='clustering_general/clustering_general_plot_algo_base_gate_runtimes_dec',
+#                       show_plot=False,
+#                       use_mat_plot=True, use_dash_plot=True)
 
-plot_cpar2_comparison(['scaling_standardscaler/standardscaler_linearscaler_clustering_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
-                     'Comparison of CPar2 scores between Linear Scaling and Standard Scaling for clusterings with less than 20 clusters',
-                     'scaling_algorithm',
-                      ['SCALEMINUSPLUS1', 'STANDARDSCALER'], ['Linear Scaling to [-1,+1]', 'Standard Scaling'], 20, 100,
-                      output_file='scaling_standardscaler/standardscaler_linearscaler_clustering_par2', show_plot=True)
 
-# features = [[item] for item in DatabaseReader.FEATURES_SOLVER]
-# plot_par2_comparison(['Single_feature_clustering/single_feature_clustering_runtimes_par2'], 'vbs', 'bss',
-#                      'Par 2 scores of runtimes with less than 20 clusters',
-#                      'selected_data',
-#                      features, DatabaseReader.FEATURES_SOLVER,
-#                      # ['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN'],
-#                      # ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS', 'Gaussian', 'DBSCAN'],
-#                      20, 200,
-#                      output_file='Single_feature_clustering/single_feature_clustering_runtimes_par2_plot_features', show_plot=False)
+# plot_cpar2_comparison(['scaling_standardscaler/standardscaler_linearscaler_clustering_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+#                      'Comparison of CPar2 scores between Linear Scaling and Standard Scaling for clusterings with less than 20 clusters',
+#                      'scaling_algorithm',
+#                       ['SCALEMINUSPLUS1', 'STANDARDSCALER'], ['Linear Scaling to [-1,+1]', 'Standard Scaling'], 20, 100,
+#                       output_file='scaling_standardscaler/standardscaler_linearscaler_clustering_par2', show_plot=True)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
