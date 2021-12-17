@@ -624,9 +624,13 @@ def plot_clustering(input_file, db_instance: DbInstance, plot_description, setti
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance, plot_description, cluster_file,
+# generates a pie chart for each given cluster where the distribution of the families in the cluster is shown
+# input_file: The file containing the clusterings
+# db_instance
+# cluster_file: File containing the clustering ids and clustering idx for which the pie charts should be drawn
+def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance, cluster_file,
                                             output_file='',
-                                            show_plot=False, use_mat_plot=True, use_dash_plot=False):
+                                            show_plot=False, use_mat_plot=True):
     data = read_json(input_file)
     cluster_data = read_json(cluster_file)
     clustering_id_list = [item[0] for item in cluster_data]
@@ -675,7 +679,6 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
 
     if use_mat_plot:
         dpi = 40
-        #plt.figure(figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
 
         plt.style.use('ggplot')
         fig, axes = plt.subplots(nrows=row, ncols=columns, figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
@@ -707,9 +710,21 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
     #         fig.show()
     #
 
+# ----------------------------------------------------------------------------------------------------------------------
+
+# plots for a single cluster how the solvers are distributed in ranks, by counting the occurrence of each solver in
+# each rank (determined by order of solvers sorted by runtime for the instance in the cluster) and scaling it to [0,1]
+# input_file: File containing the clustering
+# clustering_id: The id of the clustering to read
+# cluster_idx: The index of the cluster in the clustering
+# db_instance: Important: Init with the correct solver features, that were used in the clustering
+# output_file: Name of the generated graph file
+# show_plot: Should the plot be shown after executing?
 def plot_cluster_best_solver_distribution(input_file, clustering_id, cluster_idx, db_instance:DbInstance,
                                           output_file='', show_plot=True):
 
+    # don't take the solvers from DatabaseReader.FEATURES_SOLVERS if not all solvers where used in the clustering
+    # because glucose_syrup and yalsat were removed, we take it directly from the reduced db_instance
     key_names = db_instance.solver_f
 
     data = read_json(input_file)
@@ -727,6 +742,7 @@ def plot_cluster_best_solver_distribution(input_file, clustering_id, cluster_idx
             zipped_solvers = list(zip(db_instance.solver_wh[i], key_names))
             instances_in_cluster.append(sorted(zipped_solvers, key=lambda x: x[0]))
 
+    # contains arrays with the amounts of the solvers for each rank
     ranks = []
 
     solver_amount = len(db_instance.solver_f)
