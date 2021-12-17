@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 from numpy import argmin
 import plotly.express as px
 
-from util_scripts import DatabaseReader, util, exportFigure
+from util_scripts import util, exportFigure
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json
 
@@ -705,3 +705,63 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
     #
     #     if show_plot:
     #         fig.show()
+    #
+
+def plot_cluster_best_solver_distribution(input_file, clustering_id, cluster_idx, db_instance:DbInstance,
+                                          output_file='', show_plot=True):
+
+    key_names = db_instance.solver_f
+
+    data = read_json(input_file)
+    clustering = None
+    for elem in data:
+        if elem['id'] == clustering_id:
+            clustering = elem
+            break
+
+    instances_in_cluster = []
+    size = 0
+    for i, instance in enumerate(clustering['clustering']):
+        if instance == cluster_idx:
+            size = size + 1
+            zipped_solvers = list(zip(db_instance.solver_wh[i], key_names))
+            instances_in_cluster.append(sorted(zipped_solvers, key=lambda x: x[0]))
+
+    ranks = []
+
+    solver_amount = len(db_instance.solver_f)
+
+    for i in range(solver_amount):
+        rank_value = []
+        rank_dict = {}
+        for solver in key_names:
+            rank_dict[solver] = 0
+        for instance in instances_in_cluster:
+            rank_dict[instance[i][1]] = rank_dict[instance[i][1]] + 1
+        for solver in key_names:
+            value = float(rank_dict[solver]) / float(size)
+            rank_value.append(value)
+        ranks.append(rank_value)
+
+    dpi = 90
+    plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
+
+    for i in range(solver_amount):
+        bottom = [0] * len(key_names)
+        for j in range(i):
+            bottom = np.array(bottom) + np.array(ranks[j])
+        plt.bar(key_names, ranks[i], label=0, bottom=bottom)
+
+    plt.title(clustering['par2'][1][str(cluster_idx)][0][0][0])
+    y_pos = range(len(key_names))
+    plt.xticks(y_pos, key_names, rotation=90)
+    plt.subplots_adjust(bottom=0.3)
+
+    if output_file != '':
+        plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+
+    if show_plot:
+        plt.show()
+
+
+
