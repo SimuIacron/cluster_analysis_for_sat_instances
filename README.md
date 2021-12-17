@@ -1,3 +1,5 @@
+ATTENTION: README is outdated and will be updated in the future
+
 # ClusterAnalysis_Dash
 
 The ClusterAnalysis_Dash Repo contains a tool to analyze Sat-Problems. This is done by using their instance features and solver times to cluster them into groups.
