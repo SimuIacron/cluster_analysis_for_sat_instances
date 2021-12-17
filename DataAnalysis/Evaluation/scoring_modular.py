@@ -101,3 +101,14 @@ def f3_weigh_with_cluster_size(yhat, clusters, db_instance: DbInstance, timeout,
 
     final_score = current_score / len(yhat)
     return final_score
+
+
+def f3_weigh_with_cluster_size_n_best_cluster(yhat, clusters, db_instance: DbInstance, timeout, cluster_score_dict, n, reverse):
+    score_list = []
+
+    for cluster, (sorted_solvers, cluster_score) in cluster_score_dict.items():
+        score_list.append(cluster_score)
+
+    score_list_sorted = sorted(score_list, reverse=reverse)
+    final_score = sum(score_list_sorted[:n]) / len(yhat)
+    return final_score

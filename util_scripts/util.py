@@ -1,7 +1,12 @@
 # splits list lst into chunks of n
+import random
+
+from matplotlib import pyplot as plt
+
+
 def chunks(lst, n):
     n = max(1, n)
-    return [lst[i:i+n] for i in range(0, len(lst), n)]
+    return [lst[i:i + n] for i in range(0, len(lst), n)]
 
 
 # scales given array values to a scale of 0 to 1
@@ -10,7 +15,7 @@ def scale_array_to_01(array):
     max_v = max(array)
     min_v = min(array)
     if max_v != 0:
-        scaled_array = [((value - min_v) / (max_v-min_v)) for value in array]
+        scaled_array = [((value - min_v) / (max_v - min_v)) for value in array]
     else:
         scaled_array = [0] * len(array)
 
@@ -23,7 +28,7 @@ def scale_array_to_minus_plus_1(array):
     max_v = max(array)
     min_v = min(array)
 
-    center = (max_v + min_v)/2
+    center = (max_v + min_v) / 2
     divisor = max_v - center
 
     if divisor != 0:
@@ -60,6 +65,7 @@ def flatten(t):
 
     return final_list
 
+
 # Replaces every nth occurrence of letter in text with line break
 # text: The inpout text to add breaks to
 # letter_to_break_at: The letter that is replaced by the break
@@ -81,3 +87,5 @@ def add_line_breaks_to_text(text, letter_to_break_at, replace_n):
     return text_string
 
 
+def random_color():
+    return (random.uniform(0,1), random.uniform(0,1), random.uniform(0,1))

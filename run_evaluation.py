@@ -8,7 +8,7 @@ from util_scripts import DatabaseReader
 import run_experiments
 from DataAnalysis.Evaluation import scoring_util
 from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
-    score_virtual_best_solver, score_single_best_solver
+    score_virtual_best_solver, score_single_best_solver, f3_weigh_with_cluster_size_n
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json, read_json_temp, append_json_temp
 import multiprocessing as mp
@@ -72,6 +72,7 @@ def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_core
 
 def func_callback(result, filename, entry, dict_name):
     append_json_temp(filename, dict(entry, **{dict_name: result}))
+
 
 # -- Normalized mutual information ------------------------------------------------------------------------------------
 
@@ -152,6 +153,42 @@ def run_evaluation_par2_bss(output_file, db_instance: DbInstance):
     write_json(output_file, [final_score, cluster_score_dict])
 
 
+def run_evaluation_par2_vbs_n_best(output_file, db_instance: DbInstance, n):
+    func_weight = \
+        lambda yhat, clusters, db1, timeout, dict1: f3_weigh_with_cluster_size_n(yhat, clusters, db1, timeout,
+                                                                                 dict1, n, False)
+    final_score, cluster_score_dict = score_virtual_best_solver(db_instance, DatabaseReader.TIMEOUT, f1_par2,
+                                                                f2_par2_cluster, func_weight)
+    write_json(output_file, [final_score, cluster_score_dict])
+
+
+def run_evaluation_par2_vbs_n_worst(output_file, db_instance: DbInstance, n):
+    func_weight = \
+        lambda yhat, clusters, db1, timeout, dict1: f3_weigh_with_cluster_size_n(yhat, clusters, db1, timeout,
+                                                                                 dict1, n, True)
+    final_score, cluster_score_dict = score_virtual_best_solver(db_instance, DatabaseReader.TIMEOUT, f1_par2,
+                                                                f2_par2_cluster, func_weight)
+    write_json(output_file, [final_score, cluster_score_dict])
+
+
+def run_evaluation_par2_sbs_n_best(output_file, db_instance: DbInstance, n):
+    func_weight = \
+        lambda yhat, clusters, db1, timeout, dict1: f3_weigh_with_cluster_size_n(yhat, clusters, db1, timeout,
+                                                                                 dict1, n, False)
+    final_score, cluster_score_dict = score_single_best_solver(db_instance, DatabaseReader.TIMEOUT, f1_par2,
+                                                               f2_par2_cluster, func_weight)
+    write_json(output_file, [final_score, cluster_score_dict])
+
+
+def run_evaluation_par2_sbs_n_worst(output_file, db_instance: DbInstance, n):
+    func_weight = \
+        lambda yhat, clusters, db1, timeout, dict1: f3_weigh_with_cluster_size_n(yhat, clusters, db1, timeout,
+                                                                                 dict1, n, True)
+    final_score, cluster_score_dict = score_single_best_solver(db_instance, DatabaseReader.TIMEOUT, f1_par2,
+                                                               f2_par2_cluster, func_weight)
+    write_json(output_file, [final_score, cluster_score_dict])
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -168,7 +205,10 @@ if __name__ == '__main__':
 
     db = DbInstance(features)
 
-    run_evaluation_par2_score('clustering_general', 'clustering_general_par2', db, cores)
+    # run_evaluation_par2_score('clustering_general', 'clustering_general_par2', db, cores)
+
+    run_evaluation_par2_sbs_n_best('sbs_100_best', db, 100)
+    run_evaluation_par2_sbs_n_worst('sbs_100_worst', db, 100)
 
     # run_evaluation_par2_vbs('vbs_without_glucose_syrup_yalsat', db)
     # run_evaluation_par2_bss('bss', db)

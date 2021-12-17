@@ -1,6 +1,8 @@
 import itertools
 import os
 from collections import Counter
+from math import ceil
+
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -11,7 +13,7 @@ import plotly.express as px
 
 from util_scripts import DatabaseReader, util, exportFigure
 from DataFormats.DbInstance import DbInstance
-from run_experiments import read_json
+from run_experiments import read_json, write_json
 
 
 # gets the evaluations (or experiments) depending on the given settings_dict from the input_file
@@ -222,7 +224,6 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
             fig.show()
 
 
-
 # temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 # temp_solver_features.pop(14)
 # temp_solver_features.pop(7)
@@ -275,11 +276,12 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-
-def plot_best_cluster_comparison(input_files_par2_scores, plot_description, highlight_index,
-                          param_names,
-                          value_lists, label_list, max_cluster_amount, min_cluster_amount, cutoff, output_file='', show_plot=False,
-                          use_mat_plot=True, use_dash_plot=False):
+def plot_best_cluster_comparison(input_files_par2_scores, plot_description,
+                                 highlight_index,
+                                 param_names,
+                                 value_lists, label_list, max_cluster_amount, min_cluster_amount, cutoff,
+                                 output_file='', show_plot=False,
+                                 use_mat_plot=True, use_dash_plot=False):
     x_label = 'Best clusters sorted by Par2'
     y_label = 'Par2 Score (s)'
 
@@ -294,15 +296,19 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description, high
             if size >= min_cluster_amount:
                 cluster_list.append(dict(evaluation, **{'cluster_idx': cluster,
                                                         'cluster_cpar2': evaluation['par2'][1][str(cluster)][0][0][1],
-                                                        'cluster_size': size}))
+                                                        'cluster_size': size,
+                                                        'cluster_solver': evaluation['par2'][1][str(cluster)][0][0][
+                                                            0]}))
 
     sorted_cluster_list = sorted(cluster_list, key=lambda d: d['cluster_cpar2'])
+    export_list = []
 
-    text = []
-    keys = []
     value_dict = {}
     for elem in value_lists[highlight_index]:
         value_dict[str(elem)] = []
+
+    keys = []
+    text = []
     counter = 0
     for cluster_eval in sorted_cluster_list:
         if len(keys) >= cutoff:
@@ -327,13 +333,22 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description, high
             text_string = util.add_line_breaks_to_text(str(cluster_eval['settings']), ',', 5)
 
             text.append(text_string + ' cluster idx: ' + str(cluster_eval['cluster_idx']) +
-                                                             ' cluster size: ' + str(cluster_eval['cluster_size']))
+                        ' cluster size: ' + str(cluster_eval['cluster_size']) +
+                        ' solver: ' + str(cluster_eval['cluster_solver']) +
+                        ' id: ' + str(cluster_eval['id']))
+
+            export_list.append((cluster_eval['id'], cluster_eval['cluster_idx']))
+
+    if output_file != '':
+        write_json(output_file, export_list)
 
     if use_mat_plot:
 
         dpi = 150
         barwidth = 1.2
         plt.figure(figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
+        # plt.bar(keys, vbs_best, label=vbs_best_label, width=barwidth)
+        # plt.bar(keys, vbs_worst, label=vbs_worst_label, width=barwidth)
         for idx, elem in enumerate(value_lists[highlight_index]):
             plt.bar(keys, value_dict[str(elem)], label=label_list[idx], width=barwidth)
 
@@ -352,6 +367,8 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description, high
 
     if use_dash_plot:
         chart_data = [
+            # go.Bar(name=vbs_best_label, x=keys, y=vbs_best, hovertext=text),
+            # go.Bar(name=vbs_worst_label, x=keys, y=vbs_worst, hovertext=text)
         ]
 
         for idx, key in enumerate(value_lists[highlight_index]):
@@ -433,7 +450,8 @@ def plot_par2(input_file, plot_description, settings_dict, iter_param, iter_para
                                            evaluation['clusters']]
         cluster_size = Counter(evaluation['clustering'])
         p_size_amount = p_size_amount + [cluster_size[cluster] for cluster in evaluation['clusters']]
-        p_text_amount = p_text_amount + [evaluation['par2'][1][str(cluster)][0][0:5] for cluster in
+        p_text_amount = p_text_amount + [str(evaluation['par2'][1][str(cluster)][0][0:5]) + " cluster_size: " +
+                                         str(cluster_size[cluster]) for cluster in
                                          evaluation['clusters']]
 
     fig = go.Figure(layout=go.Layout(
@@ -594,6 +612,7 @@ def plot_clustering(input_file, db_instance: DbInstance, plot_description, setti
     if show_plot:
         fig.show()
 
+
 # Example:
 
 # plot_clustering('basic_search_all_cluster_algorithms', DbInstance(),
@@ -602,3 +621,87 @@ def plot_clustering(input_file, db_instance: DbInstance, plot_description, setti
 #                  "selection_algorithm": ["NONE"], "selected_data": [["base"]], "scaling_k_best": [3],
 #                  "cluster_algorithm": ["KMEANS"], "seed": [0], "n_clusters_k_means": [5]},
 #                 'n_vars', 'n_vars', 'n_gates', 'n_gates', '', show_plot=True)
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance, plot_description, cluster_file,
+                                            output_file='',
+                                            show_plot=False, use_mat_plot=True, use_dash_plot=False):
+    data = read_json(input_file)
+    cluster_data = read_json(cluster_file)
+    clustering_id_list = [item[0] for item in cluster_data]
+    cluster_idx_list = [item[1] for item in cluster_data]
+
+    columns = 10
+    row = ceil(len(cluster_idx_list) / columns)
+    keys_all = list(set([item[0] for item in db_instance.family_wh]))
+    keys_color_dict = {}
+    for idx, key in enumerate(keys_all):
+        keys_color_dict[key] = util.random_color()
+
+    keys_list = []
+    colors_list = []
+    values_list = []
+    for clustering_id, cluster_idx in zip(clustering_id_list, cluster_idx_list):
+
+        instance = None
+        for elem in data:
+            if elem['id'] == clustering_id:
+                instance = elem
+                break
+
+        family_dict = {}
+        size = 0
+        for cluster_elem in instance['clustering']:
+            if cluster_elem == cluster_idx:
+                size = size + 1
+                current_family = db_instance.family_wh[cluster_elem][0]
+                if current_family in family_dict:
+                    family_dict[current_family] = family_dict[current_family] + 1
+                else:
+                    family_dict[current_family] = 1
+
+        values = []
+        keys = []
+        colors = []
+        for family in family_dict:
+            values.append(family_dict[family] / size)
+            keys.append(family)
+            colors.append(keys_color_dict[family])
+
+        values_list.append(values)
+        keys_list.append(keys)
+        colors_list.append(colors)
+
+    if use_mat_plot:
+        dpi = 40
+        #plt.figure(figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
+
+        plt.style.use('ggplot')
+        fig, axes = plt.subplots(nrows=row, ncols=columns, figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
+
+        for ax, values, keys, colors in zip(axes.flat, values_list, keys_list, colors_list):
+            ax.pie(values, labels=keys, autopct='%.2f', colors=colors)
+            ax.set(ylabel='', aspect='equal')
+
+        if output_file != '':
+            plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+
+        if show_plot:
+            plt.show()
+
+
+    # if use_dash_plot:
+    #
+    #     fig = go.Figure(data=[go.Pie(labels=keys,
+    #                                  values=values)],
+    #                     layout=go.Layout(
+    #                         title=go.layout.Title(
+    #                             text=plot_description))
+    #                     )
+    #
+    #     if output_file != '':
+    #         exportFigure.export_plot_as_html(fig, output_file)
+    #
+    #     if show_plot:
+    #         fig.show()
