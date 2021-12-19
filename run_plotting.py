@@ -628,15 +628,14 @@ def plot_clustering(input_file, db_instance: DbInstance, plot_description, setti
 # input_file: The file containing the clusterings
 # db_instance
 # cluster_file: File containing the clustering ids and clustering idx for which the pie charts should be drawn
-def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance, cluster_file,
+def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance, cluster_file, cutoff=50, columns=10,
                                             output_file='',
                                             show_plot=False, use_mat_plot=True):
     data = read_json(input_file)
     cluster_data = read_json(cluster_file)
-    clustering_id_list = [item[0] for item in cluster_data]
-    cluster_idx_list = [item[1] for item in cluster_data]
+    clustering_id_list = [item[0] for item in cluster_data[:cutoff]]
+    cluster_idx_list = [item[1] for item in cluster_data[:cutoff]]
 
-    columns = 10
     row = ceil(len(cluster_idx_list) / columns)
     keys_all = list(set([item[0] for item in db_instance.family_wh]))
     keys_color_dict = {}
@@ -656,10 +655,10 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
 
         family_dict = {}
         size = 0
-        for cluster_elem in instance['clustering']:
+        for inst_idx, cluster_elem in enumerate(instance['clustering']):
             if cluster_elem == cluster_idx:
                 size = size + 1
-                current_family = db_instance.family_wh[cluster_elem][0]
+                current_family = db_instance.family_wh[inst_idx][0]
                 if current_family in family_dict:
                     family_dict[current_family] = family_dict[current_family] + 1
                 else:
@@ -678,7 +677,7 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
         colors_list.append(colors)
 
     if use_mat_plot:
-        dpi = 40
+        dpi = 60
 
         plt.style.use('ggplot')
         fig, axes = plt.subplots(nrows=row, ncols=columns, figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
