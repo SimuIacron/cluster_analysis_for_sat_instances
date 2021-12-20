@@ -628,13 +628,13 @@ def plot_clustering(input_file, db_instance: DbInstance, plot_description, setti
 # input_file: The file containing the clusterings
 # db_instance
 # cluster_file: File containing the clustering ids and clustering idx for which the pie charts should be drawn
-def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance, cluster_file, cutoff=50, columns=10,
+def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance, cluster_file, cutoff=(0, 50), columns=10,
                                             output_file='',
-                                            show_plot=False, use_mat_plot=True):
+                                            show_plot=False, use_mat_plot=True, dpi=96):
     data = read_json(input_file)
     cluster_data = read_json(cluster_file)
-    clustering_id_list = [item[0] for item in cluster_data[:cutoff]]
-    cluster_idx_list = [item[1] for item in cluster_data[:cutoff]]
+    clustering_id_list = [item[0] for item in cluster_data[cutoff[0]:cutoff[1]]]
+    cluster_idx_list = [item[1] for item in cluster_data[cutoff[0]:cutoff[1]]]
 
     row = ceil(len(cluster_idx_list) / columns)
     keys_all = list(set([item[0] for item in db_instance.family_wh]))
@@ -654,6 +654,8 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
                 break
 
         family_dict = {}
+        for family in keys_all:
+            family_dict[family] = 0
         size = 0
         for inst_idx, cluster_elem in enumerate(instance['clustering']):
             if cluster_elem == cluster_idx:
@@ -667,7 +669,7 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
         values = []
         keys = []
         colors = []
-        for family in family_dict:
+        for family in keys_all:
             values.append(family_dict[family] / size)
             keys.append(family)
             colors.append(keys_color_dict[family])
@@ -677,15 +679,38 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
         colors_list.append(colors)
 
     if use_mat_plot:
-        dpi = 60
 
-        plt.style.use('ggplot')
-        fig, axes = plt.subplots(nrows=row, ncols=columns, figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
+        plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
 
-        for ax, values, keys, colors in zip(axes.flat, values_list, keys_list, colors_list):
-            ax.pie(values, labels=keys, autopct='%.2f', colors=colors)
-            ax.set(ylabel='', aspect='equal')
+        bottom = [0] * len(values_list)
+        for family_idx, family in enumerate(keys_all):
+            current_values = [item[family_idx] for item in values_list]
+            plt.bar(range(len(values_list)), current_values, label=family, bottom=bottom)
+            bottom = np.array(bottom) + np.array(current_values)
 
+        # ax = plt.subplot(111)
+        # box = ax.get_position()
+        # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+        # plt.style.use('ggplot')
+        # plot_columns = columns
+        # if len(clustering_id_list) < columns:
+        #     plot_columns = len(clustering_id_list)
+        #
+        # fig, axes = plt.subplots(nrows=row, ncols=plot_columns, figsize=(1200 / dpi, 500 / dpi), dpi=dpi)
+        #
+        # axes_flat = [axes]
+        # if len(clustering_id_list) > 1:
+        #     axes_flat = axes.flat
+        #
+        # for ax, values, keys, colors in zip(axes_flat, values_list, keys_list, colors_list):
+        #     ax.bar(keys, values, color=colors)
+        #     ax.set_ylim([0, 1])
+        #
+        #     # ax.pie(values, labels=keys, autopct='%.2f', colors=colors)
+        #     # ax.set(ylabel='', aspect='equal')
+        #
         if output_file != '':
             plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
 
@@ -765,12 +790,18 @@ def plot_cluster_best_solver_distribution(input_file, clustering_id, cluster_idx
         bottom = [0] * len(key_names)
         for j in range(i):
             bottom = np.array(bottom) + np.array(ranks[j])
-        plt.bar(key_names, ranks[i], label=0, bottom=bottom)
+        plt.bar(key_names, ranks[i], label=i, bottom=bottom)
 
-    plt.title(clustering['par2'][1][str(cluster_idx)][0][0][0])
+    plt.title('Best Solver for Cluster: ' + str(clustering['par2'][1][str(cluster_idx)][0][0][0]))
     y_pos = range(len(key_names))
     plt.xticks(y_pos, key_names, rotation=90)
     plt.subplots_adjust(bottom=0.3)
+
+    ax = plt.subplot(111)
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    plt.legend(reversed(handles), reversed(labels), title='Rank', loc='center left', bbox_to_anchor=(1, 0.5))
 
     if output_file != '':
         plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
