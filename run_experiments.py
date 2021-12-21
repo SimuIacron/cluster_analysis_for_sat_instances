@@ -164,7 +164,7 @@ if __name__ == '__main__':
         single_features.append([elem])
 
     input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
-    output = [[input_dbs], [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
+    output = [input_dbs, [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
               [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
               [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_BASE, ['cadical']],
               [DatabaseReader.FEATURES_GATE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['glucose']], [DatabaseReader.FEATURES_GATE, ['cadical']],
@@ -236,6 +236,6 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_agg, exp_optics, exp_gaussian, exp_dbscan,
-                     exp_spectral, exp_birch], features,
+    run_experiments([exp_kmeans, exp_agg, exp_gaussian, exp_dbscan,
+                     ], features,
                     'single_solver_test_all_algos', 20, 0)
