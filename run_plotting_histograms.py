@@ -1,0 +1,66 @@
+import os
+from math import ceil, floor
+
+import matplotlib.pyplot as plt
+
+from run_experiments import read_json
+
+
+def plot_histograms_clustering(input_file_par2, highlight_index, param_names, param_values_list,
+                                label_list, max_cluster_amount=20, columns=2, bin_step=20, height=500, dpi=96,
+                               output_file='', normalize=False):
+
+    x_label = 'CPar2'
+    y_label = 'frequency'
+
+    data = read_json(input_file_par2)
+
+    rows = ceil(len(param_values_list[highlight_index]) / columns)
+
+    min_b = 5000
+    max_b = 0
+
+    split_data = {}
+    for value in param_values_list[highlight_index]:
+        split_data[str(value)] = []
+
+    for evaluation in data:
+        eval_is_in_graph = True
+        for idx, value in enumerate(param_names):
+            if evaluation['settings'][value] not in param_values_list[idx]:
+                eval_is_in_graph = False
+                break
+
+        if eval_is_in_graph and len(evaluation['clusters']) <= max_cluster_amount:
+
+            if evaluation['par2'][0] < min_b:
+                min_b = floor(evaluation['par2'][0])
+            if evaluation['par2'][0] > max_b:
+                max_b = ceil(evaluation['par2'][0])
+
+            for value in param_values_list[highlight_index]:
+                if str(evaluation['settings'][param_names[highlight_index]]) == str(value):
+                    split_data[str(value)].append(evaluation['par2'][0])
+                    break
+
+    n_bins = range(min_b - bin_step, max_b + bin_step, bin_step)
+    fig, axes = plt.subplots(nrows=rows, ncols=columns, figsize=(1700 / dpi, 1000 / dpi), dpi=dpi,
+                             constrained_layout=True)
+    axes_flat = [axes]
+    if len(param_values_list[highlight_index]) > 1:
+        axes_flat = axes.flat
+
+    for idx, value in enumerate(param_values_list[highlight_index]):
+        axes_flat[idx].set_title(label_list[idx])
+        axes_flat[idx].set_ylim([0, height])
+        axes_flat[idx].set_xlabel(x_label)
+        axes_flat[idx].set_ylabel(y_label)
+        axes_flat[idx].hist(split_data[str(value)], n_bins, density=normalize)
+
+    for idx in range(len(param_values_list[highlight_index]), len(axes_flat)):
+        axes_flat[idx].set_visible(False)
+
+    if output_file != '':
+        plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+
+    plt.show()

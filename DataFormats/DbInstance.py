@@ -34,8 +34,9 @@ class DbInstance:
 
         idx = self.solver_f.index('glucose_syrup')
         for inst, inst_wh in zip(self.solver, self.solver_wh):
-            inst[idx] = inst[idx] / 4
-            inst_wh[idx] = inst_wh[idx] / 4
+            if inst_wh[idx] != -1:
+                inst[idx+1] = inst[idx+1] / 4
+                inst_wh[idx] = inst_wh[idx] / 4
 
         # --------------------------------------------------------------------
 
