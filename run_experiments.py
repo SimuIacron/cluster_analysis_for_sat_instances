@@ -164,7 +164,13 @@ if __name__ == '__main__':
         single_features.append([elem])
 
     input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
-    output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+    output = [[input_dbs], [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
+              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
+              [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_BASE, ['cadical']],
+              [DatabaseReader.FEATURES_GATE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['glucose']], [DatabaseReader.FEATURES_GATE, ['cadical']],
+              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['kissat']],
+              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['glucose']],
+              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']]]
     output_merged = []
     for combination in output:
         comb = []
@@ -174,7 +180,7 @@ if __name__ == '__main__':
 
     standard_settings = [('scaling_algorithm', ['STANDARDSCALER']),
                          ('selection_algorithm', ['NONE']),
-                         ('selected_data', output_merged[1:]),
+                         ('selected_data', output_merged),
                          ('scaling_k_best', [3])]
 
     exp_kmeans = standard_settings + \
@@ -230,5 +236,5 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_agg, exp_optics, exp_gaussian, exp_dbscan, exp_spectral, exp_birch], features,
-                    'standardscaler_linearscaler_clustering', 20, 0)
+    run_experiments([exp_kmeans, exp_agg, exp_gaussian, exp_dbscan], features,
+                    'single_solver_test', 20, 0)
