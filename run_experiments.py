@@ -236,5 +236,6 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_agg, exp_gaussian, exp_dbscan], features,
-                    'single_solver_test', 20, 0)
+    run_experiments([exp_kmeans, exp_affinity, exp_meanshift, exp_agg, exp_optics, exp_gaussian, exp_dbscan,
+                     exp_spectral, exp_birch], features,
+                    'single_solver_test_all_algos', 20, 0)
