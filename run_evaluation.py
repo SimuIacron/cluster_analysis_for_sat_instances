@@ -8,7 +8,7 @@ from util_scripts import DatabaseReader
 import run_experiments
 from DataAnalysis.Evaluation import scoring_util
 from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
-    score_virtual_best_solver, score_single_best_solver, f3_weigh_with_cluster_size_n
+    score_virtual_best_solver, score_single_best_solver
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json, read_json_temp, append_json_temp
 import multiprocessing as mp
@@ -198,17 +198,17 @@ if __name__ == '__main__':
     temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
     temp_solver_features.pop(14)
     temp_solver_features.pop(7)
-    input_dbs = [temp_solver_features]
+    input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
     features = []
     for feature_vector in input_dbs:
         features = features + feature_vector
 
     db = DbInstance(features)
 
-    # run_evaluation_par2_score('clustering_general', 'clustering_general_par2', db, cores)
+    run_evaluation_par2_score('single_solver/single_solver_test', 'single_solver/single_solver_par2', db, cores)
 
-    run_evaluation_par2_sbs_n_best('sbs_100_best', db, 100)
-    run_evaluation_par2_sbs_n_worst('sbs_100_worst', db, 100)
+    # run_evaluation_par2_sbs_n_best('sbs_100_best', db, 100)
+    # run_evaluation_par2_sbs_n_worst('sbs_100_worst', db, 100)
 
     # run_evaluation_par2_vbs('vbs_without_glucose_syrup_yalsat', db)
     # run_evaluation_par2_bss('bss', db)
