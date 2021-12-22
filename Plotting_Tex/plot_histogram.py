@@ -1,6 +1,6 @@
 import itertools
 from run_plotting import plot_cpar2_comparison
-from run_plotting_histograms import plot_histograms_clustering
+from run_plotting_histograms import plot_histograms_clustering, plot_boxplot_clustering
 
 from util_scripts import DatabaseReader
 
@@ -78,13 +78,14 @@ for combination in output:
 
 output = [[DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
-          [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']],
-          [DatabaseReader.FEATURES_BASE, ['cadical']],
-          [DatabaseReader.FEATURES_GATE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['glucose']],
-          [DatabaseReader.FEATURES_GATE, ['cadical']],
+          [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['kissat']],
           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['kissat']],
+          [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_GATE, ['glucose']],
           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['glucose']],
-          [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']], input_dbs]
+          [DatabaseReader.FEATURES_BASE, ['cadical']],
+          [DatabaseReader.FEATURES_GATE, ['cadical']],
+          [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']],
+          input_dbs]
 output_merged = []
 for combination in output:
     comb = []
@@ -92,20 +93,53 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
-plot_histograms_clustering('single_solver/single_solver_par2',
-                           0, ['selected_data'],
-                           [output_merged],
-                           ['base', 'gate', 'base gate', 'base kissat', 'base glucose', 'base cadical',
-                            'gate kissat', 'gate glucose', 'gate cadical', 'base gate kissat', 'base gate glucose',
-                            'base gate cadical', 'base gate runtimes'],
-                           max_cluster_amount=20, columns=3,
-                           bin_step=10, height=0.11, output_file='single_solver/hist_single_solver_20', normalize=True)
+# plot_histograms_clustering('single_solver/single_solver_par2',
+#                            0, ['selected_data'],
+#                            [output_merged],
+#                            ['base', 'gate', 'base gate', 'base kissat', 'gate kissat', 'base gate kissat',
+#                             'base glucose', 'gate glucose', 'base gate glucose',
+#                             'base cadical', 'gate cadical',
+#                             'base gate cadical', 'base gate runtimes'],
+#                            max_cluster_amount=20, columns=3,
+#                            bin_step=10, height=0.11, output_file='single_solver/hist_single_solver_20', normalize=True)
+#
+# plot_histograms_clustering('single_solver/single_solver_par2',
+#                            0, ['selected_data'],
+#                            [output_merged],
+#                            ['base', 'gate', 'base gate', 'base kissat', 'gate kissat', 'base gate kissat',
+#                             'base glucose', 'gate glucose', 'base gate glucose',
+#                             'base cadical', 'gate cadical',
+#                             'base gate cadical', 'base gate runtimes'],
+#                            max_cluster_amount=100, columns=3,
+#                            bin_step=10, height=0.11, output_file='single_solver/hist_single_solver_100', normalize=True)
+#
+# plot_histograms_clustering('single_solver/single_solver_all_algos_par2',
+#                            0, ['selected_data'],
+#                            [output_merged],
+#                            ['base', 'gate', 'base gate', 'base kissat', 'gate kissat', 'base gate kissat',
+#                             'base glucose', 'gate glucose', 'base gate glucose',
+#                             'base cadical', 'gate cadical',
+#                             'base gate cadical', 'base gate runtimes'],
+#                            max_cluster_amount=20, columns=3,
+#                            bin_step=10, height=0.11, output_file='single_solver/hist_single_solver_all_algos_20',
+#                            normalize=True)
+#
+# plot_histograms_clustering('single_solver/single_solver_all_algos_par2',
+#                            0, ['selected_data'],
+#                            [output_merged],
+#                            ['base', 'gate', 'base gate', 'base kissat', 'gate kissat', 'base gate kissat',
+#                             'base glucose', 'gate glucose', 'base gate glucose',
+#                             'base cadical', 'gate cadical',
+#                             'base gate cadical', 'base gate runtimes'],
+#                            max_cluster_amount=100, columns=3,
+#                            bin_step=10, height=0.11, output_file='single_solver/hist_single_solver_all_algos_100',
+#                            normalize=True)
 
-plot_histograms_clustering('single_solver/single_solver_par2',
+plot_boxplot_clustering('single_solver/single_solver_all_algos_par2',
                            0, ['selected_data'],
                            [output_merged],
-                           ['base', 'gate', 'base gate', 'base kissat', 'base glucose', 'base cadical',
-                            'gate kissat', 'gate glucose', 'gate cadical', 'base gate kissat', 'base gate glucose',
+                           ['base', 'gate', 'base gate', 'base kissat', 'gate kissat', 'base gate kissat',
+                            'base glucose', 'gate glucose', 'base gate glucose',
+                            'base cadical', 'gate cadical',
                             'base gate cadical', 'base gate runtimes'],
-                           max_cluster_amount=100, columns=3,
-                           bin_step=10, height=0.11, output_file='single_solver/hist_single_solver_100', normalize=True)
+                           max_cluster_amount=20,  output_file='single_solver/box_single_solver_all_algos_20')

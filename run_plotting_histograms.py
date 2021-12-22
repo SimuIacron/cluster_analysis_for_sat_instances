@@ -8,7 +8,7 @@ from run_experiments import read_json
 
 def plot_histograms_clustering(input_file_par2, highlight_index, param_names, param_values_list,
                                 label_list, max_cluster_amount=20, columns=2, bin_step=20, height=500, dpi=96,
-                               output_file='', normalize=False):
+                               output_file='', normalize=False, show_plot=False):
 
     x_label = 'CPar2'
     y_label = 'frequency'
@@ -63,4 +63,36 @@ def plot_histograms_clustering(input_file_par2, highlight_index, param_names, pa
     if output_file != '':
         plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
 
+    if show_plot:
+        plt.show()
+
+
+def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param_values_list,
+                                label_list, max_cluster_amount=20, dpi=96,
+                               output_file='', show_plot=False):
+    data = read_json(input_file_par2)
+    split_data = {}
+    for value in param_values_list[highlight_index]:
+        split_data[str(value)] = []
+
+    for evaluation in data:
+        eval_is_in_graph = True
+        for idx, value in enumerate(param_names):
+            if evaluation['settings'][value] not in param_values_list[idx]:
+                eval_is_in_graph = False
+                break
+
+        if eval_is_in_graph and len(evaluation['clusters']) <= max_cluster_amount:
+            for value in param_values_list[highlight_index]:
+                if str(evaluation['settings'][param_names[highlight_index]]) == str(value):
+                    split_data[str(value)].append(evaluation['par2'][0])
+                    break
+
+    plot_data = []
+    for value in param_values_list[highlight_index]:
+        plot_data.append(split_data[str(value)])
+
+    plt.boxplot(plot_data)
+    plt.xticks(range(1, len(label_list) + 1), label_list, rotation=70)
+    plt.tight_layout()
     plt.show()
