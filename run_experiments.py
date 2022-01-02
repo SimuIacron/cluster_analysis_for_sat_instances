@@ -75,13 +75,14 @@ def convert_temp(filename):
 # filename: The name of the file where the finished clustering are stored
 # num_cores: Number of cpu cores that should be used in parallel
 # (uses max available cores, if cores is higher than available cores)
-def run_experiments(experiment_list, general_features, filename, num_cores, start_id=0):
+def run_experiments(experiment_list, general_features, filename, num_cores, start_id=0,
+                    cap_running_time=DatabaseReader.TIMEOUT):
     t_start = time()
     temp_filename = filename + '_temp'
 
     continue_evaluation = os.path.exists(cluster_result_path + temp_filename + '.txt')
 
-    db_instance = DbInstance(general_features)
+    db_instance = DbInstance(general_features, cap_running_time=cap_running_time)
 
     if num_cores > mp.cpu_count():
         num_cores = mp.cpu_count()
@@ -164,13 +165,14 @@ if __name__ == '__main__':
         single_features.append([elem])
 
     input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
-    output = [input_dbs, [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
-              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
-              [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_BASE, ['cadical']],
-              [DatabaseReader.FEATURES_GATE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['glucose']], [DatabaseReader.FEATURES_GATE, ['cadical']],
-              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['kissat']],
-              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['glucose']],
-              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']]]
+    output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+    # output = [input_dbs, [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
+    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
+    #           [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_BASE, ['cadical']],
+    #           [DatabaseReader.FEATURES_GATE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['glucose']], [DatabaseReader.FEATURES_GATE, ['cadical']],
+    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['kissat']],
+    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['glucose']],
+    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']]]
     output_merged = []
     for combination in output:
         comb = []
@@ -180,7 +182,7 @@ if __name__ == '__main__':
 
     standard_settings = [('scaling_algorithm', ['STANDARDSCALER']),
                          ('selection_algorithm', ['NONE']),
-                         ('selected_data', output_merged),
+                         ('selected_data', output_merged[1:]),
                          ('scaling_k_best', [3])]
 
     exp_kmeans = standard_settings + \
@@ -236,5 +238,5 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_spectral], features,
-                    'single_solver_test_all_algos', 20, 0)
+    run_experiments([exp_kmeans, exp_affinity, exp_agg, exp_optics, exp_gaussian, exp_birch, exp_dbscan, exp_meanshift, exp_spectral], features,
+                    'general_clustering_capped_at_60', 20, 0, cap_running_time=60)

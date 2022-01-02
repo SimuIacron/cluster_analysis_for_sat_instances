@@ -3,7 +3,7 @@ from util_scripts import DatabaseReader
 
 class DbInstance:
 
-    def __init__(self, features=None):
+    def __init__(self, features=None, cap_running_time=DatabaseReader.TIMEOUT):
 
         if features is None:
             features = []
@@ -54,6 +54,13 @@ class DbInstance:
         self.family_wh = DatabaseReader.remove_with_index_array(self.family_wh, removed_array)
         self.un_sat = DatabaseReader.remove_with_index_array(self.un_sat, removed_array)
         self.un_sat_wh = DatabaseReader.remove_with_index_array(self.un_sat_wh, removed_array)
+
+        if cap_running_time != DatabaseReader.TIMEOUT:
+            for i in range(len(self.solver_wh)):
+                for j in range(len(self.solver_f)):
+                    if self.solver_wh[i][j] > cap_running_time:
+                        self.solver_wh[i][j] = DatabaseReader.TIMEOUT
+                        self.solver[i][j+1] = DatabaseReader.TIMEOUT
 
         print("remaining instances: " + str(len(self.solver)))
 

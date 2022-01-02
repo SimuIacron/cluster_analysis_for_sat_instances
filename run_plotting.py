@@ -1,14 +1,14 @@
 import itertools
 import os
 from collections import Counter
-from math import ceil
+from math import ceil, log
 
 import matplotlib.pyplot as plt
 
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from numpy import argmin
+from numpy import argmin, quantile
 import plotly.express as px
 
 from util_scripts import util, exportFigure
@@ -809,5 +809,96 @@ def plot_cluster_best_solver_distribution(input_file, clustering_id, cluster_idx
     if show_plot:
         plt.show()
 
+
+# plots for a single cluster how the solvers are distributed in ranks, by counting the occurrence of each solver in
+# each rank (determined by order of solvers sorted by runtime for the instance in the cluster) and scaling it to [0,1]
+# input_file: File containing the clustering
+# clustering_id: The id of the clustering to read
+# cluster_idx: The index of the cluster in the clustering
+# db_instance: Important: Init with the correct solver features, that were used in the clustering
+# output_file: Name of the generated graph file
+# show_plot: Should the plot be shown after executing?
+def plot_cluster_best_solver_distribution_relative(input_file, clustering_id, cluster_idx, db_instance:DbInstance,
+                                          quantile_value=0.25, scale_with_log=None, output_file='', show_plot=True):
+
+    # don't take the solvers from DatabaseReader.FEATURES_SOLVERS if not all solvers where used in the clustering
+    # because glucose_syrup and yalsat were removed, we take it directly from the reduced db_instance
+    key_names = db_instance.solver_f
+
+    data = read_json(input_file)
+    clustering = None
+    for elem in data:
+        if elem['id'] == clustering_id:
+            clustering = elem
+            break
+
+    instances_in_cluster = []
+    all_runtimes = []
+    size = 0
+    for i, inst in enumerate(clustering['clustering']):
+        if inst == cluster_idx:
+            size = size + 1
+            instances_in_cluster.append(db_instance.solver_wh[i])
+            all_runtimes = all_runtimes + db_instance.solver_wh[i]
+
+    div_value = quantile(all_runtimes, quantile_value)
+    assert div_value != 0
+
+    max_rank = 0
+    for idx, runtimes in enumerate(instances_in_cluster):
+        instances_in_cluster[idx] = [value / div_value for value in runtimes]
+        if scale_with_log is None:
+            current_max = int(max(instances_in_cluster[idx]))
+        else:
+            current_max = int(log(max(instances_in_cluster[idx]) + 1, scale_with_log))
+
+        if current_max > max_rank:
+            max_rank = current_max
+
+
+    # contains arrays with the amounts of the solvers for each rank
+    ranks = []
+    for i in range(max_rank + 1):
+        ranks.append([0] * len(key_names))
+
+    for inst in instances_in_cluster:
+        for idx, relative_runtime in enumerate(inst):
+            if scale_with_log is None:
+                ranks[int(relative_runtime)][idx] = ranks[int(relative_runtime)][idx] + 1
+            else:
+                if relative_runtime == 0:
+                    ranks[0][idx] = ranks[0][idx] + 1
+                else:
+                    ranks[int(log(relative_runtime + 1, scale_with_log))][idx] = ranks[int(log(relative_runtime + 1, scale_with_log))][idx] + 1
+
+    for idx, rank in enumerate(ranks):
+        ranks[idx] = [value / size for value in rank]
+
+    dpi = 90
+    plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
+
+    for i in range(max_rank + 1):
+        bottom = [0] * len(key_names)
+        for j in range(i):
+            bottom = np.array(bottom) + np.array(ranks[j])
+        plt.bar(key_names, ranks[i], label=i, bottom=bottom)
+
+    plt.title('Best Solver for Cluster: ' + str(clustering['par2'][1][str(cluster_idx)][0][0][0]) +
+              '\n' + str(quantile_value) + '-Quantil: ' + str(div_value))
+    y_pos = range(len(key_names))
+    plt.xticks(y_pos, key_names, rotation=90)
+    plt.subplots_adjust(bottom=0.3)
+
+    # ax = plt.subplot(111)
+    # box = ax.get_position()
+    # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    # handles, labels = ax.get_legend_handles_labels()
+    # plt.legend(reversed(handles), reversed(labels), title='Rank', loc='center left', bbox_to_anchor=(1, 0.5))
+
+    if output_file != '':
+        plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+
+    if show_plot:
+        plt.show()
 
 

@@ -11,13 +11,13 @@ temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
 temp_solver_features.pop(7)
 input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
-output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
-output_merged = []
-for combination in output:
-    comb = []
-    for elem in combination:
-        comb = comb + elem
-    output_merged.append(comb)
+# output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+# output_merged = []
+# for combination in output:
+#     comb = []
+#     for elem in combination:
+#         comb = comb + elem
+#     output_merged.append(comb)
 
 # plot_histograms_clustering(dir1 + '/standardscaler_linearscaler_clustering_par2',
 #                             0, ['scaling_algorithm'],
@@ -63,18 +63,7 @@ for combination in output:
 #                             'OPTICS',
 #                             'Gaussian', 'DBSCAN', 'BIRCH'],
 #                            max_cluster_amount=20, columns=3,
-#                            bin_step=10, height=0.11, output_file=dir2 + '/hist_cluster_algo', normalize=True)
-#
-# plot_histograms_clustering(dir2 + '/clustering_general_par2',
-#                            0, ['cluster_algorithm', 'selected_data'],
-#                            [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
-#                              'DBSCAN',
-#                              'BIRCH'], output_merged[1:]],
-#                            ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
-#                             'OPTICS',
-#                             'Gaussian', 'DBSCAN', 'BIRCH'],
-#                            max_cluster_amount=20, columns=3,
-#                            bin_step=10, height=0.11, output_file=dir2 + '/hist_cluster_algo', normalize=True)
+#                            bin_step=10, height=0.11, output_file=dir2 + '/hist_algo_vase_gate', normalize=True)
 
 output = [[DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
