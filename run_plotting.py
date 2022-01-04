@@ -98,12 +98,12 @@ def plot_par2_vbs_distribution(input_file_vbs, output_file='', show_plot=False, 
 # output_file: The filename of the exported html (no export if equal to '')
 # show_plot: If the plot should be opened in the browser after running the function
 # use_mat_plot: Whether to show the plot as a matplotlib plot or a plotly plot
-def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sbs, plot_description, highlight_index,
-                          param_names,
-                          value_lists, label_list, max_cluster_amount, cutoff, output_file='', show_plot=False,
-                          use_mat_plot=True, use_dash_plot=False, show_complete_legend=False):
-    x_label = 'Best Instances sorted by CPar2'
-    y_label = 'CPar2 Score (s)'
+def plot_cbs_comparison(input_files_par2_scores, input_file_vbs, input_file_sbs, plot_description, highlight_index,
+                        param_names,
+                        value_lists, label_list, max_cluster_amount, cutoff, output_file='', show_plot=False,
+                        use_mat_plot=True, use_dash_plot=False, show_complete_legend=False):
+    x_label = 'Best Instances sorted by CBS'
+    y_label = 'CBS Score (s)'
     vbs_label = 'Virtual Best Solver'
     sbs_label = 'Single Best Solver'
 
@@ -181,7 +181,7 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
         plt.ylabel(y_label)
         ax = plt.subplot(111)
         box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.title(plot_description)
 
@@ -236,8 +236,8 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 #         comb = comb + elem
 #     output_merged.append(comb)
 #
-# plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
-#                       'CPar2 scores of different cluster algorithms using combinations of base, gate, runtimes',
+# plot_cbs_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+#                       'cbs scores of different cluster algorithms using combinations of base, gate, runtimes',
 #                       0, ['selected_data'],
 #                       [output_merged[1:]],
 #                       ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
@@ -245,8 +245,8 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 #                       show_plot=False,
 #                       use_mat_plot=True, use_dash_plot=True)
 
-# plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
-#                       'CPar2 scores of different cluster algorithms using combinations of base, gate, runtimes',
+# plot_cbs_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+#                       'cbs scores of different cluster algorithms using combinations of base, gate, runtimes',
 #                       0, ['selected_data'],
 #                       [output_merged[1:]],
 #                       ['base', 'gate', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
@@ -254,8 +254,8 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 #                       show_plot=False,
 #                       use_mat_plot=True, use_dash_plot=True)
 #
-# plot_cpar2_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
-#                       'CPar2 scores of different cluster algorithms using combinations of base, gate and runtimes',
+# plot_cbs_comparison(['clustering_general/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+#                       'cbs scores of different cluster algorithms using combinations of base, gate and runtimes',
 #                       0, ['cluster_algorithm', 'selected_data'],
 #                       [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN',
 #                         'BIRCH'], output_merged[1:]],
@@ -266,8 +266,8 @@ def plot_cpar2_comparison(input_files_par2_scores, input_file_vbs, input_file_sb
 #                       use_mat_plot=True, use_dash_plot=True)
 
 
-# plot_cpar2_comparison(['scaling_standardscaler/standardscaler_linearscaler_clustering_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
-#                      'Comparison of CPar2 scores between Linear Scaling and Standard Scaling for clusterings with less than 20 clusters',
+# plot_cbs_comparison(['scaling_standardscaler/standardscaler_linearscaler_clustering_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+#                      'Comparison of cbs scores between Linear Scaling and Standard Scaling for clusterings with less than 20 clusters',
 #                      'scaling_algorithm',
 #                       ['SCALEMINUSPLUS1', 'STANDARDSCALER'], ['Linear Scaling to [-1,+1]', 'Standard Scaling'], 20, 100,
 #                       output_file='scaling_standardscaler/standardscaler_linearscaler_clustering_par2', show_plot=True)
@@ -628,7 +628,8 @@ def plot_clustering(input_file, db_instance: DbInstance, plot_description, setti
 # input_file: The file containing the clusterings
 # db_instance
 # cluster_file: File containing the clustering ids and clustering idx for which the pie charts should be drawn
-def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance, cluster_file, cutoff=(0, 50), columns=10,
+def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance, cluster_file, cutoff=(0, 50),
+                                            columns=10,
                                             output_file='',
                                             show_plot=False, use_mat_plot=True, dpi=96):
     data = read_json(input_file)
@@ -717,7 +718,6 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
         if show_plot:
             plt.show()
 
-
     # if use_dash_plot:
     #
     #     fig = go.Figure(data=[go.Pie(labels=keys,
@@ -734,6 +734,7 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
     #         fig.show()
     #
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 # plots for a single cluster how the solvers are distributed in ranks, by counting the occurrence of each solver in
@@ -744,9 +745,8 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
 # db_instance: Important: Init with the correct solver features, that were used in the clustering
 # output_file: Name of the generated graph file
 # show_plot: Should the plot be shown after executing?
-def plot_cluster_best_solver_distribution(input_file, clustering_id, cluster_idx, db_instance:DbInstance,
+def plot_cluster_best_solver_distribution(input_file, clustering_id, cluster_idx, db_instance: DbInstance,
                                           output_file='', show_plot=True):
-
     # don't take the solvers from DatabaseReader.FEATURES_SOLVERS if not all solvers where used in the clustering
     # because glucose_syrup and yalsat were removed, we take it directly from the reduced db_instance
     key_names = db_instance.solver_f
@@ -818,9 +818,9 @@ def plot_cluster_best_solver_distribution(input_file, clustering_id, cluster_idx
 # db_instance: Important: Init with the correct solver features, that were used in the clustering
 # output_file: Name of the generated graph file
 # show_plot: Should the plot be shown after executing?
-def plot_cluster_best_solver_distribution_relative(input_file, clustering_id, cluster_idx, db_instance:DbInstance,
-                                          quantile_value=0.25, scale_with_log=None, output_file='', show_plot=True):
-
+def plot_cluster_best_solver_distribution_relative(input_file, clustering_id, cluster_idx, db_instance: DbInstance,
+                                                   quantile_value=0.25, scale_with_log=None, output_file='',
+                                                   show_plot=True):
     # don't take the solvers from DatabaseReader.FEATURES_SOLVERS if not all solvers where used in the clustering
     # because glucose_syrup and yalsat were removed, we take it directly from the reduced db_instance
     key_names = db_instance.solver_f
@@ -855,7 +855,6 @@ def plot_cluster_best_solver_distribution_relative(input_file, clustering_id, cl
         if current_max > max_rank:
             max_rank = current_max
 
-
     # contains arrays with the amounts of the solvers for each rank
     ranks = []
     for i in range(max_rank + 1):
@@ -869,7 +868,8 @@ def plot_cluster_best_solver_distribution_relative(input_file, clustering_id, cl
                 if relative_runtime == 0:
                     ranks[0][idx] = ranks[0][idx] + 1
                 else:
-                    ranks[int(log(relative_runtime + 1, scale_with_log))][idx] = ranks[int(log(relative_runtime + 1, scale_with_log))][idx] + 1
+                    ranks[int(log(relative_runtime + 1, scale_with_log))][idx] = \
+                    ranks[int(log(relative_runtime + 1, scale_with_log))][idx] + 1
 
     for idx, rank in enumerate(ranks):
         ranks[idx] = [value / size for value in rank]
@@ -900,5 +900,3 @@ def plot_cluster_best_solver_distribution_relative(input_file, clustering_id, cl
 
     if show_plot:
         plt.show()
-
-

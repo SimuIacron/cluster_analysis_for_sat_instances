@@ -24,7 +24,7 @@ plot_best_cluster_comparison(['clustering_general/clustering_general_par2'],
                              [output_merged[1:]],
                              ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
                               'base gate runtimes'],
-                             100, 100, 5000, output_file=dir + '/clustering_best_cluster_all_5000',
+                             100, 100, 20, output_file=dir + '/clustering_best_cluster_all_5000',
                              show_plot=False,
                              use_mat_plot=True, use_dash_plot=True)
 

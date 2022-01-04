@@ -10,7 +10,7 @@ def plot_histograms_clustering(input_file_par2, highlight_index, param_names, pa
                                 label_list, max_cluster_amount=20, columns=2, bin_step=20, height=500, dpi=96,
                                output_file='', normalize=False, show_plot=False):
 
-    x_label = 'CPar2'
+    x_label = 'CBS (s)'
     y_label = 'frequency'
 
     data = read_json(input_file_par2)
@@ -95,4 +95,9 @@ def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param
     plt.boxplot(plot_data)
     plt.xticks(range(1, len(label_list) + 1), label_list, rotation=70)
     plt.tight_layout()
-    plt.show()
+
+    if output_file != '':
+        plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+
+    if show_plot:
+        plt.show()
