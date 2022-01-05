@@ -4,7 +4,7 @@ from run_plotting_histograms import plot_histograms_clustering, plot_boxplot_clu
 
 from util_scripts import DatabaseReader
 
-dir = 'clustering_general'
+directory = 'clustering_general'
 
 # All features ---------------------------------------------------------------------------------------------------------
 
@@ -41,20 +41,43 @@ for combination in output:
 #                       use_mat_plot=True, use_dash_plot=False, show_complete_legend=True)
 
 
-# plot_histograms_clustering(dir + '/clustering_general_par2',
-#                            0, ['selected_data'],
-#                            [output_merged[1:]],
-#                            ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
-#                            max_cluster_amount=20, columns=3,
-#                            bin_step=10, height=0.11, output_file=dir + '/hist_clustering_default',
-#                            normalize=True)
+plot_histograms_clustering(directory + '/clustering_general_par2',
+                           0, ['selected_data'],
+                           [output_merged[1:]],
+                           ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
+                            'base gate runtimes'],
+                           max_cluster_amount=20, columns=3,
+                           bin_step=10, height=0.11, output_file='/general_clustering/hist_clustering_default_comb_all',
+                           normalize=True)
 
-plot_boxplot_clustering(dir + '/clustering_general_par2',
+plot_boxplot_clustering(directory + '/clustering_general_par2',
                         0, ['selected_data'],
                         [output_merged[1:]],
-                        ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
-                        max_cluster_amount=20, output_file=dir + '/box_clustering_default')
+                        ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
+                         'base gate runtimes'],
+                        max_cluster_amount=20, output_file='/general_clustering/box_clustering_default_comb_all')
 
+plot_histograms_clustering(directory + '/clustering_general_par2',
+                           0, ['cluster_algorithm', 'selected_data'],
+                           [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
+                             'DBSCAN',
+                             'BIRCH'], output_merged[1:]],
+                           ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
+                            'OPTICS',
+                            'Gaussian', 'DBSCAN', 'BIRCH'],
+                           max_cluster_amount=20, columns=3,
+                           bin_step=10, height=0.11, output_file='/general_clustering/hist_clustering_default_algo_all',
+                           normalize=True)
+
+plot_boxplot_clustering(directory + '/clustering_general_par2',
+                        0, ['cluster_algorithm', 'selected_data'],
+                        [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
+                          'DBSCAN',
+                          'BIRCH'], output_merged[1:]],
+                        ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
+                         'OPTICS',
+                         'Gaussian', 'DBSCAN', 'BIRCH'],
+                        max_cluster_amount=20, output_file='/general_clustering/box_clustering_default_algo_all')
 
 # Only base and gate ---------------------------------------------------------------------------------------------------
 
@@ -67,6 +90,29 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
+plot_histograms_clustering(directory + '/clustering_general_par2',
+                           0, ['cluster_algorithm', 'selected_data'],
+                           [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
+                             'DBSCAN',
+                             'BIRCH'], output_merged[1:]],
+                           ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
+                            'OPTICS',
+                            'Gaussian', 'DBSCAN', 'BIRCH'],
+                           max_cluster_amount=20, columns=3,
+                           bin_step=10, height=0.11,
+                           output_file='/general_clustering/hist_clustering_default_algo_base_gate',
+                           normalize=True)
+
+plot_boxplot_clustering(directory + '/clustering_general_par2',
+                        0, ['cluster_algorithm', 'selected_data'],
+                        [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
+                          'DBSCAN',
+                          'BIRCH'], output_merged[1:]],
+                        ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
+                         'OPTICS',
+                         'Gaussian', 'DBSCAN', 'BIRCH'],
+                        max_cluster_amount=20,
+                        output_file='/general_clustering/box_clustering_default_algo_base_gate')
 
 # plot_cbs_comparison([dir + '/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       '',
@@ -88,5 +134,3 @@ for combination in output:
 #                       show_plot=False,
 #                       use_mat_plot=True, use_dash_plot=False, show_complete_legend=True)
 #
-
-

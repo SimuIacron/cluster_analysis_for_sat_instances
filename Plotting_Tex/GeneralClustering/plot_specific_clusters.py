@@ -84,17 +84,20 @@ db_instance = DbInstance(features)
 
 plot_cluster_best_solver_distribution_relative('clustering_general/clustering_general_par2', 1058, 3, db_instance,
                                                quantile_value=0.1, scale_with_log=2,
-                                      output_file='best_clusters/specific_clusters/1058_3_solver_relative_010_log2', show_plot=False)
+                                               output_file='/general_clustering/single_clusters/specific_clusters/1058_3_solver_relative_010_log2',
+                                               show_plot=False)
 
 plot_cluster_best_solver_distribution_relative('clustering_general/clustering_general_par2', 184, 4, db_instance,
                                                quantile_value=0.1, scale_with_log=2,
-                                      output_file='best_clusters/specific_clusters/184_4_solver_relative_010_log2', show_plot=False)
+                                               output_file='/general_clustering/single_clusters/specific_clusters/184_4_solver_relative_010_log2',
+                                               show_plot=False)
 
 plot_cluster_best_solver_distribution_relative('clustering_general/clustering_general_par2', 8, 5, db_instance,
-                                               quantile_value=0.1, scale_with_log=2,  
-                                      output_file='best_clusters/specific_clusters/8_5_solver_relative_010_log2', show_plot=False)
+                                               quantile_value=0.1, scale_with_log=2,
+                                               output_file='/general_clustering/single_clusters/specific_clusters/8_5_solver_relative_010_log2',
+                                               show_plot=False)
 
 plot_cluster_best_solver_distribution_relative('clustering_general/clustering_general_par2', 1058, 0, db_instance,
                                                quantile_value=0.1, scale_with_log=2,
-                                      output_file='best_clusters/specific_clusters/1058_0_solver_relative_010_log2', show_plot=False)
-
+                                               output_file='/general_clustering/single_clusters/specific_clusters/1058_0_solver_relative_010_log2',
+                                               show_plot=False)

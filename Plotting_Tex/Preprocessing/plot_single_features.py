@@ -26,7 +26,7 @@ plot_cbs_comparison([dir + '/single_feature_clustering_base_par2'], 'vbs_sbs/vbs
                     0, ['selected_data'],
                     [features],
                     DatabaseReader.FEATURES_BASE, 20, 100,
-                    output_file='/single_feature_clustering/single_feature_clustering_base_plot', show_plot=False,
+                    output_file='/preprocessing/single_feature_clustering/single_feature_clustering_base_plot', show_plot=False,
                     use_mat_plot=True, use_dash_plot=True, show_complete_legend=False)
 
 plot_boxplot_clustering(dir + '/single_feature_clustering_base_par2',
@@ -34,7 +34,7 @@ plot_boxplot_clustering(dir + '/single_feature_clustering_base_par2',
                         [features],
                         DatabaseReader.FEATURES_BASE, max_cluster_amount=20, angle=90, dpi=dpi,
                         y_axis_range=y_axis_range,
-                        output_file='/single_feature_clustering/box_single_feature_clustering_base', show_plot=False)
+                        output_file='/preprocessing/single_feature_clustering/box_single_feature_clustering_base', show_plot=False)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ plot_cbs_comparison([dir + '/single_feature_clustering_gate_par2'], 'vbs_sbs/vbs
                     0, ['selected_data'],
                     [features],
                     DatabaseReader.FEATURES_GATE, 20, 100,
-                    output_file='/single_feature_clustering/single_feature_clustering_gate_plot', show_plot=False,
+                    output_file='/preprocessing/single_feature_clustering/single_feature_clustering_gate_plot', show_plot=False,
                     use_mat_plot=True, use_dash_plot=True, show_complete_legend=False)
 
 plot_boxplot_clustering(dir + '/single_feature_clustering_gate_par2',
@@ -52,7 +52,7 @@ plot_boxplot_clustering(dir + '/single_feature_clustering_gate_par2',
                         [features],
                         DatabaseReader.FEATURES_GATE, max_cluster_amount=20, angle=90, dpi=dpi,
                         y_axis_range=y_axis_range,
-                        output_file='/single_feature_clustering/box_single_feature_clustering_gate', show_plot=False)
+                        output_file='/preprocessing/single_feature_clustering/box_single_feature_clustering_gate', show_plot=False)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ plot_cbs_comparison([dir + '/single_feature_clustering_runtimes_par2'], 'vbs_sbs
                     0, ['selected_data'],
                     [features],
                     DatabaseReader.FEATURES_SOLVER, 20, 100,
-                    output_file='/single_feature_clustering/single_feature_clustering_runtimes_plot', show_plot=False,
+                    output_file='/preprocessing/single_feature_clustering/single_feature_clustering_runtimes_plot', show_plot=False,
                     use_mat_plot=True, use_dash_plot=True, show_complete_legend=False)
 
 plot_boxplot_clustering(dir + '/single_feature_clustering_runtimes_par2',
@@ -70,5 +70,5 @@ plot_boxplot_clustering(dir + '/single_feature_clustering_runtimes_par2',
                         [features],
                         temp_solver_features, max_cluster_amount=20, angle=90, dpi=dpi,
                         y_axis_range=y_axis_range,
-                        output_file='/single_feature_clustering/box_single_feature_clustering_runtimes',
+                        output_file='/preprocessing/single_feature_clustering/box_single_feature_clustering_runtimes',
                         show_plot=False)

@@ -23,14 +23,14 @@ plot_histograms_clustering(dir + '/standardscaler_linearscaler_clustering_par2',
                            ['[-1,+1]', 'Standard Scaler'],
                            max_cluster_amount=20, columns=2,
                            bin_step=10, height=500,
-                           output_file='/standardscaler_linearscaler/hist_standardscaler_linearscaler_all')
+                           output_file='/preprocessing/standardscaler_linearscaler/hist_standardscaler_linearscaler_all')
 
 plot_boxplot_clustering(dir + '/standardscaler_linearscaler_clustering_par2',
                            0, ['scaling_algorithm'],
                            [['SCALEMINUSPLUS1', 'STANDARDSCALER']],
                            ['[-1,+1]', 'Standard Scaler'],
                            max_cluster_amount=20, angle=0,
-                           output_file='/standardscaler_linearscaler/box_standardscaler_linearscaler_all')
+                           output_file='/preprocessing/standardscaler_linearscaler/box_standardscaler_linearscaler_all')
 
 input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE]
 output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
@@ -47,14 +47,14 @@ plot_histograms_clustering(dir + '/standardscaler_linearscaler_clustering_par2',
                            ['[-1,+1]', 'Standard Scaler'],
                            max_cluster_amount=20, columns=2,
                            bin_step=10, height=500,
-                           output_file='/standardscaler_linearscaler/hist_standardscaler_linearscaler_base_gate')
+                           output_file='/preprocessing/standardscaler_linearscaler/hist_standardscaler_linearscaler_base_gate')
 
 plot_boxplot_clustering(dir + '/standardscaler_linearscaler_clustering_par2',
                            0, ['scaling_algorithm', 'selected_data'],
                            [['SCALEMINUSPLUS1', 'STANDARDSCALER'], output_merged[1:]],
                            ['[-1,+1]', 'Standard Scaler'],
                            max_cluster_amount=20, angle=0,
-                           output_file='/standardscaler_linearscaler/box_standardscaler_linearscaler_base_gate')
+                           output_file='/preprocessing/standardscaler_linearscaler/box_standardscaler_linearscaler_base_gate')
 
 
 

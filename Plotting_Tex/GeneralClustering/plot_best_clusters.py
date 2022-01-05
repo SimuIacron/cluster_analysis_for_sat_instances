@@ -1,9 +1,10 @@
 import itertools
 from run_plotting import plot_best_cluster_comparison
+from run_plotting_histograms import plot_histograms_clustering
 
 from util_scripts import DatabaseReader
 
-dir = 'best_clusters'
+directory = 'best_clusters'
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -17,14 +18,15 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
+
 plot_best_cluster_comparison(['clustering_general/clustering_general_par2'],
                              '',
-                             # 'Par2 scores of the best clusters in clusterings using combinations of base, gate, runtimes',
                              0, ['selected_data'],
                              [output_merged[1:]],
                              ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
                               'base gate runtimes'],
-                             100, 100, 20, output_file=dir + '/clustering_best_cluster_all_5000',
+                             100, 100, 20,
+                             output_file='/general_clustering/single_clusters/clustering_best_cluster_all_5000',
                              show_plot=False,
                              use_mat_plot=True, use_dash_plot=True)
 
@@ -42,17 +44,16 @@ for combination in output:
 
 plot_best_cluster_comparison(['clustering_general/clustering_general_par2'],
                              '',
-                             # 'Par2 scores of the best clusters in clusterings using combinations of base, gate, runtimes',
                              0, ['selected_data'],
                              [output_merged[1:]],
                              ['base', 'gate', 'base gate'],
-                             100, 100, 100, output_file=dir + '/clustering_best_cluster_base_gate_comb_100',
+                             100, 100, 100,
+                             output_file='/general_clustering/single_clusters/clustering_best_cluster_base_gate_comb_100',
                              show_plot=False,
                              use_mat_plot=True, use_dash_plot=True)
 
 plot_best_cluster_comparison(['clustering_general/clustering_general_par2'],
                              '',
-                             # 'Par2 scores of the best clusters in clusterings using combinations of base, gate, runtimes',
                              0, ['cluster_algorithm', 'selected_data'],
                              [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
                                'DBSCAN',
@@ -60,6 +61,7 @@ plot_best_cluster_comparison(['clustering_general/clustering_general_par2'],
                              ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
                               'OPTICS',
                               'Gaussian', 'DBSCAN', 'BIRCH'],
-                             100, 100, 100, output_file=dir + '/clustering_best_cluster_base_gate_algo_100',
+                             100, 100, 100,
+                             output_file='/general_clustering/single_clusters/clustering_best_cluster_base_gate_algo_100',
                              show_plot=False,
                              use_mat_plot=True, use_dash_plot=True)
