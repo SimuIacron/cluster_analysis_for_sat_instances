@@ -92,6 +92,7 @@ def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param
     for value in param_values_list[highlight_index]:
         plot_data.append(split_data[str(value)])
 
+    plt.clf()
     plt.boxplot(plot_data)
     plt.xticks(range(1, len(label_list) + 1), label_list, rotation=70)
     plt.tight_layout()

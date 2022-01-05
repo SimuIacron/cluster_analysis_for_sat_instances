@@ -20,41 +20,41 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
-# plot_cbs_comparison([dir + '/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+# ----- Capped at 60s --------------------------------------------------------------------------------------------------
+
+# plot_cpar2_comparison([dir + '/cap_60sec/general_clustering_capped_at_60_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       '',
 #                       0, ['selected_data'],
 #                       [output_merged[1:]],
 #                       ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
-#                       20, 200, output_file=dir + '/clustering_default_comb_all_dbs_new',
+#                       20, 200, output_file=dir + '/cap_60sec/clustering_default_capped_at_60_comb_all_dbs',
 #                       show_plot=False,
-#                       use_mat_plot=True, use_dash_plot=False, show_complete_legend=True)
+#                       use_mat_plot=True, use_dash_plot=True)
 #
-# plot_cbs_comparison([dir + '/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+# plot_cpar2_comparison([dir + '/cap_60sec/general_clustering_capped_at_60_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       '',
 #                       0, ['cluster_algorithm', 'selected_data'],
 #                       [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN',
 #                         'BIRCH'], output_merged[1:]],
 #                       ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS',
 #                        'Gaussian', 'DBSCAN', 'BIRCH'],
-#                       20, 200, output_file=dir + '/clustering_default_algo_all_dbs_new',
+#                       20, 200, output_file=dir + '/cap_60sec/clustering_default_capped_at_60_algo_all_dbs',
 #                       show_plot=False,
-#                       use_mat_plot=True, use_dash_plot=False, show_complete_legend=True)
+#                       use_mat_plot=True, use_dash_plot=True)
 
+plot_histograms_clustering(dir + '/cap_60sec/general_clustering_capped_at_60_par2',
+                           0, ['selected_data'],
+                           [output_merged[1:]],
+                           ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
+                           max_cluster_amount=20, columns=3,
+                           bin_step=10, height=0.11, output_file=dir + '/cap_60sec/hist_capped_at_60_par2',
+                           normalize=True)
 
-# plot_histograms_clustering(dir + '/clustering_general_par2',
-#                            0, ['selected_data'],
-#                            [output_merged[1:]],
-#                            ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
-#                            max_cluster_amount=20, columns=3,
-#                            bin_step=10, height=0.11, output_file=dir + '/hist_clustering_default',
-#                            normalize=True)
-
-plot_boxplot_clustering(dir + '/clustering_general_par2',
+plot_boxplot_clustering(dir + '/cap_60sec/general_clustering_capped_at_60_par2',
                         0, ['selected_data'],
                         [output_merged[1:]],
                         ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes', 'base gate runtimes'],
-                        max_cluster_amount=20, output_file=dir + '/box_clustering_default')
-
+                        max_cluster_amount=20, output_file=dir + '/cap_60sec/box_capped_at_60_par2')
 
 # Only base and gate ---------------------------------------------------------------------------------------------------
 
@@ -67,26 +67,24 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
+# ----- Capped at 60s --------------------------------------------------------------------------------------------------
 
-# plot_cbs_comparison([dir + '/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+# plot_cpar2_comparison([dir + '/cap_60sec/general_clustering_capped_at_60_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       '',
-#                     0, ['selected_data'],
-#                     [output_merged[1:]],
-#                     ['base', 'gate', 'base gate'],
-#                     20, 200, output_file=dir + '/clustering_default_comb_base_gate_new',
-#                     show_plot=False,
-#                     use_mat_plot=True, use_dash_plot=False, show_complete_legend=True)
+#                       0, ['selected_data'],
+#                       [output_merged[1:]],
+#                       ['base', 'gate', 'base gate'],
+#                       20, 200, output_file=dir + '/cap_60sec/clustering_default_capped_at_60_comb_base_gate',
+#                       show_plot=False,
+#                       use_mat_plot=True, use_dash_plot=True)
 #
-# plot_cbs_comparison([dir + '/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
+# plot_cpar2_comparison([dir + '/cap_60sec/general_clustering_capped_at_60_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       '',
 #                       0, ['cluster_algorithm', 'selected_data'],
 #                       [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN', 'DBSCAN',
 #                         'BIRCH'], output_merged[1:]],
 #                       ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative', 'OPTICS',
 #                        'Gaussian', 'DBSCAN', 'BIRCH'],
-#                       20, 200, output_file=dir + '/clustering_default_algo_base_gate_new',
+#                       20, 200, output_file=dir + '/cap_60sec/clustering_default_capped_at_60_algo_base_gate',
 #                       show_plot=False,
-#                       use_mat_plot=True, use_dash_plot=False, show_complete_legend=True)
-#
-
-
+#                       use_mat_plot=True, use_dash_plot=True)

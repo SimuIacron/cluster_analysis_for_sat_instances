@@ -193,7 +193,7 @@ def run_evaluation_par2_sbs_n_worst(output_file, db_instance: DbInstance, n):
 
 
 if __name__ == '__main__':
-    cores = 20
+    cores = 12
 
     temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
     temp_solver_features.pop(14)
@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
     db = DbInstance(features)
 
-    run_evaluation_par2_score('single_solver/single_solver_test', 'single_solver/single_solver_par2', db, cores)
+    run_evaluation_par2_score('clustering_general/cap_60sec/general_clustering_capped_at_60', 'clustering_general/cap_60sec/general_clustering_capped_at_60_par2', db, cores)
 
     # run_evaluation_par2_sbs_n_best('sbs_100_best', db, 100)
     # run_evaluation_par2_sbs_n_worst('sbs_100_worst', db, 100)
