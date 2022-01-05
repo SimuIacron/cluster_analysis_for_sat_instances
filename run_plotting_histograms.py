@@ -7,9 +7,8 @@ from run_experiments import read_json
 
 
 def plot_histograms_clustering(input_file_par2, highlight_index, param_names, param_values_list,
-                                label_list, max_cluster_amount=20, columns=2, bin_step=20, height=500, dpi=96,
+                               label_list, max_cluster_amount=20, columns=2, bin_step=20, height=500, dpi=96,
                                output_file='', normalize=False, show_plot=False):
-
     x_label = 'CBS (s)'
     y_label = 'frequency'
 
@@ -61,15 +60,15 @@ def plot_histograms_clustering(input_file_par2, highlight_index, param_names, pa
         axes_flat[idx].set_visible(False)
 
     if output_file != '':
-        plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+        plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
 
     if show_plot:
         plt.show()
 
 
 def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param_values_list,
-                                label_list, max_cluster_amount=20, dpi=96,
-                               output_file='', show_plot=False):
+                            label_list, max_cluster_amount=20, dpi=96, angle=90, y_axis_range=None,
+                            output_file='', show_plot=False):
     data = read_json(input_file_par2)
     split_data = {}
     for value in param_values_list[highlight_index]:
@@ -92,13 +91,20 @@ def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param
     for value in param_values_list[highlight_index]:
         plot_data.append(split_data[str(value)])
 
-    plt.clf()
-    plt.boxplot(plot_data)
-    plt.xticks(range(1, len(label_list) + 1), label_list, rotation=70)
-    plt.tight_layout()
+    fig = plt.figure(figsize=(1700 / dpi, 1000 / dpi), dpi=dpi,
+                     constrained_layout=True)
+
+    ax = fig.add_subplot(111)
+
+    ax.boxplot(plot_data)
+    plt.xticks(range(1, len(label_list) + 1), label_list, rotation=angle)
+
+    if y_axis_range is not None:
+        ax = plt.gca()
+        ax.set_ylim(y_axis_range)
 
     if output_file != '':
-        plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+        fig.savefig(os.environ['TEXPATH'] + output_file + '.svg')
 
     if show_plot:
-        plt.show()
+        fig.show()

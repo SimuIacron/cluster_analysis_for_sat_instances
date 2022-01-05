@@ -186,7 +186,7 @@ def plot_cbs_comparison(input_files_par2_scores, input_file_vbs, input_file_sbs,
         plt.title(plot_description)
 
         if output_file != '':
-            plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+            plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
         if show_plot:
             plt.show()
 
@@ -361,7 +361,7 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description,
         plt.title(plot_description)
 
         if output_file != '':
-            plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+            plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
         if show_plot:
             plt.show()
 
@@ -713,7 +713,7 @@ def plot_single_cluster_distribution_family(input_file, db_instance: DbInstance,
         #     # ax.set(ylabel='', aspect='equal')
         #
         if output_file != '':
-            plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+            plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
 
         if show_plot:
             plt.show()
@@ -804,7 +804,7 @@ def plot_cluster_best_solver_distribution(input_file, clustering_id, cluster_idx
     plt.legend(reversed(handles), reversed(labels), title='Rank', loc='center left', bbox_to_anchor=(1, 0.5))
 
     if output_file != '':
-        plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+        plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
 
     if show_plot:
         plt.show()
@@ -896,7 +896,7 @@ def plot_cluster_best_solver_distribution_relative(input_file, clustering_id, cl
     # plt.legend(reversed(handles), reversed(labels), title='Rank', loc='center left', bbox_to_anchor=(1, 0.5))
 
     if output_file != '':
-        plt.savefig(os.environ['EXPPATH'] + output_file + '.svg')
+        plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
 
     if show_plot:
         plt.show()
