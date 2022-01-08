@@ -5,6 +5,7 @@ from run_plotting_histograms import plot_histograms_clustering, plot_boxplot_clu
 from util_scripts import DatabaseReader
 
 directory = 'clustering_general_cap_60'
+sbs_file = 'vbs_sbs/sbs'
 
 # All features ---------------------------------------------------------------------------------------------------------
 
@@ -21,7 +22,7 @@ for combination in output:
     output_merged.append(comb)
 
 
-plot_histograms_clustering(directory + '/general_clustering_cap_60_par2',
+plot_histograms_clustering(directory + '/general_clustering_cap_60_par2', sbs_file,
                            0, ['selected_data'],
                            [output_merged[1:]],
                            ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
@@ -39,7 +40,7 @@ plot_boxplot_clustering(directory + '/general_clustering_cap_60_par2',
                         max_cluster_amount=20,
                         output_file='/general_clustering_cap_60/box_clustering_default_cap_60_comb_all')
 
-plot_histograms_clustering(directory + '/general_clustering_cap_60_par2',
+plot_histograms_clustering(directory + '/general_clustering_cap_60_par2', sbs_file,
                            0, ['cluster_algorithm', 'selected_data'],
                            [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
                              'DBSCAN',
@@ -74,7 +75,7 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
-plot_histograms_clustering(directory + '/general_clustering_cap_60_par2',
+plot_histograms_clustering(directory + '/general_clustering_cap_60_par2', sbs_file,
                            0, ['cluster_algorithm', 'selected_data'],
                            [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
                              'DBSCAN',

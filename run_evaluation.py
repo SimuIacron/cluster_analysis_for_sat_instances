@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
     db = DbInstance(features)
 
-    run_evaluation_par2_score('clustering_general/cap_60sec/general_clustering_capped_at_60', 'clustering_general/cap_60sec/general_clustering_capped_at_60_par2', db, cores)
+    run_evaluation_par2_score('clustering_general_v2/general_clustering_2', 'clustering_general_v2/general_clustering_2_par2', db, cores)
 
     # run_evaluation_par2_sbs_n_best('sbs_100_best', db, 100)
     # run_evaluation_par2_sbs_n_worst('sbs_100_worst', db, 100)

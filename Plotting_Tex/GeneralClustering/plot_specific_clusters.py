@@ -5,6 +5,9 @@ from run_plotting import plot_par2, plot_single_cluster_distribution_family, plo
     plot_cluster_best_solver_distribution_relative
 from util_scripts import DatabaseReader
 
+output_directory = '/general_clustering_2'
+input_file = 'clustering_general_v2/general_clustering_2_par2'
+
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
 temp_solver_features.pop(7)
@@ -82,22 +85,22 @@ db_instance = DbInstance(features)
 #                                                quantile_value=0.25, scale_with_log=2,
 #                                       output_file='best_clusters/specific_clusters/1058_0_solver_relative_025_log2', show_plot=False)
 
-plot_cluster_best_solver_distribution_relative('clustering_general/clustering_general_par2', 1058, 3, db_instance,
+plot_cluster_best_solver_distribution_relative(input_file, 6226, 10, db_instance,
                                                quantile_value=0.1, scale_with_log=2,
-                                               output_file='/general_clustering/single_clusters/specific_clusters/1058_3_solver_relative_010_log2',
+                                               output_file=output_directory + '/single_clusters/specific_clusters/1058_3_solver_relative_010_log2',
                                                show_plot=False)
 
-plot_cluster_best_solver_distribution_relative('clustering_general/clustering_general_par2', 184, 4, db_instance,
-                                               quantile_value=0.1, scale_with_log=2,
-                                               output_file='/general_clustering/single_clusters/specific_clusters/184_4_solver_relative_010_log2',
-                                               show_plot=False)
-
-plot_cluster_best_solver_distribution_relative('clustering_general/clustering_general_par2', 8, 5, db_instance,
-                                               quantile_value=0.1, scale_with_log=2,
-                                               output_file='/general_clustering/single_clusters/specific_clusters/8_5_solver_relative_010_log2',
-                                               show_plot=False)
-
-plot_cluster_best_solver_distribution_relative('clustering_general/clustering_general_par2', 1058, 0, db_instance,
-                                               quantile_value=0.1, scale_with_log=2,
-                                               output_file='/general_clustering/single_clusters/specific_clusters/1058_0_solver_relative_010_log2',
-                                               show_plot=False)
+# plot_cluster_best_solver_distribution_relative(input_file, 184, 4, db_instance,
+#                                                quantile_value=0.1, scale_with_log=2,
+#                                                output_file=output_directory + '/single_clusters/specific_clusters/184_4_solver_relative_010_log2',
+#                                                show_plot=False)
+#
+# plot_cluster_best_solver_distribution_relative(input_file, 8, 5, db_instance,
+#                                                quantile_value=0.1, scale_with_log=2,
+#                                                output_file=output_directory + '/single_clusters/specific_clusters/8_5_solver_relative_010_log2',
+#                                                show_plot=False)
+#
+# plot_cluster_best_solver_distribution_relative(input_file, 1058, 0, db_instance,
+#                                                quantile_value=0.1, scale_with_log=2,
+#                                                output_file=output_directory + '/single_clusters/specific_clusters/1058_0_solver_relative_010_log2',
+#                                                show_plot=False)

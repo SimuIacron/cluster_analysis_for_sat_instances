@@ -5,6 +5,7 @@ from run_plotting_histograms import plot_histograms_clustering, plot_boxplot_clu
 from util_scripts import DatabaseReader
 
 dir = 'scaling_standardscaler'
+sbs_file = 'vbs_sbs/sbs'
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
 temp_solver_features.pop(7)
@@ -17,12 +18,12 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
-plot_histograms_clustering(dir + '/standardscaler_linearscaler_clustering_par2',
+plot_histograms_clustering(dir + '/standardscaler_linearscaler_clustering_par2', sbs_file,
                            0, ['scaling_algorithm'],
                            [['SCALEMINUSPLUS1', 'STANDARDSCALER']],
                            ['[-1,+1]', 'Standard Scaler'],
                            max_cluster_amount=20, columns=2,
-                           bin_step=10, height=500,
+                           bin_step=10, height=550,
                            output_file='/preprocessing/standardscaler_linearscaler/hist_standardscaler_linearscaler_all')
 
 plot_boxplot_clustering(dir + '/standardscaler_linearscaler_clustering_par2',
@@ -41,7 +42,7 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
-plot_histograms_clustering(dir + '/standardscaler_linearscaler_clustering_par2',
+plot_histograms_clustering(dir + '/standardscaler_linearscaler_clustering_par2', sbs_file,
                            0, ['scaling_algorithm', 'selected_data'],
                            [['SCALEMINUSPLUS1', 'STANDARDSCALER'], output_merged[1:]],
                            ['[-1,+1]', 'Standard Scaler'],

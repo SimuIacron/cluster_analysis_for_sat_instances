@@ -4,6 +4,8 @@ from run_plotting_histograms import plot_histograms_clustering, plot_boxplot_clu
 
 from util_scripts import DatabaseReader
 
+sbs_file = 'vbs_sbs/sbs'
+
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
 temp_solver_features.pop(7)
@@ -57,7 +59,7 @@ for combination in output:
 #                            normalize=True)
 #
 
-plot_histograms_clustering('single_solver/single_solver_all_algos_par2',
+plot_histograms_clustering('single_solver/single_solver_all_algos_par2', sbs_file,
                            0, ['selected_data'],
                            [output_merged],
                            ['base', 'gate', 'base gate', 'base kissat', 'gate kissat', 'base gate kissat',

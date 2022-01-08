@@ -279,9 +279,9 @@ def plot_cbs_comparison(input_files_par2_scores, input_file_vbs, input_file_sbs,
 def plot_best_cluster_comparison(input_files_par2_scores, plot_description,
                                  highlight_index,
                                  param_names,
-                                 value_lists, label_list, max_cluster_amount, min_cluster_amount, cutoff,
+                                 value_lists, label_list, max_cluster_amount, min_cluster_size, cutoff,
                                  output_file='', show_plot=False,
-                                 use_mat_plot=True, use_dash_plot=False):
+                                 use_mat_plot=True, use_dash_plot=False, output_file_json=''):
     x_label = 'Best clusters sorted by Par2'
     y_label = 'Par2 Score (s)'
 
@@ -293,7 +293,7 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description,
     for evaluation in data:
         cluster_size = Counter(evaluation['clustering'])
         for cluster, size in cluster_size.items():
-            if size >= min_cluster_amount:
+            if size >= min_cluster_size:
                 cluster_list.append(dict(evaluation, **{'cluster_idx': cluster,
                                                         'cluster_cpar2': evaluation['par2'][1][str(cluster)][0][0][1],
                                                         'cluster_size': size,
@@ -337,10 +337,11 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description,
                         ' solver: ' + str(cluster_eval['cluster_solver']) +
                         ' id: ' + str(cluster_eval['id']))
 
-            export_list.append((cluster_eval['id'], cluster_eval['cluster_idx']))
+            export_list.append((cluster_eval['id'], cluster_eval['cluster_idx'], cluster_eval['cluster_cpar2'],
+                                cluster_eval['cluster_solver'], cluster_eval['cluster_size']))
 
-    if output_file != '':
-        write_json(output_file, export_list)
+    if output_file_json != '':
+        write_json(output_file_json, export_list)
 
     if use_mat_plot:
 
