@@ -5,6 +5,8 @@ from run_plotting_histograms import plot_histograms_clustering, plot_boxplot_clu
 from util_scripts import DatabaseReader
 
 sbs_file = 'vbs_sbs/sbs'
+dpi = 192
+angle = 20
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -69,7 +71,7 @@ plot_histograms_clustering('single_solver/single_solver_all_algos_par2', sbs_fil
                            max_cluster_amount=20, columns=3,
                            bin_step=10, height=0.11,
                            output_file='/single_runtime_feature_clustering/hist_single_runtime_features',
-                           normalize=True)
+                           normalize=True, dpi=dpi)
 
 output = [[DatabaseReader.FEATURES_BASE],
           [DatabaseReader.FEATURES_BASE, ['kissat']],
@@ -103,4 +105,5 @@ plot_boxplot_clustering('single_solver/single_solver_all_algos_par2',
                          'base gate', 'base gate kissat', 'base gate glucose', 'base gate cadical',
                          'base gate runtimes'],
                         max_cluster_amount=20,
-                        output_file='/single_runtime_feature_clustering/box_single_runtime_features')
+                        output_file='/single_runtime_feature_clustering/box_single_runtime_features',
+                        dpi=dpi, angle=angle)

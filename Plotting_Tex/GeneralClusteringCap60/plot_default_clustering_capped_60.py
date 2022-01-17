@@ -6,6 +6,8 @@ from util_scripts import DatabaseReader
 
 directory = 'clustering_general_cap_60'
 sbs_file = 'vbs_sbs/sbs'
+dpi=192
+angle=20
 
 # All features ---------------------------------------------------------------------------------------------------------
 
@@ -30,7 +32,7 @@ plot_histograms_clustering(directory + '/general_clustering_cap_60_par2', sbs_fi
                            max_cluster_amount=20, columns=3,
                            bin_step=10, height=0.11,
                            output_file='/general_clustering_cap_60/hist_clustering_default_cap_60_comb_all',
-                           normalize=True)
+                           normalize=True, dpi=dpi)
 
 plot_boxplot_clustering(directory + '/general_clustering_cap_60_par2',
                         0, ['selected_data'],
@@ -38,7 +40,8 @@ plot_boxplot_clustering(directory + '/general_clustering_cap_60_par2',
                         ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
                          'base gate runtimes'],
                         max_cluster_amount=20,
-                        output_file='/general_clustering_cap_60/box_clustering_default_cap_60_comb_all')
+                        output_file='/general_clustering_cap_60/box_clustering_default_cap_60_comb_all', dpi=dpi,
+                        angle=angle)
 
 plot_histograms_clustering(directory + '/general_clustering_cap_60_par2', sbs_file,
                            0, ['cluster_algorithm', 'selected_data'],
@@ -51,7 +54,7 @@ plot_histograms_clustering(directory + '/general_clustering_cap_60_par2', sbs_fi
                            max_cluster_amount=20, columns=3,
                            bin_step=10, height=0.11,
                            output_file='/general_clustering_cap_60/hist_clustering_default_cap_60_algo_all',
-                           normalize=True)
+                           normalize=True, dpi=dpi)
 
 plot_boxplot_clustering(directory + '/general_clustering_cap_60_par2',
                         0, ['cluster_algorithm', 'selected_data'],
@@ -62,7 +65,8 @@ plot_boxplot_clustering(directory + '/general_clustering_cap_60_par2',
                          'OPTICS',
                          'Gaussian', 'DBSCAN', 'BIRCH'],
                         max_cluster_amount=20,
-                        output_file='/general_clustering_cap_60/box_clustering_default_cap_60_algo_all')
+                        output_file='/general_clustering_cap_60/box_clustering_default_cap_60_algo_all', dpi=dpi,
+                        angle=angle)
 
 # Only base and gate ---------------------------------------------------------------------------------------------------
 
@@ -86,7 +90,7 @@ plot_histograms_clustering(directory + '/general_clustering_cap_60_par2', sbs_fi
                            max_cluster_amount=20, columns=3,
                            bin_step=10, height=0.11,
                            output_file='/general_clustering_cap_60/hist_clustering_default_cap_60_algo_base_gate',
-                           normalize=True)
+                           normalize=True, dpi=dpi)
 
 plot_boxplot_clustering(directory + '/general_clustering_cap_60_par2',
                         0, ['cluster_algorithm', 'selected_data'],
@@ -97,4 +101,5 @@ plot_boxplot_clustering(directory + '/general_clustering_cap_60_par2',
                          'OPTICS',
                          'Gaussian', 'DBSCAN', 'BIRCH'],
                         max_cluster_amount=20,
-                        output_file='/general_clustering_cap_60/box_clustering_default_cap_60_algo_base_gate')
+                        output_file='/general_clustering_cap_60/box_clustering_default_cap_60_algo_base_gate',
+                        dpi=dpi, angle=angle)

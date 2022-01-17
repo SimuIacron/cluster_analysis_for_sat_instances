@@ -50,7 +50,7 @@ plot_histograms_clustering(input_file, sbs_file,
                             'base gate runtimes'],
                            max_cluster_amount=20, columns=3,
                            bin_step=10, height=0.11, output_file=output_directory + '/hist_clustering_default_comb_all',
-                           normalize=True)
+                           normalize=True, dpi=192)
 
 plot_boxplot_clustering(input_file,
                         0, ['selected_data'],
@@ -58,7 +58,7 @@ plot_boxplot_clustering(input_file,
                         ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
                          'base gate runtimes'],
                         max_cluster_amount=20, output_file=output_directory + '/box_clustering_default_comb_all',
-                        sbs_file=sbs_file)
+                        sbs_file=sbs_file, dpi=192, angle=20)
 
 plot_histograms_clustering(input_file, sbs_file,
                            0, ['cluster_algorithm', 'selected_data'],
@@ -70,7 +70,7 @@ plot_histograms_clustering(input_file, sbs_file,
                             'Gaussian', 'DBSCAN', 'BIRCH'],
                            max_cluster_amount=20, columns=3,
                            bin_step=10, height=0.11, output_file=output_directory + '/hist_clustering_default_algo_all',
-                           normalize=True)
+                           normalize=True, dpi=192)
 
 plot_boxplot_clustering(input_file,
                         0, ['cluster_algorithm', 'selected_data'],
@@ -81,7 +81,7 @@ plot_boxplot_clustering(input_file,
                          'OPTICS',
                          'Gaussian', 'DBSCAN', 'BIRCH'],
                         max_cluster_amount=20, output_file=output_directory + '/box_clustering_default_algo_all',
-                        sbs_file=sbs_file)
+                        sbs_file=sbs_file, dpi=192, angle=20)
 
 # Only base and gate ---------------------------------------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ plot_histograms_clustering(input_file, sbs_file,
                            max_cluster_amount=20, columns=3,
                            bin_step=10, height=0.11,
                            output_file=output_directory + '/hist_clustering_default_algo_base_gate',
-                           normalize=True)
+                           normalize=True, dpi=192)
 
 plot_boxplot_clustering(input_file,
                         0, ['cluster_algorithm', 'selected_data'],
@@ -116,7 +116,8 @@ plot_boxplot_clustering(input_file,
                          'OPTICS',
                          'Gaussian', 'DBSCAN', 'BIRCH'],
                         max_cluster_amount=20,
-                        output_file=output_directory + '/box_clustering_default_algo_base_gate', sbs_file=sbs_file)
+                        output_file=output_directory + '/box_clustering_default_algo_base_gate', sbs_file=sbs_file,
+                        dpi=192, angle=20)
 
 # plot_cbs_comparison([dir + '/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       '',

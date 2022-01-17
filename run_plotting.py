@@ -276,12 +276,15 @@ def plot_cbs_comparison(input_files_par2_scores, input_file_vbs, input_file_sbs,
 # ----------------------------------------------------------------------------------------------------------------------
 
 
+
+
+
 def plot_best_cluster_comparison(input_files_par2_scores, plot_description,
                                  highlight_index,
                                  param_names,
                                  value_lists, label_list, max_cluster_amount, min_cluster_size, cutoff,
                                  output_file='', show_plot=False,
-                                 use_mat_plot=True, use_dash_plot=False, output_file_json=''):
+                                 use_mat_plot=True, use_dash_plot=False):
     x_label = 'Best clusters sorted by Par2'
     y_label = 'Par2 Score (s)'
 
@@ -301,7 +304,6 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description,
                                                             0]}))
 
     sorted_cluster_list = sorted(cluster_list, key=lambda d: d['cluster_cpar2'])
-    export_list = []
 
     value_dict = {}
     for elem in value_lists[highlight_index]:
@@ -336,12 +338,6 @@ def plot_best_cluster_comparison(input_files_par2_scores, plot_description,
                         ' cluster size: ' + str(cluster_eval['cluster_size']) +
                         ' solver: ' + str(cluster_eval['cluster_solver']) +
                         ' id: ' + str(cluster_eval['id']))
-
-            export_list.append((cluster_eval['id'], cluster_eval['cluster_idx'], cluster_eval['cluster_cpar2'],
-                                cluster_eval['cluster_solver'], cluster_eval['cluster_size']))
-
-    if output_file_json != '':
-        write_json(output_file_json, export_list)
 
     if use_mat_plot:
 
@@ -870,7 +866,7 @@ def plot_cluster_best_solver_distribution_relative(input_file, clustering_id, cl
                     ranks[0][idx] = ranks[0][idx] + 1
                 else:
                     ranks[int(log(relative_runtime + 1, scale_with_log))][idx] = \
-                    ranks[int(log(relative_runtime + 1, scale_with_log))][idx] + 1
+                        ranks[int(log(relative_runtime + 1, scale_with_log))][idx] + 1
 
     for idx, rank in enumerate(ranks):
         ranks[idx] = [value / size for value in rank]

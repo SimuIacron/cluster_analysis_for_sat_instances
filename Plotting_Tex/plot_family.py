@@ -5,6 +5,7 @@ from run_plotting_histograms import plot_boxplot_family
 from util_scripts import DatabaseReader
 
 output_directory = '/family'
+dpi = 192
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -23,5 +24,4 @@ for feature_vector in input_dbs:
     features = features + feature_vector
 db_instance = DbInstance(features)
 
-
-plot_boxplot_family(db_instance, output_file=output_directory + '/family_distribution')
+plot_boxplot_family(db_instance, output_file=output_directory + '/family_distribution', dpi=192)

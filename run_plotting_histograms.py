@@ -111,6 +111,7 @@ def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param
 
     ax.boxplot(plot_data)
     plt.xticks(range(1, len(label_list) + 1), label_list, rotation=angle)
+    ax.set_ylabel('CBS (s)')
 
     if sbs_file != '':
         sbs_data = read_json(sbs_file)
@@ -185,6 +186,7 @@ def plot_boxplot_best_cluster(input_file,
 
     ax.boxplot(plot_data)
     plt.xticks(range(1, len(label_list) + 1), label_list, rotation=angle)
+    ax.set_ylabel('CBS (s)')
 
     if output_file != '':
         fig.savefig(os.environ['TEXPATH'] + output_file + '.svg')
@@ -286,6 +288,7 @@ def plot_boxplot_family(db_instance: DbInstance, dpi=96, output_file='', show_pl
                      constrained_layout=True)
 
     ax = fig.add_subplot(111)
+    ax.set_xlabel('CBS (s)')
 
     ax.boxplot(count_list, vert=False, widths=[1.7])
 

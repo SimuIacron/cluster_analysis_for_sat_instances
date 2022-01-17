@@ -35,9 +35,9 @@ plot_boxplot_best_cluster(input_file,
                           [output_merged[1:]],
                           ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
                            'base gate runtimes'],
-                          max_cluster_amount=10000, min_cluster_size=20, angle=0,
+                          max_cluster_amount=10000, min_cluster_size=20, angle=20,
                           output_file=output_directory + '/single_clusters/box_best_clusters_all_comb_20_10000',
-                          show_plot=False)
+                          show_plot=False, dpi=192)
 
 plot_histogram_best_cluster(input_file,
                             0, ['selected_data'],
@@ -47,16 +47,16 @@ plot_histogram_best_cluster(input_file,
                              'base gate runtimes'],
                             max_cluster_amount=10000, min_cluster_size=20, columns=3, bin_step=100,
                             output_file=output_directory + '/single_clusters/hist_best_clusters_all_comb_20_10000',
-                            show_plot=False, normalize=False)
+                            show_plot=False, normalize=False, dpi=192)
 
 plot_boxplot_best_cluster(input_file,
                           0, ['selected_data'],
                           [output_merged[1:]],
                           ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
                            'base gate runtimes'],
-                          max_cluster_amount=10000, min_cluster_size=10, angle=0,
+                          max_cluster_amount=10000, min_cluster_size=10, angle=20,
                           output_file=output_directory + '/single_clusters/box_best_clusters_all_comb_10_10000',
-                          show_plot=False)
+                          show_plot=False, dpi=192)
 
 plot_histogram_best_cluster(input_file,
                             0, ['selected_data'],
@@ -66,7 +66,7 @@ plot_histogram_best_cluster(input_file,
                              'base gate runtimes'],
                             max_cluster_amount=10000, min_cluster_size=10, columns=3, bin_step=100,
                             output_file=output_directory + '/single_clusters/hist_best_clusters_all_comb_10_10000',
-                            show_plot=False, normalize=False)
+                            show_plot=False, normalize=False, dpi=192)
 
 plot_boxplot_best_cluster(input_file,
                           0, ['cluster_algorithm', 'selected_data'],
@@ -76,9 +76,9 @@ plot_boxplot_best_cluster(input_file,
                           ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
                           'OPTICS',
                           'Gaussian', 'DBSCAN', 'BIRCH'],
-                          max_cluster_amount=10000, min_cluster_size=10, angle=0,
+                          max_cluster_amount=10000, min_cluster_size=10, angle=20,
                           output_file=output_directory + '/single_clusters/box_best_clusters_all_algo_10_10000',
-                          show_plot=False)
+                          show_plot=False, dpi=192)
 
 input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE]
 output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
@@ -97,9 +97,9 @@ plot_boxplot_best_cluster(input_file,
                           ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
                           'OPTICS',
                           'Gaussian', 'DBSCAN', 'BIRCH'],
-                          max_cluster_amount=10000, min_cluster_size=10, angle=0,
+                          max_cluster_amount=10000, min_cluster_size=10, angle=20,
                           output_file=output_directory + '/single_clusters/box_best_clusters_base_gate_algo_10_10000',
-                          show_plot=False)
+                          show_plot=False, dpi=192)
 
 
 #
