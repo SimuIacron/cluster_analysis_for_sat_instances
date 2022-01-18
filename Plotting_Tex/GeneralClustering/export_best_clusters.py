@@ -3,7 +3,8 @@ import itertools
 from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cluster
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json
-from run_plotting_clusters import export_clusters_sorted_best, compare_with_family, plot_biggest_cluster_for_family
+from run_plotting_clusters import export_clusters_sorted_best, compare_with_family, plot_biggest_cluster_for_family, \
+    search_clusters_with_unsolvable_instances
 from util_scripts import DatabaseReader
 
 input_file_cluster = 'clustering_general_v2/single_clusters/clustering_general_v2_best_cluster'
@@ -30,8 +31,6 @@ for feature_vector in input_dbs:
     features = features + feature_vector
 
 db_instance = DbInstance(features)
-
-export_variance_mean_of_cluster(input_file_clustering, input_file_cluster, output_dir_stochastic, db_instance)
 
 plot_biggest_cluster_for_family(input_file_clustering, input_file_cluster,
                                 ['selected_data'],

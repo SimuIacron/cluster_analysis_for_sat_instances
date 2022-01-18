@@ -59,13 +59,14 @@ def plot_biggest_cluster_for_family(input_file_clustering, input_file_cluster,
                     'family': key,
                     'percentage_of_family_in_cluster': percentage,
                     'occurrence_of_family_in_cluster': item,
-                    'percentage_of_total_family_instances_in_cluster': item/total_family_count[key]
+                    'percentage_of_total_family_instances_in_cluster': item / total_family_count[key]
                 })
                 if key not in family_dict:
                     family_dict[key] = new_dict
                 else:
                     if comparison == 'SIZE':
-                        if family_dict[key]['occurrence_of_family_in_cluster'] < new_dict['occurrence_of_family_in_cluster']:
+                        if family_dict[key]['occurrence_of_family_in_cluster'] < new_dict[
+                            'occurrence_of_family_in_cluster']:
                             family_dict[key] = new_dict
                     elif comparison == 'RUNTIME':
                         if family_dict[key]['cluster_par2'][0][0][1] > new_dict['cluster_par2'][0][0][1]:
@@ -129,7 +130,21 @@ def plot_biggest_cluster_for_family(input_file_clustering, input_file_cluster,
         plt.show()
 
 
+def search_clusters_with_unsolvable_instances(input_file_clustering, input_file_clusters_stochastic):
+    data_clusters = read_json(input_file_clustering)
+    data_clustering = read_json(input_file_clusters_stochastic)
+    filtered_data = filter_cluster_data(data_clustering, data_clusters, ['cluster_algorithm'],
+                                        [['KMEANS', 'DBSCAN', 'AGGLOMERATIVE']],
+                                        20, 10000)
 
+    unsolvable_clusters = []
+    for cluster in filtered_data:
+        for mean_value, variance_value in zip(cluster['runtimes_mean'], cluster['runtime_variance']):
+            if mean_value == DatabaseReader.TIMEOUT and variance_value == 0:
+                unsolvable_clusters.append(cluster)
+
+    unsolvable_clusters_sorted_by_size = sorted(unsolvable_clusters, key=lambda d: d['cluster_size'])
+    return unsolvable_clusters_sorted_by_size
 
 
 def filter_cluster_data(data_clustering, data_cluster, param_names, param_values_list, min_cluster_size,
@@ -224,5 +239,3 @@ def compare_with_family(input_file_clustering, input_file_cluster, param_names, 
 
     if show_plot:
         plt.show()
-
-
