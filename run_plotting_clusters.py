@@ -130,21 +130,64 @@ def plot_biggest_cluster_for_family(input_file_clustering, input_file_cluster,
         plt.show()
 
 
-def search_clusters_with_unsolvable_instances(input_file_clustering, input_file_clusters_stochastic):
-    data_clusters = read_json(input_file_clustering)
-    data_clustering = read_json(input_file_clusters_stochastic)
-    filtered_data = filter_cluster_data(data_clustering, data_clusters, ['cluster_algorithm'],
-                                        [['KMEANS', 'DBSCAN', 'AGGLOMERATIVE']],
-                                        20, 10000)
+def calculate_biggest_family_for_cluster(data_clustering, data_clusters, db_instance: DbInstance):
+    data_cluster_family = []
+    for cluster in data_clusters:
+        family_list = []
+        clustering = get_clustering_for_cluster(data_clustering, cluster)
+        for i, value in enumerate(clustering['clustering']):
+            if value == cluster['cluster_idx']:
+                family_list.append(db_instance.family_wh[i][0])
 
+        family_count = Counter(family_list)
+        family_list = sorted([(key, value) for key, value in family_count.items()], key=lambda d: d[1], reverse=True)
+        family_highest_percentage = family_list[0][1] / cluster['cluster_size']
+        new_dict = dict(cluster, **{
+            'family_list': family_list,
+            'family_highest_percentage': family_highest_percentage
+        })
+        data_cluster_family.append(new_dict)
+
+    return data_cluster_family
+
+
+def calculate_cluster_deviation_score(data_clusters_stochastic):
+    data_clusters_stochastic_deviation_score = []
+    for cluster in data_clusters_stochastic:
+        cluster_deviations = [mean_value + standard_deviation for mean_value, standard_deviation in
+                              zip(cluster['runtimes_mean'],
+                                  cluster['runtimes_standard_deviation'])]
+        cluster_deviation_score = min(cluster_deviations)
+        new_dict = dict(cluster, **{
+            'cluster_deviation_score': cluster_deviation_score,
+            'cluster_deviations': cluster_deviations
+        })
+        data_clusters_stochastic_deviation_score.append(new_dict)
+
+    sorted_data = sorted(data_clusters_stochastic_deviation_score, key=lambda d: d['cluster_deviation_score'])
+    return sorted_data
+
+
+def search_clusters_with_unsolvable_instances(data_clusters_stochastic):
     unsolvable_clusters = []
-    for cluster in filtered_data:
+    for cluster in data_clusters_stochastic:
+        is_unsolvable = True
         for mean_value, variance_value in zip(cluster['runtimes_mean'], cluster['runtime_variance']):
-            if mean_value == DatabaseReader.TIMEOUT and variance_value == 0:
-                unsolvable_clusters.append(cluster)
+            if mean_value != DatabaseReader.TIMEOUT or variance_value != 0:
+                is_unsolvable = False
+                break
 
-    unsolvable_clusters_sorted_by_size = sorted(unsolvable_clusters, key=lambda d: d['cluster_size'])
-    return unsolvable_clusters_sorted_by_size
+        if is_unsolvable:
+            unsolvable_clusters.append(cluster)
+    return unsolvable_clusters
+
+
+def get_clustering_for_cluster(data_clustering, cluster):
+    idx = cluster['id']
+    clustering = data_clustering[idx]
+    assert clustering['id'] == idx, 'clustering had id "{a}" but expected id "{b}"'.format(a=clustering['id'],
+                                                                                           b=idx)
+    return clustering
 
 
 def filter_cluster_data(data_clustering, data_cluster, param_names, param_values_list, min_cluster_size,
@@ -152,10 +195,7 @@ def filter_cluster_data(data_clustering, data_cluster, param_names, param_values
     print('start filtering')
     filtered_data_cluster = []
     for cluster in data_cluster:
-        idx = cluster['id']
-        clustering = data_clustering[idx]
-        assert clustering['id'] == idx, 'clustering had id "{a}" but expected id "{b}"'.format(a=clustering['id'],
-                                                                                                 b=idx)
+        clustering = get_clustering_for_cluster(data_clustering, cluster)
 
         if cluster['cluster_size'] >= min_cluster_size and len(clustering['clusters']) <= max_cluster_amount:
 
