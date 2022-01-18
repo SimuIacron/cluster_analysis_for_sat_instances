@@ -8,7 +8,7 @@ from util_scripts import DatabaseReader
 
 input_file_cluster = 'clustering_general_v2_best_cluster'
 input_file_clustering = 'general_clustering_2_par2'
-output_dir_stochastic = 'clustering_general_v2/clustering_general_clusters_stochastic'
+output_dir_stochastic = 'clustering_general_clusters_stochastic'
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
