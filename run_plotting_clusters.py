@@ -154,7 +154,8 @@ def filter_cluster_data(data_clustering, data_cluster, param_names, param_values
     for cluster in data_cluster:
         idx = cluster['id']
         clustering = data_clustering[idx]
-        assert clustering['id'] == idx
+        assert clustering['id'] == idx, 'clustering had id "{a}" but expected id "{b}"'.format(a=clustering['id'],
+                                                                                                 b=idx)
 
         if cluster['cluster_size'] >= min_cluster_size and len(clustering['clusters']) <= max_cluster_amount:
 
