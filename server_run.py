@@ -6,8 +6,8 @@ from run_experiments import read_json
 from run_plotting_clusters import export_clusters_sorted_best, compare_with_family, plot_biggest_cluster_for_family
 from util_scripts import DatabaseReader
 
-input_file_cluster = 'clustering_general_v2/single_clusters/clustering_general_v2_best_cluster'
-input_file_clustering = 'clustering_general_v2/general_clustering_2_par2'
+input_file_cluster = 'clustering_general_v2_best_cluster'
+input_file_clustering = 'general_clustering_2_par2'
 output_dir_stochastic = 'clustering_general_v2/clustering_general_clusters_stochastic'
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
