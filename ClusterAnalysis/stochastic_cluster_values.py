@@ -3,7 +3,7 @@ from collections import Counter
 from DataFormats.DbInstance import DbInstance
 from run_experiments import write_json, read_json
 from util_scripts import util, DatabaseReader
-from util_scripts.pareto_optimal import get_pareto_indices_2d, get_pareto_indices
+from util_scripts.pareto_optimal import get_pareto_indices
 
 
 def calculate_feature_stochastic(data_clustering, data_clusters, db_instance: DbInstance):
@@ -11,13 +11,13 @@ def calculate_feature_stochastic(data_clustering, data_clusters, db_instance: Db
 
     base_interval_size = [max(item) for item in util.rotateNestedLists(db_instance.base_wh)]
     gate_interval_size = [max(item) for item in util.rotateNestedLists(db_instance.gate_wh)]
-    for i in range(len(base_interval_size)):
-        if base_interval_size[i] == 0:
-            base_interval_size[i] = float(1)
-
-    for i in range(len(gate_interval_size)):
-        if gate_interval_size[i] == 0:
-            gate_interval_size[i] = float(1)
+    # for i in range(len(base_interval_size)):
+    #     if base_interval_size[i] == 0:
+    #         base_interval_size[i] = float(1)
+    #
+    # for i in range(len(gate_interval_size)):
+    #     if gate_interval_size[i] == 0:
+    #         gate_interval_size[i] = float(1)
 
     for cluster in data_clusters:
         clustering = get_clustering_for_cluster(data_clustering, cluster)
@@ -34,13 +34,13 @@ def calculate_feature_stochastic(data_clustering, data_clusters, db_instance: Db
 
         base_rot = util.rotateNestedLists(base)
         base_variance = [np.var(feature) for feature in base_rot]
-        base_mean = [np.mean(feature) / size for feature, size in zip(base_rot, base_interval_size)]
-        base_std = [np.std(feature) / size for feature, size in zip(base_rot, base_interval_size)]
+        base_mean = [np.mean(feature) for feature in base_rot]
+        base_std = [np.std(feature) for feature in base_rot]
 
         gate_rot = util.rotateNestedLists(gate)
         gate_variance = [np.var(feature) for feature in gate_rot]
-        gate_mean = [np.mean(feature) / size for feature, size in zip(gate_rot, gate_interval_size)]
-        gate_std = [np.std(feature) / size for feature, size in zip(gate_rot, gate_interval_size)]
+        gate_mean = [np.mean(feature)for feature in gate_rot]
+        gate_std = [np.std(feature)for feature in gate_rot]
 
         runtimes_rot = util.rotateNestedLists(runtimes)
         runtimes_variance = [np.var(feature) for feature in runtimes_rot]
@@ -51,9 +51,11 @@ def calculate_feature_stochastic(data_clustering, data_clusters, db_instance: Db
             'base_variance': base_variance,
             'base_mean': base_mean,
             'base_std': base_std,
+            'base_interval_size': base_interval_size,
             'gate_variance': gate_variance,
             'gate_mean': gate_mean,
             'gate_std': gate_std,
+            'gate_interval_size': gate_interval_size,
             'runtimes_variance': runtimes_variance,
             'runtimes_mean': runtimes_mean,
             'runtimes_std': runtimes_std
@@ -114,8 +116,7 @@ def calculate_pareto_optimal_solvers_std_mean(data_clusters_stochastic, db_insta
     for cluster in data_clusters_stochastic:
         mean = cluster['runtimes_mean']
         std = cluster['runtimes_std']
-        indices = get_pareto_indices_2d(mean, std, minimize_x=True,
-                                        minimize_y=True)
+        indices = get_pareto_indices([mean, std], [True, True])
 
         pareto_optimal_solvers = []
         for i in indices:
@@ -230,6 +231,31 @@ def calculate_biggest_family_for_cluster(data_clustering, data_clusters, db_inst
         data_cluster_family.append(new_dict)
 
     return data_cluster_family
+
+
+def find_base_and_gate_features_with_low_std(data_cluster, dataset_stochastic_values, db_instance: DbInstance, max_std=0.1):
+    data_cluster_interesting_features = []
+    for cluster in data_cluster:
+        interesting_features_base = []
+        for i, (cluster_std, dataset_std) in enumerate(zip(cluster['base_std'], dataset_stochastic_values['base_std'])):
+            if cluster_std < max_std * dataset_std:
+                feature = db_instance.base_f[i]
+                interesting_features_base.append(
+                    (feature, cluster['base_mean'][i], cluster_std, cluster_std / dataset_std))
+        interesting_features_gate = []
+        for i, (cluster_std, dataset_std) in enumerate(zip(cluster['gate_std'], dataset_stochastic_values['gate_std'])):
+            if cluster_std < max_std * dataset_std:
+                feature = db_instance.gate_f[i]
+                interesting_features_gate.append(
+                    (feature, cluster['gate_mean'][i], cluster_std, cluster_std / dataset_std))
+
+        new_dict = dict(cluster, **{
+            'low_std_base': interesting_features_base,
+            'low_std_gate': interesting_features_gate
+        })
+        data_cluster_interesting_features.append(new_dict)
+
+    return data_cluster_interesting_features
 
 
 # --- Helper functions -------------------------------------------------------------------------------------------------

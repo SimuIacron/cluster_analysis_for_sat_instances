@@ -238,5 +238,6 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_agg, exp_birch, exp_dbscan], features,
-                    'general_clustering_3', 20, 0, cap_running_time=5000)
+    run_experiments([exp_kmeans, exp_agg, exp_birch, exp_dbscan, exp_gaussian, exp_optics, exp_affinity,
+                     exp_spectral, exp_meanshift], features,
+                    'general_clustering_3_all', 20, 0, cap_running_time=5000)
