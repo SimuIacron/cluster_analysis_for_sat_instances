@@ -4,13 +4,14 @@ from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cl
     calculate_cluster_deviation_score, calculate_biggest_family_for_cluster, calculate_pareto_optimal_solvers_std_mean, \
     filter_best_cluster_for_each_family, filter_pareto_optimal_clusters, calculate_feature_stochastic
 from DataFormats.DbInstance import DbInstance
-from run_experiments import read_json
+from run_experiments import read_json, write_json
 from run_plotting_clusters import export_clusters_sorted_best, compare_with_family, plot_biggest_cluster_for_family
 from util_scripts import DatabaseReader
 
-input_file_cluster = 'clustering_general_v3/single_clusters/general_clustering_3_clusters'
-input_file_clustering = 'clustering_general_v3/general_clustering_3'
+input_file_cluster = 'general_clustering_3_clusters'
+input_file_clustering = 'general_clustering_3'
 # output_dir_stochastic = 'clustering_general_v3/single_clusters/clustering_general_clusters_stochastic'
+output_file = 'general_clustering_3_clusters_stochastic'
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -35,20 +36,23 @@ db_instance = DbInstance(features)
 data_clustering = read_json(input_file_clustering)
 data_clusters = read_json(input_file_cluster)
 
-filtered = filter_cluster_data(data_clustering, data_clusters,
-                               ['selected_data', 'cluster_algorithm'],
-                               [[DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, DatabaseReader.FEATURES_BASE + DatabaseReader.FEATURES_GATE],
-                                ['KMEANS', 'DBSCAN', 'AGGLOMERATIVE']],
-                               20, 10000)
-calculated = calculate_feature_stochastic(data_clustering, filtered, db_instance)
-pareto = calculate_pareto_optimal_solvers_std_mean(calculated, db_instance)
-deviation_data = calculate_cluster_deviation_score(pareto, db_instance)
-biggest_families = calculate_biggest_family_for_cluster(data_clustering, deviation_data, db_instance)
-best_clusters = filter_pareto_optimal_clusters(biggest_families,
-                                               ['cluster_deviation_score',
-                                                'family_total_percentage'],
-                                               [True, False])
-best_families = filter_best_cluster_for_each_family(best_clusters, 'cluster_deviation_score', minimize=True)
+calculated = calculate_feature_stochastic(data_clustering, data_clusters, db_instance)
+write_json(output_file, calculated)
 
-pass
+# filtered = filter_cluster_data(data_clustering, data_clusters,
+#                                ['selected_data', 'cluster_algorithm'],
+#                                [[DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, DatabaseReader.FEATURES_BASE + DatabaseReader.FEATURES_GATE],
+#                                 ['KMEANS', 'DBSCAN', 'AGGLOMERATIVE']],
+#                                20, 10000)
+# calculated = calculate_feature_stochastic(data_clustering, filtered, db_instance)
+# pareto = calculate_pareto_optimal_solvers_std_mean(calculated, db_instance)
+# deviation_data = calculate_cluster_deviation_score(pareto, db_instance)
+# biggest_families = calculate_biggest_family_for_cluster(data_clustering, deviation_data, db_instance)
+# best_clusters = filter_pareto_optimal_clusters(biggest_families,
+#                                                ['cluster_deviation_score',
+#                                                 'family_total_percentage'],
+#                                                [True, False])
+# best_families = filter_best_cluster_for_each_family(best_clusters, 'cluster_deviation_score', minimize=True)
+#
+# pass
 

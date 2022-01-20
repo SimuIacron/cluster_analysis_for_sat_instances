@@ -11,13 +11,13 @@ def calculate_feature_stochastic(data_clustering, data_clusters, db_instance: Db
 
     base_interval_size = [max(item) for item in util.rotateNestedLists(db_instance.base_wh)]
     gate_interval_size = [max(item) for item in util.rotateNestedLists(db_instance.gate_wh)]
-    for i in range(len(base_interval_size)):
-        if base_interval_size[i] == 0:
-            base_interval_size[i] = float(1)
-
-    for i in range(len(gate_interval_size)):
-        if gate_interval_size[i] == 0:
-            gate_interval_size[i] = float(1)
+    # for i in range(len(base_interval_size)):
+    #     if base_interval_size[i] == 0:
+    #         base_interval_size[i] = float(1)
+    #
+    # for i in range(len(gate_interval_size)):
+    #     if gate_interval_size[i] == 0:
+    #         gate_interval_size[i] = float(1)
 
     for cluster in data_clusters:
         clustering = get_clustering_for_cluster(data_clustering, cluster)
@@ -34,13 +34,13 @@ def calculate_feature_stochastic(data_clustering, data_clusters, db_instance: Db
 
         base_rot = util.rotateNestedLists(base)
         base_variance = [np.var(feature) for feature in base_rot]
-        base_mean = [np.mean(feature) / size for feature, size in zip(base_rot, base_interval_size)]
-        base_std = [np.std(feature) / size for feature, size in zip(base_rot, base_interval_size)]
+        base_mean = [np.mean(feature) for feature in base_rot]
+        base_std = [np.std(feature) for feature in base_rot]
 
         gate_rot = util.rotateNestedLists(gate)
         gate_variance = [np.var(feature) for feature in gate_rot]
-        gate_mean = [np.mean(feature) / size for feature, size in zip(gate_rot, gate_interval_size)]
-        gate_std = [np.std(feature) / size for feature, size in zip(gate_rot, gate_interval_size)]
+        gate_mean = [np.mean(feature)for feature in gate_rot]
+        gate_std = [np.std(feature)for feature in gate_rot]
 
         runtimes_rot = util.rotateNestedLists(runtimes)
         runtimes_variance = [np.var(feature) for feature in runtimes_rot]
@@ -51,9 +51,11 @@ def calculate_feature_stochastic(data_clustering, data_clusters, db_instance: Db
             'base_variance': base_variance,
             'base_mean': base_mean,
             'base_std': base_std,
+            'base_interval_size': base_interval_size,
             'gate_variance': gate_variance,
             'gate_mean': gate_mean,
             'gate_std': gate_std,
+            'gate_interval_size': gate_interval_size,
             'runtimes_variance': runtimes_variance,
             'runtimes_mean': runtimes_mean,
             'runtimes_std': runtimes_std
