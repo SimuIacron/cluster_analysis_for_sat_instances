@@ -1,4 +1,7 @@
 import os
+import sys
+from collections import Counter
+
 from gbd_tool.gbd_api import GBD
 
 from util_scripts import util
@@ -65,7 +68,6 @@ FEATURES_RESULT = ['result']
 
 
 def remove_keywords_from_query_with_hash(query, features):
-
     for inst in query:
         for i in range(1, len(inst)):
 
@@ -75,10 +77,11 @@ def remove_keywords_from_query_with_hash(query, features):
                 if features == FEATURES_SOLVER:
                     inst[i] = TIMEOUT
                 else:
-                    inst[i] = 0
+                    inst[i] = -sys.maxsize - 1
             else:
                 try:
                     inst[i] = float(inst[i])
+
                 # needed to let discrete values such as families intact
                 except ValueError:
                     pass
@@ -144,8 +147,22 @@ def read_from_db(features):
         # do the query and create one query with, and one without the hash
         queries = []
         queries_without_hash = []
+
+        # hash_list = []
+
         for sub_features in split_features:
             query = gbd.query_search("local like %sat202%", [], sub_features)
+
+            # for inst in query:
+            #     for i in inst:
+            #         try:
+            #             if float(i) < 0:
+            #                 hash_list.append(inst[0])
+            #         except ValueError:
+            #             pass
+            #
+            # print(hash_list)
+
             query = [list(i) for i in query]
             query = remove_keywords_from_query_with_hash(query, sub_features)
             query_without_hash = [el[1:] for el in query]
