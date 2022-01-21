@@ -6,18 +6,15 @@ from util_scripts import util, DatabaseReader
 from util_scripts.pareto_optimal import get_pareto_indices
 
 
-def calculate_feature_stochastic(data_clustering, data_clusters, db_instance: DbInstance):
+# calculates the mean, variance and std for base, gate and runtimes
+# data_clustering
+# data_clusters
+# db_instance
+def calculate_feature_stochastic(data_clustering, data_clusters, data_dataset, db_instance: DbInstance):
     data_clusters_stochastic = []
 
     base_interval_size = [max(item) for item in util.rotateNestedLists(db_instance.base_wh)]
     gate_interval_size = [max(item) for item in util.rotateNestedLists(db_instance.gate_wh)]
-    # for i in range(len(base_interval_size)):
-    #     if base_interval_size[i] == 0:
-    #         base_interval_size[i] = float(1)
-    #
-    # for i in range(len(gate_interval_size)):
-    #     if gate_interval_size[i] == 0:
-    #         gate_interval_size[i] = float(1)
 
     for cluster in data_clusters:
         clustering = get_clustering_for_cluster(data_clustering, cluster)
@@ -36,29 +33,57 @@ def calculate_feature_stochastic(data_clustering, data_clusters, db_instance: Db
         base_variance = [np.var(feature) for feature in base_rot]
         base_mean = [np.mean(feature) for feature in base_rot]
         base_std = [np.std(feature) for feature in base_rot]
+        base_min = [np.min(feature) for feature in base_rot]
+        base_max = [np.max(feature) for feature in base_rot]
+        base_01 = util.rotateNestedLists([scale_array_to_01_to_given_interval(feature, min_, max_)
+                                          for feature, min_, max_ in
+                                          zip(base_rot, data_dataset['base_min'], data_dataset['base_max'])])
 
         gate_rot = util.rotateNestedLists(gate)
         gate_variance = [np.var(feature) for feature in gate_rot]
-        gate_mean = [np.mean(feature)for feature in gate_rot]
-        gate_std = [np.std(feature)for feature in gate_rot]
+        gate_mean = [np.mean(feature) for feature in gate_rot]
+        gate_std = [np.std(feature) for feature in gate_rot]
+        gate_min = [np.min(feature) for feature in gate_rot]
+        gate_max = [np.max(feature) for feature in gate_rot]
+        gate_01 = util.rotateNestedLists([scale_array_to_01_to_given_interval(feature, min_, max_)
+                                          for feature, min_, max_ in
+                                          zip(gate_rot, data_dataset['gate_min'], data_dataset['gate_max'])])
 
         runtimes_rot = util.rotateNestedLists(runtimes)
         runtimes_variance = [np.var(feature) for feature in runtimes_rot]
         runtimes_mean = [np.mean(feature) for feature in runtimes_rot]
         runtimes_std = [np.std(feature) for feature in runtimes_rot]
+        runtimes_min = [np.min(feature) for feature in runtimes_rot]
+        runtimes_max = [np.max(feature) for feature in runtimes_rot]
+        runtimes_01 = util.rotateNestedLists([scale_array_to_01_to_given_interval(feature, min_, max_)
+                                              for feature, min_, max_ in
+                                              zip(runtimes_rot, data_dataset['runtimes_min'],
+                                                  data_dataset['runtimes_max'])])
 
         new_dict = dict(cluster, **{
+            'base': base,
+            'base_01': base_01,
             'base_variance': base_variance,
             'base_mean': base_mean,
             'base_std': base_std,
+            'base_min': base_min,
+            'base_max': base_max,
             'base_interval_size': base_interval_size,
+            'gate': gate,
+            'gate_01': gate_01,
             'gate_variance': gate_variance,
             'gate_mean': gate_mean,
             'gate_std': gate_std,
+            'gate_min': gate_min,
+            'gate_max': gate_max,
             'gate_interval_size': gate_interval_size,
+            'runtimes': runtimes,
+            'runtimes_01': runtimes_01,
             'runtimes_variance': runtimes_variance,
             'runtimes_mean': runtimes_mean,
-            'runtimes_std': runtimes_std
+            'runtimes_std': runtimes_std,
+            'runtimes_min': runtimes_min,
+            'runtimes_max': runtimes_max
         })
 
         data_clusters_stochastic.append(new_dict)
@@ -94,7 +119,7 @@ def filter_best_cluster_for_each_family(data_clusters, filter_param, minimize=Fa
 # filter_params: List of the parameters that should be used when calculating pareto optimal clusters
 # minimize_params: List of booleans, whether the filter_param should be minimized or maximized
 def filter_pareto_optimal_clusters(data_clusters, filter_params, minimize_params):
-    pareto_data = [[] for i in filter_params]
+    pareto_data = [[] for _ in filter_params]
     for cluster in data_clusters:
         for i, param in enumerate(filter_params):
             pareto_data[i].append(cluster[param])
@@ -104,6 +129,8 @@ def filter_pareto_optimal_clusters(data_clusters, filter_params, minimize_params
     for i in indices:
         pareto_optimal_clusters.append(data_clusters[i])
 
+    print('remaining clusters after filtering for pareto optimal clusters with params {b}: {a}'
+          .format(a=len(pareto_optimal_clusters), b=filter_params))
     return pareto_optimal_clusters
 
 
@@ -142,6 +169,7 @@ def calculate_cluster_deviation_score(data_clusters_stochastic, db_instance: DbI
                                   cluster['runtimes_std'])]
         cluster_deviation_score = min(cluster_deviations)
         solver = db_instance.solver_f[np.argmin(cluster_deviations)]
+
         new_dict = dict(cluster, **{
             'cluster_deviation_score': cluster_deviation_score,
             'cluster_deviation_solver': solver,
@@ -151,6 +179,25 @@ def calculate_cluster_deviation_score(data_clusters_stochastic, db_instance: DbI
 
     sorted_data = sorted(data_clusters_stochastic_deviation_score, key=lambda d: d['cluster_deviation_score'])
     return sorted_data
+
+
+def calculate_factor_of_sbs_and_deviation_solver(data_clustering, data_clusters, sbs_solver, db_instance: DbInstance):
+    data_clusters_factor = []
+    for cluster in data_clusters:
+        bss_index = db_instance.solver_f.index(sbs_solver)
+        deviation_index = db_instance.solver_f.index(cluster['cluster_deviation_solver'])
+
+        runtimes = util.rotateNestedLists(get_cluster_runtimes(data_clustering, cluster, db_instance))
+        par2_bss = calculate_par2(runtimes[bss_index], 5000)
+        par2_deviation = calculate_par2(runtimes[deviation_index], 5000)
+        factor = par2_bss / par2_deviation
+
+        new_dict = dict(cluster, **{
+            'bss_deviation_factor': factor
+        })
+        data_clusters_factor.append(new_dict)
+
+    return data_clusters_factor
 
 
 # searches for clusters where all instances in the cluster are unsolvable for all solvers
@@ -181,7 +228,6 @@ def search_clusters_with_unsolvable_instances(data_clusters_stochastic):
 # max_cluster_amount: The maximum amount of clusters in the clustering the cluster is part of
 def filter_cluster_data(data_clustering, data_cluster, param_names, param_values_list, min_cluster_size,
                         max_cluster_amount):
-    print('start filtering')
     filtered_data_cluster = []
     for cluster in data_cluster:
         clustering = get_clustering_for_cluster(data_clustering, cluster)
@@ -197,8 +243,7 @@ def filter_cluster_data(data_clustering, data_cluster, param_names, param_values
             if params_fit:
                 filtered_data_cluster.append(cluster)
 
-    print('finished filtering')
-    print('remaining clusters: ' + str(len(filtered_data_cluster)))
+    print('remaining clusters after filtering general: ' + str(len(filtered_data_cluster)))
     return filtered_data_cluster
 
 
@@ -233,7 +278,14 @@ def calculate_biggest_family_for_cluster(data_clustering, data_clusters, db_inst
     return data_cluster_family
 
 
-def find_base_and_gate_features_with_low_std(data_cluster, dataset_stochastic_values, db_instance: DbInstance, max_std=0.1):
+# selects the base and gate features that have a lower standard deviation in comparison to the factor of
+# the standard deviation of all instances.
+# data_cluster: The clusters, must contain stochastic values
+# dataset_stochastic_values: The stochastic values of all features over the whole dataset
+# db_instance
+# max_std: The feature gets selected if cluster_std < max_std * dataset_std of a feature
+def find_base_and_gate_features_with_low_std(data_cluster, dataset_stochastic_values, db_instance: DbInstance,
+                                             max_std=0.1):
     data_cluster_interesting_features = []
     for cluster in data_cluster:
         interesting_features_base = []
@@ -244,7 +296,7 @@ def find_base_and_gate_features_with_low_std(data_cluster, dataset_stochastic_va
                     (feature, cluster['base_mean'][i], cluster_std, cluster_std / dataset_std))
         interesting_features_gate = []
         for i, (cluster_std, dataset_std) in enumerate(zip(cluster['gate_std'], dataset_stochastic_values['gate_std'])):
-            if cluster_std < max_std * dataset_std:
+            if cluster_std < max_std * dataset_std and dataset_std != 0:
                 feature = db_instance.gate_f[i]
                 interesting_features_gate.append(
                     (feature, cluster['gate_mean'][i], cluster_std, cluster_std / dataset_std))
@@ -258,7 +310,154 @@ def find_base_and_gate_features_with_low_std(data_cluster, dataset_stochastic_va
     return data_cluster_interesting_features
 
 
+# sorts the given clusters after the given parameters
+# data_cluster: Must contain the given sort_param
+# sort_param: The parameter that is used to sort
+# descending: Whether to sort ascending or descending
+def sort_after_param(data_cluster, sort_param, descending=False):
+    return sorted(data_cluster, key=lambda x: x[sort_param], reverse=descending)
+
+
+# uses the best solver with the lowest deviation score on all instances in the whole dataset,
+# that has a majority in the cluster
+# data_cluster: Must contain cluster_deviation_solver and family_list
+# db_instance
+def check_performance_for_all_instances_of_major_family(data_cluster, db_instance: DbInstance):
+    database_cluster_complete_family = []
+    for cluster in data_cluster:
+        solver = cluster['cluster_deviation_solver']
+        solver_index = db_instance.solver_f.index(solver)
+        family = cluster['family_list'][0][0]
+        unsolvable_instances = 0
+        runtimes = []
+        for current_family, current_runtimes in zip(db_instance.family_wh, db_instance.solver_wh):
+            if current_family[0] == family:
+                current_runtime = current_runtimes[solver_index]
+                runtimes.append(current_runtime)
+                if current_runtime >= DatabaseReader.TIMEOUT:
+                    unsolvable_instances = unsolvable_instances + 1
+
+        par2 = calculate_par2(runtimes, DatabaseReader.TIMEOUT)
+        new_dict = dict(cluster, **{
+            'complete_family_par2': par2,
+            'complete_family_unsolvable_instances': unsolvable_instances,
+            'complete_family_unsolvable_instances_percentage':
+                unsolvable_instances / len(runtimes),
+        })
+        database_cluster_complete_family.append(new_dict)
+
+    return database_cluster_complete_family
+
+
+def check_performance_for_instances_with_similar_feature_values(data_cluster, data_clustering, db_instance: DbInstance,
+                                                                only_allow_features_that_were_used_in_clustering=True):
+    database_cluster_similar_instances = []
+    for cluster in data_cluster:
+        clustering = get_clustering_for_cluster(data_clustering, cluster)
+        selected_data = clustering['settings']['selected_data']
+
+        solver = cluster['cluster_deviation_solver']
+        solver_index = db_instance.solver_f.index(solver)
+
+        unsolvable_instances = 0
+        new_instances_not_in_cluster = 0
+
+        contains_base = True
+        contains_gate = True
+        if only_allow_features_that_were_used_in_clustering:
+            contains_base = all(item in selected_data for item in db_instance.base_f)
+            contains_gate = all(item in selected_data for item in db_instance.gate_f)
+
+        low_std_base_feature_index = [db_instance.base_f.index(item[0]) for item in cluster['low_std_base']]
+        low_std_gate_feature_index = [db_instance.gate_f.index(item[0]) for item in cluster['low_std_gate']]
+
+        new_instance_families = []
+        runtimes_of_instances_close_to_cluster = []
+        for i, (base, gate, runtimes, family) in \
+                enumerate(zip(db_instance.base_wh, db_instance.gate_wh, db_instance.solver_wh, db_instance.family_wh)):
+            near_cluster = True
+            if contains_base:
+                for index in low_std_base_feature_index:
+                    if not (cluster['base_max'][index] >= base[index] >= cluster['base_min'][index]):
+                        near_cluster = False
+                        break
+            if contains_gate and near_cluster:
+                for index in low_std_gate_feature_index:
+                    if not (cluster['gate_max'][index] >= gate[index] >= cluster['gate_min'][index]):
+                        near_cluster = False
+                        break
+
+            if near_cluster:
+                if clustering['clustering'][i] != cluster['cluster_idx']:
+                    new_instances_not_in_cluster = new_instances_not_in_cluster + 1
+                    new_instance_families.append(family[0])
+
+                current_runtime = runtimes[solver_index]
+                runtimes_of_instances_close_to_cluster.append(current_runtime)
+                if current_runtime >= DatabaseReader.TIMEOUT:
+                    unsolvable_instances = unsolvable_instances + 1
+
+        par2 = calculate_par2(runtimes_of_instances_close_to_cluster, DatabaseReader.TIMEOUT)
+        new_dict = dict(cluster, **{
+            'similar_instances_par2': par2,
+            'similar_instances_unsolvable_instances': unsolvable_instances,
+            'similar_instances_unsolvable_instances_percentage':
+                unsolvable_instances / len(runtimes_of_instances_close_to_cluster),
+            'similar_instances_new_in_cluster': new_instances_not_in_cluster,
+            'similar_instances_new_in_cluster_families': Counter(new_instance_families)
+        })
+        database_cluster_similar_instances.append(new_dict)
+
+    return database_cluster_similar_instances
+
+
+def filter_non_clusters(data_cluster):
+    data_cluster_filtered = []
+    for cluster in data_cluster:
+        if cluster['cluster_idx'] != -1:
+            data_cluster_filtered.append(cluster)
+
+    print('remaining clusters after filtering non clusters: {a}'.format(a=len(data_cluster_filtered)))
+    return data_cluster_filtered
+
+
+def filter_same_cluster(data_clustering, data_cluster):
+    remaining_clusters = []
+    accepted_clusters = []
+    for cluster in data_cluster:
+        clustering = get_clustering_for_cluster(data_clustering, cluster)
+        index_list = []
+        for i, value in enumerate(clustering['clustering']):
+            if value == cluster['cluster_idx']:
+                index_list.append(i)
+        already_in_list = False
+        for other_cluster in accepted_clusters:
+            if Counter(other_cluster) == Counter(index_list):
+                # print('{a} same as {b}'.format(a=other_cluster, b=index_list))
+                already_in_list = True
+                break
+
+        if not already_in_list:
+            accepted_clusters.append(index_list)
+            remaining_clusters.append(cluster)
+
+    print('remaining clusters after filtering equals: {a}'.format(a=len(remaining_clusters)))
+    return remaining_clusters
+
+
 # --- Helper functions -------------------------------------------------------------------------------------------------
+
+# calculates the par2 score for the given runtimes using the timeout value given
+def calculate_par2(runtimes, timeout):
+    par2 = 0
+    for runtime in runtimes:
+        if runtime >= timeout:
+            par2 = par2 + timeout * 2
+        else:
+            par2 = par2 + runtime
+
+    return par2 / len(runtimes)
+
 
 # gets the runtimes for the instances in the cluster
 # data_clustering: list of clustering dicts
@@ -296,3 +495,14 @@ def export_variance_mean_of_cluster(input_file_clustering, input_file_cluster, o
     data_cluster = read_json(input_file_cluster)
     variance_mean_list = calculate_feature_stochastic(data_clustering, data_cluster, db_instance)
     write_json(output_file, variance_mean_list)
+
+
+# scales given array values to a scale of 0 to 1
+# example: [3,5,7] --> [0, 0.5, 1]
+def scale_array_to_01_to_given_interval(array, min_v, max_v):
+    if max_v - min_v != 0:
+        scaled_array = [((value - min_v) / (max_v - min_v)) for value in array]
+    else:
+        scaled_array = [0] * len(array)
+
+    return scaled_array

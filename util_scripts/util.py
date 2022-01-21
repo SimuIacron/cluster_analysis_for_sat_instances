@@ -14,7 +14,7 @@ def chunks(lst, n):
 def scale_array_to_01(array):
     max_v = max(array)
     min_v = min(array)
-    if max_v != 0:
+    if max_v-min_v != 0:
         scaled_array = [((value - min_v) / (max_v - min_v)) for value in array]
     else:
         scaled_array = [0] * len(array)

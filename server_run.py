@@ -1,9 +1,13 @@
 import itertools
 
+from ClusterAnalysis.plot_single_clusters import boxplot_cluster_feature_distribution, barchart_compare_runtime_scores, \
+    barchart_compare_sbs_speedup
 from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cluster, filter_cluster_data, \
     calculate_cluster_deviation_score, calculate_biggest_family_for_cluster, calculate_pareto_optimal_solvers_std_mean, \
     filter_best_cluster_for_each_family, filter_pareto_optimal_clusters, calculate_feature_stochastic, \
-    find_base_and_gate_features_with_low_std
+    find_base_and_gate_features_with_low_std, sort_after_param, check_performance_for_all_instances_of_major_family, \
+    check_performance_for_instances_with_similar_feature_values, filter_non_clusters, filter_same_cluster, \
+    calculate_factor_of_sbs_and_deviation_solver
 from ClusterAnalysis.stochastic_values_dataset import calculate_stochastic_value_for_dataset
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json
@@ -13,7 +17,9 @@ from util_scripts import DatabaseReader
 input_file_cluster = 'clustering_general_v3/single_clusters/general_clustering_3_clusters'
 input_file_clustering = 'clustering_general_v3/general_clustering_3'
 # output_dir_stochastic = 'clustering_general_v3/single_clusters/clustering_general_clusters_stochastic'
-output_file = 'clustering_general_v3/stochastic_values_dataset'
+input_file_dataset = 'clustering_general_v3/stochastic_values_dataset'
+input_file_sbs = 'clustering_general_v3/sbs_3'
+output_file = '/general_clustering_3/single_clusters/'
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -33,30 +39,68 @@ for feature_vector in input_dbs:
 
 db_instance = DbInstance(features)
 
+
+
 # values = calculate_stochastic_value_for_dataset(db_instance)
-# write_json('stochastic_values_dataset', values)
+# write_json(input_file_dataset, values)
 
 # export_variance_mean_of_cluster(input_file_clustering, input_file_cluster, output_dir_stochastic, db_instance)
 
 data_clustering = read_json(input_file_clustering)
 data_clusters = read_json(input_file_cluster)
-data_dataset = read_json(output_file)
+data_dataset = read_json(input_file_dataset)
+sbs = read_json(input_file_sbs)
+sbs_solver = sbs[1]["0"][0][0][0]
 
+print('starting with {a} clusters'.format(a=len(data_clusters)))
 
-filtered = filter_cluster_data(data_clustering, data_clusters,
+filtered1 = filter_cluster_data(data_clustering, data_clusters,
                                ['selected_data', 'cluster_algorithm'],
-                               [[DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, DatabaseReader.FEATURES_BASE + DatabaseReader.FEATURES_GATE],
+                               [[DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE,
+                                 DatabaseReader.FEATURES_BASE + DatabaseReader.FEATURES_GATE],
                                 ['KMEANS', 'DBSCAN', 'AGGLOMERATIVE']],
                                20, 10000)
-calculated = calculate_feature_stochastic(data_clustering, filtered, db_instance)
+filtered2 = filter_non_clusters(filtered1)
+filtered3 = filter_same_cluster(data_clustering, filtered2)
+calculated = calculate_feature_stochastic(data_clustering, filtered3, data_dataset, db_instance)
 deviation_data = calculate_cluster_deviation_score(calculated, db_instance)
-biggest_families = calculate_biggest_family_for_cluster(data_clustering, deviation_data, db_instance)
-best_clusters = filter_pareto_optimal_clusters(biggest_families,
-                                               ['cluster_deviation_score',
-                                                'family_total_percentage'],
-                                               [True, False])
-best_families = filter_best_cluster_for_each_family(best_clusters, 'cluster_deviation_score', minimize=True)
-interesting_features = find_base_and_gate_features_with_low_std(biggest_families, data_dataset, db_instance)
+sbs_data = calculate_factor_of_sbs_and_deviation_solver(data_clustering, deviation_data, sbs_solver, db_instance)
+biggest_families = calculate_biggest_family_for_cluster(data_clustering, sbs_data, db_instance)
+# best_clusters = filter_pareto_optimal_clusters(biggest_families,
+#                                                ['cluster_deviation_score',
+#                                                 'family_total_percentage'],
+#                                                [True, False])
+interesting_features = find_base_and_gate_features_with_low_std(biggest_families, data_dataset, db_instance,
+                                                                max_std=0.0001)
+family_performance = check_performance_for_all_instances_of_major_family(interesting_features, db_instance)
+# pareto_solvers = calculate_pareto_optimal_solvers_std_mean(family_performance, db_instance)
+# similar_instances_performance = check_performance_for_instances_with_similar_feature_values(family_performance,
+#                                                                                             data_clustering,
+#                                                                                             db_instance)
+
+
+best_families = filter_best_cluster_for_each_family(family_performance, 'cluster_deviation_score', minimize=True)
+sort = sort_after_param(family_performance, 'cluster_deviation_score', descending=False)
 
 pass
+
+
+# for key, value in best_families.items():
+#     boxplot_cluster_feature_distribution(value, db_instance, use_base=True, use_gate=True,
+#                                      dpi=100, show_plot=False, output_file=output_file + 'feature_distribution/' + key)
+
+
+# family_list = []
+# for key, item in best_families.items():
+#     family_list.append(item)
+# barchart_compare_runtime_scores(family_list, output_file=output_file + 'family_cluster_scores', dpi=100)
 #
+# barchart_compare_runtime_scores(sort[:30], output_file=output_file + 'best_cluster_scores', dpi=100)
+
+family_list = []
+for key, item in best_families.items():
+    family_list.append(item)
+barchart_compare_sbs_speedup(family_list, output_file=output_file + 'family_sbs_speedup', dpi=100)
+
+barchart_compare_sbs_speedup(sort[:30], output_file=output_file + 'best_sbs_speedup', dpi=100)
+
