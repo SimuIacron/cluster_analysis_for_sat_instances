@@ -13,9 +13,6 @@ from util_scripts.pareto_optimal import get_pareto_indices
 def calculate_feature_stochastic(data_clustering, data_clusters, data_dataset, db_instance: DbInstance):
     data_clusters_stochastic = []
 
-    base_interval_size = [max(item) for item in util.rotateNestedLists(db_instance.base_wh)]
-    gate_interval_size = [max(item) for item in util.rotateNestedLists(db_instance.gate_wh)]
-
     for cluster in data_clusters:
         clustering = get_clustering_for_cluster(data_clustering, cluster)
 
@@ -68,7 +65,6 @@ def calculate_feature_stochastic(data_clustering, data_clusters, data_dataset, d
             'base_std': base_std,
             'base_min': base_min,
             'base_max': base_max,
-            'base_interval_size': base_interval_size,
             'gate': gate,
             'gate_01': gate_01,
             'gate_variance': gate_variance,
@@ -76,7 +72,6 @@ def calculate_feature_stochastic(data_clustering, data_clusters, data_dataset, d
             'gate_std': gate_std,
             'gate_min': gate_min,
             'gate_max': gate_max,
-            'gate_interval_size': gate_interval_size,
             'runtimes': runtimes,
             'runtimes_01': runtimes_01,
             'runtimes_variance': runtimes_variance,
@@ -161,39 +156,40 @@ def calculate_pareto_optimal_solvers_std_mean(data_clusters_stochastic, db_insta
 # calculates the cluster_deviation score for each cluster in data_clusters_stochastic
 # data_clusters_stochastic: Must contain mean and std
 # db_instance
-def calculate_cluster_deviation_score(data_clusters_stochastic, db_instance: DbInstance):
-    data_clusters_stochastic_deviation_score = []
+def calculate_cluster_performance_score(data_clusters_stochastic, db_instance: DbInstance):
+    data_clusters_stochastic_performance_score = []
     for cluster in data_clusters_stochastic:
-        cluster_deviations = [mean_value + standard_deviation for mean_value, standard_deviation in
+        cluster_performances = [runtime_timeout_par2(mean_value, DatabaseReader.TIMEOUT) + standard_deviation
+                              for mean_value, standard_deviation in
                               zip(cluster['runtimes_mean'],
                                   cluster['runtimes_std'])]
-        cluster_deviation_score = min(cluster_deviations)
-        solver = db_instance.solver_f[np.argmin(cluster_deviations)]
+        cluster_performance_score = min(cluster_performances)
+        solver = db_instance.solver_f[np.argmin(cluster_performances)]
 
         new_dict = dict(cluster, **{
-            'cluster_deviation_score': cluster_deviation_score,
-            'cluster_deviation_solver': solver,
-            'cluster_deviations': cluster_deviations
+            'cluster_performance_score': cluster_performance_score,
+            'cluster_performance_solver': solver,
+            'cluster_performances': cluster_performances
         })
-        data_clusters_stochastic_deviation_score.append(new_dict)
+        data_clusters_stochastic_performance_score.append(new_dict)
 
-    sorted_data = sorted(data_clusters_stochastic_deviation_score, key=lambda d: d['cluster_deviation_score'])
+    sorted_data = sorted(data_clusters_stochastic_performance_score, key=lambda d: d['cluster_performance_score'])
     return sorted_data
 
 
 def calculate_factor_of_sbs_and_deviation_solver(data_clustering, data_clusters, sbs_solver, db_instance: DbInstance):
     data_clusters_factor = []
     for cluster in data_clusters:
-        bss_index = db_instance.solver_f.index(sbs_solver)
-        deviation_index = db_instance.solver_f.index(cluster['cluster_deviation_solver'])
+        sbs_index = db_instance.solver_f.index(sbs_solver)
+        performance_index = db_instance.solver_f.index(cluster['cluster_performance_solver'])
 
         runtimes = util.rotateNestedLists(get_cluster_runtimes(data_clustering, cluster, db_instance))
-        par2_bss = calculate_par2(runtimes[bss_index], 5000)
-        par2_deviation = calculate_par2(runtimes[deviation_index], 5000)
-        factor = par2_bss / par2_deviation
+        par2_sbs = calculate_par2(runtimes[sbs_index], 5000)
+        par2_performance = calculate_par2(runtimes[performance_index], 5000)
+        factor = par2_sbs / par2_performance
 
         new_dict = dict(cluster, **{
-            'bss_deviation_factor': factor
+            'sbs_performance_factor': factor
         })
         data_clusters_factor.append(new_dict)
 
@@ -206,14 +202,28 @@ def search_clusters_with_unsolvable_instances(data_clusters_stochastic):
     unsolvable_clusters = []
     for cluster in data_clusters_stochastic:
         is_unsolvable = True
-        for mean_value, variance_value in zip(cluster['runtimes_mean'], cluster['runtime_variance']):
-            if mean_value != DatabaseReader.TIMEOUT or variance_value != 0:
+        for mean_value, variance_value in zip(cluster['runtimes_mean'], cluster['runtimes_variance']):
+            if mean_value != DatabaseReader.TIMEOUT:  # or variance_value != 0:
                 is_unsolvable = False
                 break
 
         if is_unsolvable:
             unsolvable_clusters.append(cluster)
     return unsolvable_clusters
+
+
+# filters the clusters by a maximum amount of clusterings
+# def filter_clusterings_by_cluster_amount(data_clustering, data_cluster, max_size):
+#     data_clusters_filtered = []
+#     for clustering in data_clustering:
+#         if len(clustering['clusters']) < max_size:
+#             id_ = clustering['id']
+#             for cluster in data_cluster:
+#                 if cluster['id'] == id_:
+#                     data_clusters_filtered.append(cluster)
+#
+#     print('remaining clusters after filtering clustering size: ' + str(len(data_clusters_filtered)))
+#     return data_clusters_filtered
 
 
 # filters the given clusters by parameters as well as the size of the cluster and the amount of clusters in the
@@ -226,13 +236,14 @@ def search_clusters_with_unsolvable_instances(data_clusters_stochastic):
 # from the filtering
 # min_cluster_size: The minimal size of a cluster
 # max_cluster_amount: The maximum amount of clusters in the clustering the cluster is part of
-def filter_cluster_data(data_clustering, data_cluster, param_names, param_values_list, min_cluster_size,
-                        max_cluster_amount):
+def filter_cluster_data(data_clustering, data_cluster, param_names, param_values_list, cluster_size_interval,
+                        cluster_amount_interval):
     filtered_data_cluster = []
     for cluster in data_cluster:
         clustering = get_clustering_for_cluster(data_clustering, cluster)
 
-        if cluster['cluster_size'] >= min_cluster_size and len(clustering['clusters']) <= max_cluster_amount:
+        if cluster_size_interval[0] <= cluster['cluster_size'] <= cluster_size_interval[1] and \
+                cluster_amount_interval[0] <= len(clustering['clusters']) <= cluster_amount_interval[1]:
 
             params_fit = True
             for param_name, param_values in zip(param_names, param_values_list):
@@ -245,6 +256,15 @@ def filter_cluster_data(data_clustering, data_cluster, param_names, param_values
 
     print('remaining clusters after filtering general: ' + str(len(filtered_data_cluster)))
     return filtered_data_cluster
+
+
+def filter_specific_clustering(data_clusters, id_):
+    data_specific_clustering = []
+    for cluster in data_clusters:
+        if cluster['id'] == id_:
+            data_specific_clustering.append(cluster)
+
+    return data_specific_clustering
 
 
 # calculates what family has the majority in a cluster
@@ -320,12 +340,12 @@ def sort_after_param(data_cluster, sort_param, descending=False):
 
 # uses the best solver with the lowest deviation score on all instances in the whole dataset,
 # that has a majority in the cluster
-# data_cluster: Must contain cluster_deviation_solver and family_list
+# data_cluster: Must contain cluster_performance_solver and family_list
 # db_instance
 def check_performance_for_all_instances_of_major_family(data_cluster, db_instance: DbInstance):
     database_cluster_complete_family = []
     for cluster in data_cluster:
-        solver = cluster['cluster_deviation_solver']
+        solver = cluster['cluster_performance_solver']
         solver_index = db_instance.solver_f.index(solver)
         family = cluster['family_list'][0][0]
         unsolvable_instances = 0
@@ -356,7 +376,7 @@ def check_performance_for_instances_with_similar_feature_values(data_cluster, da
         clustering = get_clustering_for_cluster(data_clustering, cluster)
         selected_data = clustering['settings']['selected_data']
 
-        solver = cluster['cluster_deviation_solver']
+        solver = cluster['cluster_performance_solver']
         solver_index = db_instance.solver_f.index(solver)
 
         unsolvable_instances = 0
@@ -445,18 +465,50 @@ def filter_same_cluster(data_clustering, data_cluster):
     return remaining_clusters
 
 
+def find_best_clustering_by_performance_score(data_clustering, data_clusters):
+    clustering_list = []
+    for clustering in data_clustering:
+        id_ = clustering['id']
+        count = 0
+        size = 0
+        clustering_performance_score = 0
+        for cluster in data_clusters:
+            if cluster['id'] == id_:
+                count = count + 1
+                size = size + cluster['cluster_size']
+                clustering_performance_score = clustering_performance_score + cluster['cluster_performance_score'] * \
+                                             cluster['cluster_size']
+
+        if count != 0:
+            clustering_performance_score = clustering_performance_score / size
+            assert count == len(
+                clustering['clusters']), '{id}: added {a} clusters to the score, but expected {b}'.format(
+                id=id_, a=count, b=len(clustering['clusters']))
+            new_dict = dict({
+                'clustering_performance_score': clustering_performance_score,
+                'size': len(clustering['clusters']),
+                'cluster_sizes': Counter(clustering['clustering'])
+            }, **clustering)
+            clustering_list.append(new_dict)
+
+    return clustering_list
+
+
 # --- Helper functions -------------------------------------------------------------------------------------------------
 
 # calculates the par2 score for the given runtimes using the timeout value given
 def calculate_par2(runtimes, timeout):
     par2 = 0
     for runtime in runtimes:
-        if runtime >= timeout:
-            par2 = par2 + timeout * 2
-        else:
-            par2 = par2 + runtime
-
+        par2 = par2 + runtime_timeout_par2(runtime, timeout)
     return par2 / len(runtimes)
+
+
+def runtime_timeout_par2(runtime, timeout):
+    if runtime >= timeout:
+        return timeout * 2
+    else:
+        return runtime
 
 
 # gets the runtimes for the instances in the cluster
