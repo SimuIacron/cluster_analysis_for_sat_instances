@@ -1,7 +1,8 @@
 import itertools
 
 from ClusterAnalysis.plot_single_clustering import plot_family_distribution_of_clusters, plot_runtime_comparison_sbs, \
-    plot_performance_mean_std_and_performance_of_cluster, boxplot_runtimes_distribution_per_cluster
+    plot_performance_mean_std_and_performance_of_cluster, boxplot_runtimes_distribution_per_cluster, \
+    plot_biggest_family_runtime
 from ClusterAnalysis.plot_single_clusters import boxplot_cluster_feature_distribution, barchart_compare_runtime_scores, \
     barchart_compare_sbs_speedup
 from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cluster, filter_cluster_data, \
@@ -11,8 +12,7 @@ from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cl
     find_base_and_gate_features_with_low_std, sort_after_param, check_performance_for_all_instances_of_major_family, \
     check_performance_for_instances_with_similar_feature_values, filter_non_clusters, filter_same_cluster, \
     calculate_factor_of_sbs_and_deviation_solver, search_clusters_with_unsolvable_instances, \
-    find_best_clustering_by_performance_score, filter_specific_clustering, \
-    sort_clusters_by_lowest_performance_scores_of_best_clusters
+    find_best_clustering_by_performance_score, filter_specific_clustering
 from ClusterAnalysis.stochastic_values_dataset import calculate_stochastic_value_for_dataset
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json
@@ -21,10 +21,9 @@ from util_scripts import DatabaseReader
 
 input_file_cluster = 'clustering_general_v3/single_clusters/general_clustering_3_clusters'
 input_file_clustering = 'clustering_general_v3/general_clustering_3'
-# output_dir_stochastic = 'clustering_general_v3/single_clusters/clustering_general_clusters_stochastic'
 input_file_dataset = 'clustering_general_v3/stochastic_values_dataset'
 input_file_sbs = 'clustering_general_v3/sbs_3'
-output_file = '/general_clustering_3/specific_clustering/kmeans/'
+output_file = '/general_clustering_3/specific_clustering/'
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -44,11 +43,6 @@ for feature_vector in input_dbs:
 
 db_instance = DbInstance(features)
 
-# values = calculate_stochastic_value_for_dataset(db_instance)
-# write_json(input_file_dataset, values)
-
-# export_variance_mean_of_cluster(input_file_clustering, input_file_cluster, output_dir_stochastic, db_instance)
-
 data_clustering = read_json(input_file_clustering)
 data_clusters = read_json(input_file_cluster)
 data_dataset = read_json(input_file_dataset)
@@ -57,18 +51,18 @@ sbs_solver = sbs[1]["0"][0][0][0]
 
 print('starting with {a} clusters'.format(a=len(data_clusters)))
 
-filtered1 = filter_cluster_data(data_clustering, data_clusters,
-                                ['selected_data', 'cluster_algorithm'],
-                                [[DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE,
-                                  DatabaseReader.FEATURES_BASE + DatabaseReader.FEATURES_GATE],
-                                 ['AGGLOMERATIVE']],
-                                #'KMEANS', 'DBSCAN', 'AGGLOMERATIVE'
-                                (0, 100000), (5, 30))
+clusterings = [
+    (5549, 'dbscan_5549/dbscan_5549'),
+    (8, 'kmeans_8/kmeans_8'),
+    (7, 'kmeans_7/kmeans_7'),
+    (95, 'agg_95/agg_95'),
+    (91, 'agg_91/agg_91')
+]
+setting = 4
+dpi = 120
 
-# filtered1 = filter_specific_clustering(data_clusters, 8)
+filtered1 = filter_specific_clustering(data_clusters, clusterings[setting][0])
 
-# filtered2 = filter_non_clusters(filtered1)
-# filtered3 = filter_same_cluster(data_clustering, filtered2)
 calculated = calculate_feature_stochastic(data_clustering, filtered1, data_dataset, db_instance)
 
 deviation_data = calculate_cluster_performance_score(calculated, db_instance)
@@ -80,40 +74,34 @@ biggest_families = calculate_biggest_family_for_cluster(data_clustering, deviati
 #                                                [True, False])
 interesting_features = find_base_and_gate_features_with_low_std(biggest_families, data_dataset, db_instance,
                                                                 max_std=0.0001)
-family_performance = check_performance_for_all_instances_of_major_family(data_clustering, interesting_features, db_instance)
+family_performance = check_performance_for_all_instances_of_major_family(data_clustering, interesting_features,
+                                                                         db_instance)
 # pareto_solvers = calculate_pareto_optimal_solvers_std_mean(family_performance, db_instance)
 similar_instances_performance = check_performance_for_instances_with_similar_feature_values(family_performance,
                                                                                             data_clustering,
                                                                                             db_instance)
 
-
 # best_families = filter_best_cluster_for_each_family(family_performance, 'cluster_performance_score', minimize=True)
-# clusterings = find_best_clustering_by_performance_score(data_clustering, similar_instances_performance)
-# sort = sort_after_param(clusterings, 'clustering_performance_score', descending=False)
-clusterings = sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering,
-                                                                          similar_instances_performance,
-                                                                          sbs_solver=sbs_solver)
+# clusterings = find_best_clustering_by_deviation_score(data_clustering, deviation_data)
+sort = sort_after_param(similar_instances_performance, 'cluster_performance_score', descending=False)
 
 pass
+plot_family_distribution_of_clusters(sort, db_instance, show_plot=False,
+                                     output_file=output_file + clusterings[setting][1] + '_family_distribution',
+                                     dpi=dpi)
+plot_performance_mean_std_and_performance_of_cluster(sort, db_instance, show_plot=False,
+                                                     output_file=output_file + clusterings[setting][
+                                                         1] + '_performance_score', dpi=dpi)
+plot_runtime_comparison_sbs(sort, sbs_solver, show_plot=False,
+                            output_file=output_file + clusterings[setting][1] + '_sbs_comparison', dpi=dpi)
+boxplot_runtimes_distribution_per_cluster(sort, db_instance,
+                                          output_file=output_file + clusterings[setting][1] + '_boxplot_runtimes',
+                                          dpi=dpi)
+plot_biggest_family_runtime(sort, show_plot=False, output_file=output_file + clusterings[setting][1] + '_par2_scores',
+                            dpi=dpi)
 
-# for cluster in sort:
-#     boxplot_cluster_feature_distribution(cluster, db_instance, use_base=True, use_gate=False,
-#                                          dpi=100, show_plot=False,
-#                                          output_file=output_file + str(cluster['cluster_idx']) + '_base')
-#     boxplot_cluster_feature_distribution(value, db_instance, use_base=False, use_gate=True,
-#                                          dpi=100, show_plot=False,
-#                                          output_file=output_file + 'feature_distribution/' + key + '_gate')
-
-# family_list = []
-# for key, item in best_families.items():
-#     family_list.append(item)
-# barchart_compare_runtime_scores(family_list, db_instance, output_file=output_file + 'family_cluster_scores', dpi=100)
-#
-# barchart_compare_runtime_scores(sort[:30], db_instance, output_file=output_file + 'best_cluster_scores', dpi=100)
-# 
-# family_list = []
-# for key, item in best_families.items():
-#     family_list.append(item)
-# barchart_compare_sbs_speedup(family_list, output_file=output_file + 'family_sbs_speedup', dpi=100)
-#
-# barchart_compare_sbs_speedup(sort[:30], output_file=output_file + 'best_sbs_speedup', dpi=100)
+for cluster in sort:
+    boxplot_cluster_feature_distribution(cluster, db_instance, dpi=dpi, use_base=True, use_gate=False,
+                                         angle=90, output_file=output_file + clusterings[setting][1] + '_' +
+                                                               str(cluster['cluster_idx']) + '_base',
+                                         show_plot=False)

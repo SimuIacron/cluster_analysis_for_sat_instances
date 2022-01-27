@@ -7,65 +7,35 @@ from DataFormats.DbInstance import DbInstance
 from util_scripts.util import random_color
 
 
-def plot_family_distribution_of_clusters(data_clusters, db_instance: DbInstance, biggest_n_families=2, output_file='',
+def plot_family_distribution_of_clusters(data_clusters, db_instance: DbInstance, output_file='',
                                          show_plot=False, dpi=192):
-
-    other_label = 'other'
-    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'tab:orange', 'navy', 'tab:gray', 'gold', 'deeppink']
-
-    family_list = []
-    families = list(set([family[0] for family in db_instance.family_wh]))
-    families.append(other_label)
-    data_clusters_edited = []
+    biggest_family_size = []
+    biggest_family_name = []
+    other_families_size = []
+    percentage_familes = []
 
     for cluster in data_clusters:
-        cluster_edited = cluster['family_list'][:biggest_n_families]
-        count = 0
-        for tuple_ in cluster['family_list'][biggest_n_families:]:
-            count = count + tuple_[1]
-        cluster_edited.append((other_label, count))
-        data_clusters_edited.append(cluster_edited)
+        biggest_family_name.append(cluster['family_list'][0][0])
+        biggest_family_size.append(cluster['family_list'][0][1])
+        percentage_familes.append(cluster['family_total_percentage'])
+        size = 0
+        for family in cluster['family_list'][1:]:
+            size = size + family[1]
+        other_families_size.append(size)
 
-    for family in families:
-        current_family_list = []
-        for cluster in data_clusters_edited:
-            found_tuple = False
-            for tuple_ in cluster:
-                if tuple_[0] == family:
-                    current_family_list.append(tuple_[1])
-                    found_tuple = True
-                    break
-
-            if not found_tuple:
-                current_family_list.append(0)
-
-        family_list.append(current_family_list)
-
-    families_edited = []
-    family_list_edited = []
-    for i, family in enumerate(families):
-        hasNonZeroEntry = False
-        for entry in family_list[i]:
-            if entry != 0:
-                hasNonZeroEntry = True
-                break
-        if hasNonZeroEntry:
-            families_edited.append(family)
-            family_list_edited.append(family_list[i])
-
-    families = families_edited
-    family_list = family_list_edited
+    X_axis = range(len(data_clusters))
 
     plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
+    plt.bar(X_axis, biggest_family_size, label='Biggest Family')
+    plt.bar(X_axis, other_families_size, label='Other Families', bottom=biggest_family_size)
 
-    for i in range(len(family_list)):
-        bottom = [0] * len(data_clusters)
-        for j in range(i):
-            bottom = np.array(bottom) + np.array(family_list[j])
-        plt.bar(range(len(data_clusters)), family_list[i], label=families[i], bottom=bottom,
-                color=colors[i % len(colors)])
+    for x, family in zip(X_axis, biggest_family_name):
+        plt.annotate('{family} ({size}/{total_size}), {percentage}% of family'.format(family=family, size=biggest_family_size[x],
+                                                             total_size=biggest_family_size[x] + other_families_size[
+                                                                 x], percentage=round(percentage_familes[x] * 100)),
+                     (x, 250), rotation=90)
 
-    plt.legend(ncol=2)
+    plt.legend()
     plt.xlabel('Cluster')
     plt.ylabel('Size')
 
@@ -100,7 +70,7 @@ def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_p
     plt.ylabel('Par2-Score (s)')
 
     for x, solver in zip(X_axis, solvers):
-        plt.annotate(solver, (x, 1000), rotation=90)
+        plt.annotate(solver, (x-0.05, 1000), rotation=90)
 
     plt.legend()
     plt.tight_layout()
@@ -114,7 +84,6 @@ def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_p
 
 def plot_performance_mean_std_and_performance_of_cluster(data_clusters, db_instance: DbInstance, output_file='',
                                                          show_plot=False, dpi=192):
-
     mean_list = []
     std_list = []
     solvers = [cluster['cluster_performance_solver'] for cluster in data_clusters]
@@ -136,7 +105,7 @@ def plot_performance_mean_std_and_performance_of_cluster(data_clusters, db_insta
     plt.ylabel('Seconds (s)')
 
     for x, solver in zip(X_axis, solvers):
-        plt.annotate(solver, (x, 1000), rotation=90)
+        plt.annotate(solver, (x-0.05, 1000), rotation=90)
 
     plt.legend()
     plt.tight_layout()
@@ -149,7 +118,7 @@ def plot_performance_mean_std_and_performance_of_cluster(data_clusters, db_insta
 
 
 def boxplot_runtimes_distribution_per_cluster(data_clusters, db_instance: DbInstance, output_file='',
-                                                         show_plot=False, dpi=192):
+                                              show_plot=False, dpi=192):
     boxplot_list = []
     solvers = [cluster['cluster_performance_solver'] for cluster in data_clusters]
 
@@ -168,7 +137,7 @@ def boxplot_runtimes_distribution_per_cluster(data_clusters, db_instance: DbInst
     plt.ylabel('Seconds (s)')
 
     for x, solver in zip(X_axis, solvers):
-        plt.annotate(solver, (x+1, 1000), rotation=90)
+        plt.annotate(solver, (x + 1-0.05, 1000), rotation=90)
 
     # plt.legend()
     plt.tight_layout()
@@ -179,3 +148,51 @@ def boxplot_runtimes_distribution_per_cluster(data_clusters, db_instance: DbInst
     if show_plot:
         plt.show()
 
+
+def plot_biggest_family_runtime(data_clusters, output_file='', show_plot=False, dpi=192):
+    par2_scores_cluster = []
+    par2_scores_family_in_cluster = []
+    par2_scores_total_family = []
+
+    biggest_family_size = []
+    biggest_family_name = []
+    other_families_size = []
+    solver_name = []
+
+    for cluster in data_clusters:
+        par2_scores_total_family.append(cluster['complete_family_par2'])
+        par2_scores_cluster.append(cluster['cluster_performance_solver_par2'])
+        par2_scores_family_in_cluster.append(cluster['family_in_cluster_par2'])
+        biggest_family_name.append(cluster['family_list'][0][0])
+        biggest_family_size.append(cluster['family_list'][0][1])
+        solver_name.append(cluster['cluster_performance_solver'])
+        size = 0
+        for family in cluster['family_list'][1:]:
+            size = size + family[1]
+        other_families_size.append(size)
+
+    X_axis = np.arange(len(data_clusters))
+
+    plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
+    plt.xlabel('Cluster')
+    plt.ylabel('Par2 (s)')
+    bar_size = 0.2
+    plt.bar(X_axis - bar_size, par2_scores_family_in_cluster, bar_size, label='Family in Cluster')
+    plt.bar(X_axis, par2_scores_cluster, bar_size, label='Complete Cluster')
+    plt.bar(X_axis + bar_size, par2_scores_total_family, bar_size, label='Complete Family')
+
+    for x, family in zip(X_axis, biggest_family_name):
+        plt.annotate('{family} ({size}/{total_size}), {solver}'.format(family=family, size=biggest_family_size[x],
+                                                                            total_size=biggest_family_size[x] +
+                                                                                       other_families_size[x],
+                                                                            solver=solver_name[x]),
+                     (x-0.05, 250), rotation=90)
+
+    plt.tight_layout()
+    plt.legend()
+
+    if output_file != '':
+        plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
+
+    if show_plot:
+        plt.show()

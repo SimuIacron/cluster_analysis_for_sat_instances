@@ -160,16 +160,19 @@ def calculate_cluster_performance_score(data_clusters_stochastic, db_instance: D
     data_clusters_stochastic_performance_score = []
     for cluster in data_clusters_stochastic:
         cluster_performances = [runtime_timeout_par2(mean_value, DatabaseReader.TIMEOUT) + standard_deviation
-                              for mean_value, standard_deviation in
-                              zip(cluster['runtimes_mean'],
-                                  cluster['runtimes_std'])]
+                                for mean_value, standard_deviation in
+                                zip(cluster['runtimes_mean'],
+                                    cluster['runtimes_std'])]
         cluster_performance_score = min(cluster_performances)
-        solver = db_instance.solver_f[np.argmin(cluster_performances)]
+        bps_index = np.argmin(cluster_performances)
+        solver = db_instance.solver_f[bps_index]
 
         new_dict = dict(cluster, **{
             'cluster_performance_score': cluster_performance_score,
             'cluster_performance_solver': solver,
-            'cluster_performances': cluster_performances
+            'cluster_performances': cluster_performances,
+            'cluster_performance_solver_par2': calculate_par2([item[bps_index] for item in cluster['runtimes']],
+                                                              DatabaseReader.TIMEOUT)
         })
         data_clusters_stochastic_performance_score.append(new_dict)
 
@@ -323,6 +326,7 @@ def find_base_and_gate_features_with_low_std(data_cluster, dataset_stochastic_va
 
         new_dict = dict(cluster, **{
             'low_std_base': interesting_features_base,
+            'low_std_base': interesting_features_base,
             'low_std_gate': interesting_features_gate
         })
         data_cluster_interesting_features.append(new_dict)
@@ -342,27 +346,33 @@ def sort_after_param(data_cluster, sort_param, descending=False):
 # that has a majority in the cluster
 # data_cluster: Must contain cluster_performance_solver and family_list
 # db_instance
-def check_performance_for_all_instances_of_major_family(data_cluster, db_instance: DbInstance):
+def check_performance_for_all_instances_of_major_family(data_clustering, data_cluster, db_instance: DbInstance):
     database_cluster_complete_family = []
     for cluster in data_cluster:
+        clustering = get_clustering_for_cluster(data_clustering, cluster)
         solver = cluster['cluster_performance_solver']
         solver_index = db_instance.solver_f.index(solver)
         family = cluster['family_list'][0][0]
         unsolvable_instances = 0
         runtimes = []
-        for current_family, current_runtimes in zip(db_instance.family_wh, db_instance.solver_wh):
+        runtimes_of_family_in_cluster = []
+        for i, (current_family, current_runtimes) in enumerate(zip(db_instance.family_wh, db_instance.solver_wh)):
             if current_family[0] == family:
                 current_runtime = current_runtimes[solver_index]
                 runtimes.append(current_runtime)
                 if current_runtime >= DatabaseReader.TIMEOUT:
                     unsolvable_instances = unsolvable_instances + 1
+                if clustering['clustering'][i] == cluster['cluster_idx']:
+                    runtimes_of_family_in_cluster.append(current_runtime)
 
         par2 = calculate_par2(runtimes, DatabaseReader.TIMEOUT)
+        family_in_cluster_par2 = calculate_par2(runtimes_of_family_in_cluster, DatabaseReader.TIMEOUT)
         new_dict = dict(cluster, **{
             'complete_family_par2': par2,
             'complete_family_unsolvable_instances': unsolvable_instances,
             'complete_family_unsolvable_instances_percentage':
                 unsolvable_instances / len(runtimes),
+            'family_in_cluster_par2': family_in_cluster_par2
         })
         database_cluster_complete_family.append(new_dict)
 
@@ -477,7 +487,7 @@ def find_best_clustering_by_performance_score(data_clustering, data_clusters):
                 count = count + 1
                 size = size + cluster['cluster_size']
                 clustering_performance_score = clustering_performance_score + cluster['cluster_performance_score'] * \
-                                             cluster['cluster_size']
+                                               cluster['cluster_size']
 
         if count != 0:
             clustering_performance_score = clustering_performance_score / size
@@ -492,6 +502,56 @@ def find_best_clustering_by_performance_score(data_clustering, data_clusters):
             clustering_list.append(new_dict)
 
     return clustering_list
+
+
+def sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering, data_clusters, min_cluster_size=20, sbs_solver='', use_best_n=3):
+    clusters_mapped_to_clustering = {}
+    for cluster in data_clusters:
+        if cluster['id'] not in clusters_mapped_to_clustering:
+            clusters_mapped_to_clustering[cluster['id']] = []
+        clusters_mapped_to_clustering[cluster['id']].append(cluster)
+
+    clusterings = []
+    for key, item in clusters_mapped_to_clustering.items():
+        clustering = get_clustering_for_cluster(data_clustering, item[0])
+        assert len(clustering['clusters']) == len(item), 'expected {a}, but found {b} clusters'.format(
+            a=len(clustering['clusters']), b=len(item))
+
+        if sbs_solver != '':
+            removed_sbs = []
+            for cluster in item:
+                if cluster['cluster_performance_solver'] != sbs_solver:
+                    removed_sbs.append(cluster)
+            item = removed_sbs
+
+        filtered_item = []
+        for cluster in item:
+            if cluster['cluster_size'] >= min_cluster_size:
+                filtered_item.append(cluster)
+
+        best_clusters = sorted(filtered_item, key=lambda d: d['cluster_performance_score'])[:use_best_n]
+        clustering_score = 0
+        size = 0
+        for cluster in best_clusters:
+            clustering_score = clustering_score + cluster['cluster_performance_score'] * cluster['cluster_size']
+            size = size + cluster['cluster_size']
+
+        if size != 0:
+            clustering_score = clustering_score / size
+
+            new_dict = dict({
+                'clustering_performance_score_n_best': clustering_score,
+                'n_best': len(best_clusters),
+                'size': len(clustering['clusters']),
+                'cluster_sizes': Counter(clustering['clustering'])
+            }, **clustering)
+            clusterings.append(new_dict)
+
+    return sorted(clusterings, key=lambda d: d['clustering_performance_score_n_best'])
+
+
+
+
 
 
 # --- Helper functions -------------------------------------------------------------------------------------------------

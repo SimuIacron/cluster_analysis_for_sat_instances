@@ -188,7 +188,7 @@ if __name__ == '__main__':
     exp_kmeans = standard_settings + \
                  [('cluster_algorithm', ['KMEANS']),
                   ('seed', [0]),
-                  ('n_clusters_k_means', range(1, 10))]
+                  ('n_clusters_k_means', range(1, 30))]
 
     exp_affinity = standard_settings + \
                    [('cluster_algorithm', ['AFFINITY']),
@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
     exp_agg = standard_settings + \
               [('cluster_algorithm', ['AGGLOMERATIVE']),
-               ('n_clusters_agg', range(1, 10)),
+               ('n_clusters_agg', range(1, 30)),
                ('affinity_agg', ['euclidean']),
                ('linkage_agg', ['ward', 'complete', 'average', 'single']),
                ('distance_threshold', [None])]  # not clear what float values useful
@@ -238,6 +238,7 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_agg, exp_birch, exp_dbscan, exp_gaussian, exp_optics, exp_affinity,
-                     exp_spectral, exp_meanshift], features,
-                    'general_clustering_3_all', 20, 0, cap_running_time=5000)
+    run_experiments([exp_kmeans, exp_agg, exp_dbscan],# , exp_birch, exp_gaussian, exp_optics, exp_affinity,
+                    #exp_spectral, exp_meanshift],
+                    features,
+                    'general_clustering_4_more_clusters', 20, 0, cap_running_time=5000)
