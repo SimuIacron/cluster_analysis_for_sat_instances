@@ -68,12 +68,18 @@ FEATURES_RESULT = ['result']
 
 
 def remove_keywords_from_query_with_hash(query, features):
+
+    empties = 0
+    other_missing = 0
+
     for inst in query:
         for i in range(1, len(inst)):
 
             if inst[i] == "empty":
                 inst[i] = -1
+                empties = empties + 1
             elif inst[i] == "memout" or inst[i] is None or inst[i] == 'timeout' or inst[i] == 'failed':
+                other_missing = other_missing + 1
                 if features == FEATURES_SOLVER:
                     inst[i] = TIMEOUT
                 else:
@@ -85,6 +91,9 @@ def remove_keywords_from_query_with_hash(query, features):
                 # needed to let discrete values such as families intact
                 except ValueError:
                     pass
+
+    print(empties)
+    print(other_missing)
 
     return query
 
@@ -123,18 +132,18 @@ def remove_with_index_array(dataset, removed_indexes):
     return result
 
 
-def remove_empties(dataset):
-    result = []
+def generate_empty_array(dataset):
+    # result = []
     removed_indexes = []
 
     for inst in dataset:
         if -1 not in inst:
-            result.append(inst)
+            # result.append(inst)
             removed_indexes.append(1)
         else:
             removed_indexes.append(0)
 
-    return result, removed_indexes
+    return removed_indexes
 
 
 # reads the given features from the db and returns a query with and without the instance hashes
@@ -149,6 +158,8 @@ def read_from_db(features):
         queries_without_hash = []
 
         # hash_list = []
+
+        print(features)
 
         for sub_features in split_features:
             query = gbd.query_search("local like %sat202%", [], sub_features)

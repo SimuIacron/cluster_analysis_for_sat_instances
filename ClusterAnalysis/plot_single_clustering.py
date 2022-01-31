@@ -64,7 +64,7 @@ def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_p
     plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
 
     plt.scatter(X_axis, runtimes_sbs, zorder=2, label='SBS')
-    plt.bar(X_axis, runtimes_cluster_solver, zorder=1, label='BPF')
+    plt.bar(X_axis, runtimes_cluster_solver, zorder=1, label='BPS')
 
     plt.xlabel('Cluster')
     plt.ylabel('Par2-Score (s)')

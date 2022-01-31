@@ -19,11 +19,12 @@ from run_experiments import read_json, write_json
 from run_plotting_clusters import export_clusters_sorted_best, compare_with_family, plot_biggest_cluster_for_family
 from util_scripts import DatabaseReader
 
-input_file_cluster = 'clustering_general_v3/single_clusters/general_clustering_3_clusters'
-input_file_clustering = 'clustering_general_v3/general_clustering_3'
-input_file_dataset = 'clustering_general_v3/stochastic_values_dataset'
-input_file_sbs = 'clustering_general_v3/sbs_3'
-output_file = '/general_clustering_3/specific_clustering/'
+version = '3'
+input_file_cluster = 'clustering_general_v{ver}/single_clusters/general_clustering_{ver}_clusters'.format(ver=version)
+input_file_clustering = 'clustering_general_v{ver}/general_clustering_{ver}'.format(ver=version)
+input_file_dataset = 'clustering_general_v{ver}/stochastic_values_dataset'.format(ver=version)
+input_file_sbs = 'clustering_general_v{ver}/sbs_{ver}'.format(ver=version)
+output_file = '/general_clustering_{ver}/specific_clustering/'.format(ver=version)
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -52,13 +53,19 @@ sbs_solver = sbs[1]["0"][0][0][0]
 print('starting with {a} clusters'.format(a=len(data_clusters)))
 
 clusterings = [
+    # v3
     (5549, 'dbscan_5549/dbscan_5549'),
     (8, 'kmeans_8/kmeans_8'),
     (7, 'kmeans_7/kmeans_7'),
     (95, 'agg_95/agg_95'),
-    (91, 'agg_91/agg_91')
+    (91, 'agg_91/agg_91'),
+    # v4
+    (112, 'kmeans_112/kmeans_112'),
+    (25, 'kmeans_25/kmeans_25'),
+    (635, 'agg_635/agg_635'),
+    (255, 'agg_255/agg_255')
 ]
-setting = 4
+setting = 1
 dpi = 120
 
 filtered1 = filter_specific_clustering(data_clusters, clusterings[setting][0])
@@ -100,8 +107,8 @@ boxplot_runtimes_distribution_per_cluster(sort, db_instance,
 plot_biggest_family_runtime(sort, show_plot=False, output_file=output_file + clusterings[setting][1] + '_par2_scores',
                             dpi=dpi)
 
-for cluster in sort:
+for i, cluster in enumerate(sort):
     boxplot_cluster_feature_distribution(cluster, db_instance, dpi=dpi, use_base=True, use_gate=False,
                                          angle=90, output_file=output_file + clusterings[setting][1] + '_' +
-                                                               str(cluster['cluster_idx']) + '_base',
+                                                               str(i) + '_base',
                                          show_plot=False)

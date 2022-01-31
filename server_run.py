@@ -12,19 +12,21 @@ from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cl
     check_performance_for_instances_with_similar_feature_values, filter_non_clusters, filter_same_cluster, \
     calculate_factor_of_sbs_and_deviation_solver, search_clusters_with_unsolvable_instances, \
     find_best_clustering_by_performance_score, filter_specific_clustering, \
-    sort_clusters_by_lowest_performance_scores_of_best_clusters
+    sort_clusters_by_lowest_performance_scores_of_best_clusters, filter_clusters_where_sbs_and_bps_are_different
 from ClusterAnalysis.stochastic_values_dataset import calculate_stochastic_value_for_dataset
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json
 from run_plotting_clusters import export_clusters_sorted_best, compare_with_family, plot_biggest_cluster_for_family
 from util_scripts import DatabaseReader
 
-input_file_cluster = 'clustering_general_v3/single_clusters/general_clustering_3_clusters'
-input_file_clustering = 'clustering_general_v3/general_clustering_3'
-# output_dir_stochastic = 'clustering_general_v3/single_clusters/clustering_general_clusters_stochastic'
-input_file_dataset = 'clustering_general_v3/stochastic_values_dataset'
-input_file_sbs = 'clustering_general_v3/sbs_3'
-output_file = '/general_clustering_3/specific_clustering/kmeans/'
+version = '3'
+
+input_file_cluster = 'clustering_general_v{ver}/single_clusters/general_clustering_{ver}_clusters'.format(ver=version)
+input_file_clustering = 'clustering_general_v{ver}/general_clustering_{ver}'.format(ver=version)
+# output_dir_stochastic = 'clustering_general_v{ver}/single_clusters/clustering_general_clusters_stochastic'
+# .format(ver=version)
+input_file_dataset = 'clustering_general_v{ver}/stochastic_values_dataset'.format(ver=version)
+input_file_sbs = 'clustering_general_v{ver}/sbs_{ver}'.format(ver=version)
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -61,8 +63,8 @@ filtered1 = filter_cluster_data(data_clustering, data_clusters,
                                 ['selected_data', 'cluster_algorithm'],
                                 [[DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE,
                                   DatabaseReader.FEATURES_BASE + DatabaseReader.FEATURES_GATE],
-                                 ['AGGLOMERATIVE']],
-                                #'KMEANS', 'DBSCAN', 'AGGLOMERATIVE'
+                                 ['DBSCAN']],
+                                # 'KMEANS', 'DBSCAN', 'AGGLOMERATIVE'
                                 (0, 100000), (5, 30))
 
 # filtered1 = filter_specific_clustering(data_clusters, 8)
@@ -80,19 +82,23 @@ biggest_families = calculate_biggest_family_for_cluster(data_clustering, deviati
 #                                                [True, False])
 interesting_features = find_base_and_gate_features_with_low_std(biggest_families, data_dataset, db_instance,
                                                                 max_std=0.0001)
-family_performance = check_performance_for_all_instances_of_major_family(data_clustering, interesting_features, db_instance)
+family_performance = check_performance_for_all_instances_of_major_family(data_clustering, interesting_features,
+                                                                         db_instance)
 # pareto_solvers = calculate_pareto_optimal_solvers_std_mean(family_performance, db_instance)
 similar_instances_performance = check_performance_for_instances_with_similar_feature_values(family_performance,
                                                                                             data_clustering,
                                                                                             db_instance)
 
+# filtered2 = filter_same_cluster(data_clustering, similar_instances_performance)
+# filtered_different_solvers = sorted(filter_clusters_where_sbs_and_bps_are_different(filtered2),
+#                                     key=lambda d: d['cluster_size'], reverse=True)
 
 # best_families = filter_best_cluster_for_each_family(family_performance, 'cluster_performance_score', minimize=True)
-# clusterings = find_best_clustering_by_performance_score(data_clustering, similar_instances_performance)
-# sort = sort_after_param(clusterings, 'clustering_performance_score', descending=False)
-clusterings = sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering,
-                                                                          similar_instances_performance,
-                                                                          sbs_solver=sbs_solver)
+clusterings = find_best_clustering_by_performance_score(data_clustering, similar_instances_performance)
+sort = sort_after_param(clusterings, 'clustering_performance_score', descending=False)
+# clusterings_best = sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering,
+#                                                                                similar_instances_performance,
+#                                                                                sbs_solver=sbs_solver)
 
 pass
 

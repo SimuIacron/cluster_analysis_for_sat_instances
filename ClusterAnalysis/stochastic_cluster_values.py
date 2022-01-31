@@ -550,8 +550,13 @@ def sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering,
     return sorted(clusterings, key=lambda d: d['clustering_performance_score_n_best'])
 
 
+def filter_clusters_where_sbs_and_bps_are_different(data_cluster):
+    filtered = []
+    for cluster in data_cluster:
+        if cluster['cluster_performance_solver'] != cluster['cluster_par2'][0][0][0]:
+            filtered.append(cluster)
 
-
+    return filtered
 
 
 # --- Helper functions -------------------------------------------------------------------------------------------------

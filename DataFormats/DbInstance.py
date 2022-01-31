@@ -28,6 +28,8 @@ class DbInstance:
         (self.un_sat, self.un_sat_wh), self.result_f = DatabaseReader.read_result_from_db()
         print("Queries finished")
 
+        print("starting instances: " + str(len(self.solver)))
+
         # -------------------------------------------------------------------
         # This section is a quickfix for the glucose_syrup solver which is wrongly with four times the real running time
         # section can be removed, after runtimes.db has been correctly updated
@@ -43,8 +45,18 @@ class DbInstance:
         self.dataset_f, self.base_f, self.gate_f, self.solver_f, self.dataset, self.dataset_wh, self.base, self.base_wh,\
         self.gate, self.gate_wh, self.solver, self.solver_wh = self.generate_dataset(features)
 
-        self.solver, removed_array = DatabaseReader.remove_empties(self.solver)
+        removed_array_base = DatabaseReader.generate_empty_array(self.base)
+        removed_array_gate = DatabaseReader.generate_empty_array(self.gate)
+        removed_array_solver = DatabaseReader.generate_empty_array(self.solver)
 
+        removed_array = []
+        for i, j, k in zip(removed_array_base, removed_array_gate, removed_array_solver):
+            if i == 0 or j == 0 or k == 0:
+                removed_array.append(0)
+            else:
+                removed_array.append(1)
+
+        self.solver = DatabaseReader.remove_with_index_array(self.solver, removed_array)
         self.solver_wh = DatabaseReader.remove_with_index_array(self.solver_wh, removed_array)
         self.gate = DatabaseReader.remove_with_index_array(self.gate, removed_array)
         self.gate_wh = DatabaseReader.remove_with_index_array(self.gate_wh, removed_array)
