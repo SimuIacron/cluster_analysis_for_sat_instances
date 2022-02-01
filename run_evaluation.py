@@ -206,7 +206,7 @@ if __name__ == '__main__':
 
     db = DbInstance(features)
 
-    run_evaluation_par2_score('general_clustering_5', 'general_clustering_4_par2', db, cores)
+    run_evaluation_par2_score('general_clustering_5', 'general_clustering_5_par2', db, cores)
 
     export_clusters_sorted_best('general_clustering_5_par2', 'general_clustering_5_clusters')
 
