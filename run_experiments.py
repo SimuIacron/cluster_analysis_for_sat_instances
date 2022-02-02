@@ -166,14 +166,14 @@ if __name__ == '__main__':
         single_features.append([elem])
 
     input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
-    output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
-    # output = [input_dbs, [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
-    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
-    #           [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_BASE, ['cadical']],
-    #           [DatabaseReader.FEATURES_GATE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['glucose']], [DatabaseReader.FEATURES_GATE, ['cadical']],
-    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['kissat']],
-    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['glucose']],
-    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']]]
+    # output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+    output = [input_dbs, [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
+              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
+              [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_BASE, ['cadical']],
+              [DatabaseReader.FEATURES_GATE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['glucose']], [DatabaseReader.FEATURES_GATE, ['cadical']],
+              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['kissat']],
+              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['glucose']],
+              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']]]
     output_merged = []
     for combination in output:
         comb = []
@@ -240,7 +240,7 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_agg, exp_dbscan, exp_birch, exp_gaussian, exp_optics, exp_affinity,
-                    exp_spectral, exp_meanshift],
+    run_experiments([exp_kmeans, exp_agg, exp_dbscan, exp_birch],  # , exp_gaussian, exp_optics, exp_affinity,
+                    # exp_spectral, exp_meanshift],
                     features,
                     'general_clustering_6_linearscaler', 20, 0, cap_running_time=5000)

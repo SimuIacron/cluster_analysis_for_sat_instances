@@ -81,7 +81,7 @@ def plot_histograms_clustering(input_file_par2, sbs_file, highlight_index, param
 
 def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param_values_list,
                             label_list, max_cluster_amount=20, dpi=96, angle=90, y_axis_range=None,
-                            output_file='', show_plot=False, sbs_file=''):
+                            output_file='', show_plot=False, sbs_file='', remove_box_if_all_values_in_range_of_sbs=None):
     data = read_json(input_file_par2)
     split_data = {}
     for value in param_values_list[highlight_index]:
@@ -101,8 +101,22 @@ def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param
                     break
 
     plot_data = []
-    for value in param_values_list[highlight_index]:
-        plot_data.append(split_data[str(value)])
+    plot_labels = []
+    for label, value in zip(label_list, param_values_list[highlight_index]):
+        if remove_box_if_all_values_in_range_of_sbs is not None and sbs_file != '':
+            sbs_data = read_json(sbs_file)
+            found_bigger = False
+            for score in split_data[str(value)]:
+                if score < (sbs_data[0] - remove_box_if_all_values_in_range_of_sbs):
+                    found_bigger = True
+                    break
+
+            if found_bigger:
+                plot_data.append(split_data[str(value)])
+                plot_labels.append(label)
+        else:
+            plot_data.append(split_data[str(value)])
+            plot_labels.append(label)
 
     fig = plt.figure(figsize=(1700 / dpi, 1000 / dpi), dpi=dpi,
                      constrained_layout=True)
@@ -110,7 +124,7 @@ def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param
     ax = fig.add_subplot(111)
 
     ax.boxplot(plot_data)
-    plt.xticks(range(1, len(label_list) + 1), label_list, rotation=angle)
+    plt.xticks(range(1, len(plot_labels) + 1), plot_labels, rotation=angle)
     ax.set_ylabel('CBS (s)')
 
     if sbs_file != '':

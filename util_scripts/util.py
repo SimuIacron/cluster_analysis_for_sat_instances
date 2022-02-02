@@ -1,7 +1,10 @@
 # splits list lst into chunks of n
+import itertools
 import random
 
 from matplotlib import pyplot as plt
+
+from util_scripts import DatabaseReader
 
 
 def chunks(lst, n):
@@ -88,4 +91,32 @@ def add_line_breaks_to_text(text, letter_to_break_at, replace_n):
 
 
 def random_color():
-    return (random.uniform(0,1), random.uniform(0,1), random.uniform(0,1))
+    return random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)
+
+
+def get_combinations_of_databases(use_base=True, use_gate=True, use_solver=True):
+    temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
+    temp_solver_features.pop(14)
+    temp_solver_features.pop(7)
+
+    input_dbs = []
+    if use_base:
+        input_dbs.append(DatabaseReader.FEATURES_BASE)
+    if use_gate:
+        input_dbs.append(DatabaseReader.FEATURES_GATE)
+    if use_solver:
+        input_dbs.append(temp_solver_features)
+
+    output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+    output_merged = []
+    for combination in output:
+        comb = []
+        for elem in combination:
+            comb = comb + elem
+        output_merged.append(comb)
+
+    features = []
+    for feature_vector in input_dbs:
+        features = features + feature_vector
+
+    return output_merged[1:], features

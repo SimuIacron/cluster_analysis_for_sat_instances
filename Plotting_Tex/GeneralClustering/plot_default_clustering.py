@@ -1,26 +1,26 @@
 import itertools
+
+from DataFormats.DbInstance import DbInstance
+from run_evaluation import run_evaluation_par2_sbs, run_evaluation_par2_vbs
 from run_plotting import plot_cbs_comparison
 from run_plotting_histograms import plot_histograms_clustering, plot_boxplot_clustering
 
 from util_scripts import DatabaseReader
+from util_scripts.util import get_combinations_of_databases
 
-output_directory = '/general_clustering_2'
-input_file = 'clustering_general_v2/general_clustering_2_par2'
-sbs_file = 'vbs_sbs/sbs'
+version = '6'
+output_directory = '/general_clustering_{ver}'.format(ver=version)
+input_file = 'clustering_general_v{ver}/general_clustering_{ver}_par2'.format(ver=version)
+sbs_file = 'clustering_general_v{ver}/sbs_{ver}'.format(ver=version)
+vbs_file = 'clustering_general_v{ver}/vbs_{ver}'.format(ver=version)
+
+max_cluster_amounts = 35
+remove_from_sbs = 25
 
 # All features ---------------------------------------------------------------------------------------------------------
 
-temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
-temp_solver_features.pop(14)
-temp_solver_features.pop(7)
-input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
-output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
-output_merged = []
-for combination in output:
-    comb = []
-    for elem in combination:
-        comb = comb + elem
-    output_merged.append(comb)
+
+output_merged, features = get_combinations_of_databases()
 
 # plot_cbs_comparison([dir + '/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       '',
@@ -45,30 +45,30 @@ for combination in output:
 
 plot_histograms_clustering(input_file, sbs_file,
                            0, ['selected_data'],
-                           [output_merged[1:]],
+                           [output_merged],
                            ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
                             'base gate runtimes'],
-                           max_cluster_amount=20, columns=3,
+                           max_cluster_amount=max_cluster_amounts, columns=3,
                            bin_step=10, height=0.11, output_file=output_directory + '/hist_clustering_default_comb_all',
                            normalize=True, dpi=192)
 
 plot_boxplot_clustering(input_file,
                         0, ['selected_data'],
-                        [output_merged[1:]],
+                        [output_merged],
                         ['base', 'gate', 'runtimes', 'base gate', 'base runtimes', 'gate runtimes',
                          'base gate runtimes'],
-                        max_cluster_amount=20, output_file=output_directory + '/box_clustering_default_comb_all',
+                        max_cluster_amount=max_cluster_amounts, output_file=output_directory + '/box_clustering_default_comb_all',
                         sbs_file=sbs_file, dpi=192, angle=20)
 
 plot_histograms_clustering(input_file, sbs_file,
                            0, ['cluster_algorithm', 'selected_data'],
                            [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
                              'DBSCAN',
-                             'BIRCH'], output_merged[1:]],
+                             'BIRCH'], output_merged],
                            ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
                             'OPTICS',
                             'Gaussian', 'DBSCAN', 'BIRCH'],
-                           max_cluster_amount=20, columns=3,
+                           max_cluster_amount=max_cluster_amounts, columns=3,
                            bin_step=10, height=0.11, output_file=output_directory + '/hist_clustering_default_algo_all',
                            normalize=True, dpi=192)
 
@@ -76,33 +76,26 @@ plot_boxplot_clustering(input_file,
                         0, ['cluster_algorithm', 'selected_data'],
                         [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
                           'DBSCAN',
-                          'BIRCH'], output_merged[1:]],
+                          'BIRCH'], output_merged],
                         ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
                          'OPTICS',
                          'Gaussian', 'DBSCAN', 'BIRCH'],
-                        max_cluster_amount=20, output_file=output_directory + '/box_clustering_default_algo_all',
-                        sbs_file=sbs_file, dpi=192, angle=20)
+                        max_cluster_amount=max_cluster_amounts, output_file=output_directory + '/box_clustering_default_algo_all',
+                        sbs_file=sbs_file, dpi=192, angle=20, remove_box_if_all_values_in_range_of_sbs=remove_from_sbs)
 
 # Only base and gate ---------------------------------------------------------------------------------------------------
 
-input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE]
-output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
-output_merged = []
-for combination in output:
-    comb = []
-    for elem in combination:
-        comb = comb + elem
-    output_merged.append(comb)
+output_merged, features_2 = get_combinations_of_databases(use_solver=False)
 
 plot_histograms_clustering(input_file, sbs_file,
                            0, ['cluster_algorithm', 'selected_data'],
                            [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
                              'DBSCAN',
-                             'BIRCH'], output_merged[1:]],
+                             'BIRCH'], output_merged],
                            ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
                             'OPTICS',
                             'Gaussian', 'DBSCAN', 'BIRCH'],
-                           max_cluster_amount=20, columns=3,
+                           max_cluster_amount=max_cluster_amounts, columns=3,
                            bin_step=10, height=0.11,
                            output_file=output_directory + '/hist_clustering_default_algo_base_gate',
                            normalize=True, dpi=192)
@@ -111,13 +104,13 @@ plot_boxplot_clustering(input_file,
                         0, ['cluster_algorithm', 'selected_data'],
                         [['KMEANS', 'AFFINITY', 'MEANSHIFT', 'SPECTRAL', 'AGGLOMERATIVE', 'OPTICS', 'GAUSSIAN',
                           'DBSCAN',
-                          'BIRCH'], output_merged[1:]],
+                          'BIRCH'], output_merged],
                         ['K-Means', 'Affintiy Propagation', 'Meanshift', 'Spectral Clustering', 'Agglomerative',
                          'OPTICS',
                          'Gaussian', 'DBSCAN', 'BIRCH'],
-                        max_cluster_amount=20,
+                        max_cluster_amount=max_cluster_amounts,
                         output_file=output_directory + '/box_clustering_default_algo_base_gate', sbs_file=sbs_file,
-                        dpi=192, angle=20)
+                        dpi=192, angle=20, remove_box_if_all_values_in_range_of_sbs=remove_from_sbs)
 
 # plot_cbs_comparison([dir + '/clustering_general_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                       '',
