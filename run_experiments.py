@@ -243,4 +243,4 @@ if __name__ == '__main__':
     run_experiments([exp_kmeans, exp_agg, exp_dbscan, exp_birch],  # , exp_gaussian, exp_optics, exp_affinity,
                     # exp_spectral, exp_meanshift],
                     features,
-                    'general_clustering_6_linearscaler', 20, 0, cap_running_time=5000)
+                    'general_clustering_6_single_runtimes', 20, 0, cap_running_time=5000)
