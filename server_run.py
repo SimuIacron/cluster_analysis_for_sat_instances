@@ -15,11 +15,12 @@ from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cl
     sort_clusters_by_lowest_performance_scores_of_best_clusters, filter_clusters_where_sbs_and_bps_are_different
 from ClusterAnalysis.stochastic_values_dataset import calculate_stochastic_value_for_dataset
 from DataFormats.DbInstance import DbInstance
+from run_evaluation import run_evaluation_par2_sbs, run_evaluation_par2_vbs
 from run_experiments import read_json, write_json
 from run_plotting_clusters import export_clusters_sorted_best, compare_with_family, plot_biggest_cluster_for_family
 from util_scripts import DatabaseReader
 
-version = '3'
+version = '5'
 
 input_file_cluster = 'clustering_general_v{ver}/single_clusters/general_clustering_{ver}_clusters'.format(ver=version)
 input_file_clustering = 'clustering_general_v{ver}/general_clustering_{ver}'.format(ver=version)
@@ -27,6 +28,7 @@ input_file_clustering = 'clustering_general_v{ver}/general_clustering_{ver}'.for
 # .format(ver=version)
 input_file_dataset = 'clustering_general_v{ver}/stochastic_values_dataset'.format(ver=version)
 input_file_sbs = 'clustering_general_v{ver}/sbs_{ver}'.format(ver=version)
+input_file_vbs = 'clustering_general_v{ver}/vbs_{ver}'.format(ver=version)
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -47,8 +49,9 @@ for feature_vector in input_dbs:
 db_instance = DbInstance(features)
 
 # values = calculate_stochastic_value_for_dataset(db_instance)
-# write_json(input_file_dataset, values)
 
+# run_evaluation_par2_sbs(input_file_sbs, db_instance)
+run_evaluation_par2_vbs(input_file_vbs, db_instance)
 # export_variance_mean_of_cluster(input_file_clustering, input_file_cluster, output_dir_stochastic, db_instance)
 
 data_clustering = read_json(input_file_clustering)

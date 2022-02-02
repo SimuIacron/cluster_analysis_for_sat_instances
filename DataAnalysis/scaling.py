@@ -62,7 +62,7 @@ def scaling(data, features, params_dict):
             return finished
 
         # scale all features (base, gate, solver time) per feature form [-1,1]
-        else:
+        else: # params_dict['scaling_technique'] == 'NORMALSCALE'
             return util.rotateNestedLists([util.scale_array_to_minus_plus_1(feature) for feature in
                                            util.rotateNestedLists(data)])
     elif algorithm == "SCALE01":

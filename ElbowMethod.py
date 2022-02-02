@@ -1,4 +1,5 @@
 import itertools
+import os
 
 from sklearn.cluster import KMeans
 from sklearn.datasets import make_blobs
@@ -29,7 +30,9 @@ db_instance = DbInstance(features)
 
 comb_dict = {'selection_algorithm': 'NONE', 'scaling_algorithm': 'STANDARDSCALER'}
 
-for comb in output_merged[1:]:
+names = ['base', 'gate', 'runtimes', 'base_gate', 'base_runtimes', 'gate_runtimes', 'base_gate_runtimes']
+
+for i, comb in enumerate(output_merged[1:]):
     print(comb)
     dataset_f, base_f, gate_f, solver_f, dataset, dataset_wh, base, base_wh, gate, gate_wh, solver, solver_wh = db_instance.generate_dataset(
         comb)
@@ -41,4 +44,8 @@ for comb in output_merged[1:]:
     visualizer = KElbowVisualizer(model, k=(1,100))
 
     visualizer.fit(scaled_data)        # Fit the data to the visualizer
-    visualizer.show()        # Finalize and render the figure
+
+    output_file = '/elbow/elbow_' + names[i]
+    path = os.environ['TEXPATH'] + output_file + '.svg'
+
+    visualizer.show(outpath=path, clear_figure=True)        # Finalize and render the figure
