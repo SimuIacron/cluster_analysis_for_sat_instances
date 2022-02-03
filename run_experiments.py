@@ -181,9 +181,9 @@ if __name__ == '__main__':
             comb = comb + elem
         output_merged.append(comb)
 
-    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),
+    standard_settings = [('scaling_algorithm', ['STANDARDSCALER']),
                          ('selection_algorithm', ['NONE']),
-                         ('scaling_technique', ['NORMALSCALE']),
+                         # ('scaling_technique', ['NORMALSCALE']),
                          ('selected_data', output_merged[1:]),
                          ('scaling_k_best', [3])]
 
