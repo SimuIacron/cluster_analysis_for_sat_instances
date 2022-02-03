@@ -15,7 +15,12 @@ def plot_histograms_clustering(input_file_par2, sbs_file, highlight_index, param
     x_label = 'CBS (s)'
     y_label = 'frequency'
 
-    data = read_json(input_file_par2)
+    data = []
+    if isinstance(input_file_par2, list):
+        for file in input_file_par2:
+            data = data + read_json(file)
+    else:
+        data = read_json(input_file_par2)
 
     rows = ceil(len(param_values_list[highlight_index]) / columns)
 
@@ -82,7 +87,13 @@ def plot_histograms_clustering(input_file_par2, sbs_file, highlight_index, param
 def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param_values_list,
                             label_list, max_cluster_amount=20, dpi=96, angle=90, y_axis_range=None,
                             output_file='', show_plot=False, sbs_file='', remove_box_if_all_values_in_range_of_sbs=None):
-    data = read_json(input_file_par2)
+    data = []
+    if isinstance(input_file_par2, list):
+        for file in input_file_par2:
+            data = data + read_json(file)
+    else:
+        data = read_json(input_file_par2)
+
     split_data = {}
     for value in param_values_list[highlight_index]:
         split_data[str(value)] = []

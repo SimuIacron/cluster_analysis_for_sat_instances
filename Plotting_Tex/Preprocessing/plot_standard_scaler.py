@@ -6,9 +6,16 @@ from util_scripts import DatabaseReader
 
 dpi = 192
 angle = 20
+max_cluster_amount = 35
 
-dir = 'scaling_standardscaler'
-sbs_file = 'vbs_sbs/sbs'
+names = ['Linear Scaling', 'Standard Scaling']
+
+version = 6
+input_file_clustering_standard_scaler = 'clustering_general_v{ver}/general_clustering_{ver}_par2'.format(ver=version)
+input_file_clustering_linear_scaler = \
+    'clustering_general_v{ver}/linearscaler/general_clustering_{ver}_linearscaler_par2'.format(ver=version)
+input_file_sbs = 'clustering_general_v{ver}/sbs_{ver}'.format(ver=version)
+output_file = '/general_clustering_{ver}/preprocessing/scaling/'.format(ver=version)
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
 temp_solver_features.pop(7)
@@ -21,21 +28,21 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
-plot_histograms_clustering(dir + '/standardscaler_linearscaler_clustering_par2', sbs_file,
+plot_histograms_clustering([input_file_clustering_linear_scaler, input_file_clustering_standard_scaler], input_file_sbs,
                            0, ['scaling_algorithm'],
                            [['SCALEMINUSPLUS1', 'STANDARDSCALER']],
-                           ['[-1,+1]', 'Standard Scaler'],
-                           max_cluster_amount=20, columns=2,
-                           bin_step=10, height=550,
-                           output_file='/preprocessing/standardscaler_linearscaler/hist_standardscaler_linearscaler_all',
+                           names,
+                           max_cluster_amount=max_cluster_amount, columns=2,
+                           bin_step=10, height=5000,
+                           output_file=output_file + 'hist_standardscaler_linearscaler_all',
                            dpi=dpi)
 
-plot_boxplot_clustering(dir + '/standardscaler_linearscaler_clustering_par2',
+plot_boxplot_clustering([input_file_clustering_linear_scaler, input_file_clustering_standard_scaler],
                         0, ['scaling_algorithm'],
                         [['SCALEMINUSPLUS1', 'STANDARDSCALER']],
-                        ['[-1,+1]', 'Standard Scaler'],
-                        max_cluster_amount=20, angle=angle,
-                        output_file='/preprocessing/standardscaler_linearscaler/box_standardscaler_linearscaler_all',
+                        names,
+                        max_cluster_amount=max_cluster_amount, angle=angle,
+                        output_file=output_file + 'box_standardscaler_linearscaler_all',
                         dpi=dpi)
 
 input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE]
@@ -47,21 +54,21 @@ for combination in output:
         comb = comb + elem
     output_merged.append(comb)
 
-plot_histograms_clustering(dir + '/standardscaler_linearscaler_clustering_par2', sbs_file,
+plot_histograms_clustering([input_file_clustering_linear_scaler, input_file_clustering_standard_scaler], input_file_sbs,
                            0, ['scaling_algorithm', 'selected_data'],
                            [['SCALEMINUSPLUS1', 'STANDARDSCALER'], output_merged[1:]],
-                           ['[-1,+1]', 'Standard Scaler'],
-                           max_cluster_amount=20, columns=2,
-                           bin_step=10, height=500,
-                           output_file='/preprocessing/standardscaler_linearscaler/hist_standardscaler_linearscaler_base_gate',
+                           names,
+                           max_cluster_amount=max_cluster_amount, columns=2,
+                           bin_step=10, height=3000,
+                           output_file=output_file + 'hist_standardscaler_linearscaler_base_gate',
                            dpi=dpi)
 
-plot_boxplot_clustering(dir + '/standardscaler_linearscaler_clustering_par2',
+plot_boxplot_clustering([input_file_clustering_linear_scaler, input_file_clustering_standard_scaler],
                         0, ['scaling_algorithm', 'selected_data'],
                         [['SCALEMINUSPLUS1', 'STANDARDSCALER'], output_merged[1:]],
-                        ['[-1,+1]', 'Standard Scaler'],
-                        max_cluster_amount=20, angle=angle,
-                        output_file='/preprocessing/standardscaler_linearscaler/box_standardscaler_linearscaler_base_gate',
+                        names,
+                        max_cluster_amount=max_cluster_amount, angle=angle,
+                        output_file=output_file + 'box_standardscaler_linearscaler_base_gate',
                         dpi=dpi)
 
 # CHANGE ax.set_position to multiply by 0.7 instead of 0.8!
