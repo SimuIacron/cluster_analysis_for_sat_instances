@@ -185,9 +185,9 @@ if __name__ == '__main__':
                     [[item] for item in DatabaseReader.FEATURES_GATE] + \
                     [[item] for item in DatabaseReader.FEATURES_SOLVER]
 
-    standard_settings = [('scaling_algorithm', ['STANDARDSCALER']),
+    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),
                          ('selection_algorithm', ['NONE']),
-                         # ('scaling_technique', ['NORMALSCALE']),
+                         ('scaling_technique', ['NORMALSCALE']),
                          ('selected_data', output_merged),
                          ('scaling_k_best', [3])]
 

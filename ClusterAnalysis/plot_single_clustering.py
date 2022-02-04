@@ -25,19 +25,19 @@ def plot_family_distribution_of_clusters(data_clusters, db_instance: DbInstance,
 
     X_axis = range(len(data_clusters))
 
-    plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
-    plt.bar(X_axis, biggest_family_size, label='Biggest Family')
-    plt.bar(X_axis, other_families_size, label='Other Families', bottom=biggest_family_size)
+    plt.figure(figsize=(1200 / dpi, 1200 / dpi), dpi=dpi)
+    plt.barh(X_axis, biggest_family_size, label='Biggest Family')
+    plt.barh(X_axis, other_families_size, label='Other Families', left=biggest_family_size)
 
     for x, family in zip(X_axis, biggest_family_name):
         plt.annotate('{family} ({size}/{total_size}), {percentage}% of family'.format(family=family, size=biggest_family_size[x],
                                                              total_size=biggest_family_size[x] + other_families_size[
                                                                  x], percentage=round(percentage_familes[x] * 100)),
-                     (x, 250), rotation=90)
+                     (150, x-0.1), rotation=0)
 
     plt.legend()
-    plt.xlabel('Cluster')
-    plt.ylabel('Size')
+    plt.ylabel('Cluster')
+    plt.xlabel('Size')
 
     if output_file != '':
         plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')

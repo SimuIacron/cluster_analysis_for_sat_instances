@@ -1,13 +1,38 @@
 
 # Filters the list of clusterings based on a list of params and the allowed values of settings
 import os
+from collections import Counter
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import normalized_mutual_info_score, v_measure_score, homogeneity_score, completeness_score
 
+from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json
 from util_scripts import DatabaseReader
 from util_scripts.util import get_combinations_of_databases
+
+
+def calculate_homogeneity_of_clustering(clustering, db_instance: DbInstance):
+    families = [item[0] for item in db_instance.family_wh]
+    count = Counter(families)
+    family_vector = {}
+    for key, item in count.items():
+        family_vector[key] = []
+
+    for family in families:
+        for key, item in family_vector.items():
+            if key == family:
+                family_vector[key].append(1)
+            else:
+                family_vector[key].append(0)
+
+    family_homogeneity = {}
+    family_completeness = {}
+    for key, item in family_vector.items():
+        family_homogeneity[key] = homogeneity_score(item, clustering)
+        family_completeness[key] = completeness_score(item, clustering)
+
+    return family_homogeneity, family_completeness
 
 
 def filter_clustering_settings(clusterings, param_list, param_values_list):

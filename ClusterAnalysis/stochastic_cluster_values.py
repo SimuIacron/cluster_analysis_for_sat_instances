@@ -10,6 +10,9 @@ from util_scripts.pareto_optimal import get_pareto_indices
 # data_clustering
 # data_clusters
 # db_instance
+from util_scripts.scores import par2
+
+
 def calculate_feature_stochastic(data_clustering, data_clusters, data_dataset, db_instance: DbInstance):
     data_clusters_stochastic = []
 
@@ -269,6 +272,36 @@ def filter_specific_clustering(data_clusters, id_):
 
     return data_specific_clustering
 
+
+def calculate_clusters_in_strip(data_clustering, data_clusters, db_instance: DbInstance):
+
+    offset = 3
+    grade = 1/10
+
+    data_cluster_par2_strip = []
+
+    for cluster in data_clusters:
+        clustering = get_clustering_for_cluster(data_clustering, cluster)
+        csbs = cluster['cluster_par2'][0][0]
+        csbs_strip = (csbs[1] + offset) * (1 + grade)
+        cluster_index = cluster['cluster_idx']
+        cluster_positions = []
+        for i, current_cluster_index in enumerate(clustering['clustering']):
+            if current_cluster_index == cluster_index:
+                cluster_positions.append(i)
+
+        par2_strip = []
+        for solver in db_instance.solver_f:
+            par2_ = par2(solver, db_instance, cluster_positions, DatabaseReader.TIMEOUT)
+            if par2_ <= csbs_strip:
+                par2_strip.append((solver, par2_))
+
+        new_dict = dict(cluster, **{
+            'par2_strip': sorted(par2_strip, key=lambda d: d[1])
+        })
+        data_cluster_par2_strip.append(new_dict)
+
+    return data_cluster_par2_strip
 
 # calculates what family has the majority in a cluster
 # data_clustering: List of all clusterings
