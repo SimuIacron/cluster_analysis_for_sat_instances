@@ -1,4 +1,5 @@
 import itertools
+from collections import Counter
 
 from ClusterAnalysis.plot_single_clustering import plot_family_distribution_of_clusters, plot_runtime_comparison_sbs, \
     plot_performance_mean_std_and_performance_of_cluster, boxplot_runtimes_distribution_per_cluster, \
@@ -12,7 +13,8 @@ from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cl
     find_base_and_gate_features_with_low_std, sort_after_param, check_performance_for_all_instances_of_major_family, \
     check_performance_for_instances_with_similar_feature_values, filter_non_clusters, filter_same_cluster, \
     calculate_factor_of_sbs_and_deviation_solver, search_clusters_with_unsolvable_instances, \
-    find_best_clustering_by_performance_score, filter_specific_clustering, calculate_clusters_in_strip
+    find_best_clustering_by_performance_score, filter_specific_clustering, calculate_clusters_in_strip, \
+    get_unsolvable_instances_amount
 from ClusterAnalysis.stochastic_values_dataset import calculate_stochastic_value_for_dataset
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json
@@ -69,15 +71,35 @@ similar_instances_performance = check_performance_for_instances_with_similar_fea
                                                                                             db_instance)
 
 strip_par2 = calculate_clusters_in_strip(data_clustering, similar_instances_performance, db_instance)
+unsolvable = get_unsolvable_instances_amount(data_clustering, strip_par2, db_instance)
 
 # best_families = filter_best_cluster_for_each_family(family_performance, 'cluster_performance_score', minimize=True)
 # clusterings = find_best_clustering_by_deviation_score(data_clustering, deviation_data)
-sort = sort_after_param(strip_par2, 'cluster_performance_score', descending=False)
+sort = sort_after_param(unsolvable, 'cluster_performance_score', descending=False)
+pass
+
+all_strip_solvers = []
+for cluster in sort:
+    current_strip_solvers = []
+    for item in cluster['par2_strip']:
+        if item[1] != DatabaseReader.TIMEOUT * 2:
+            current_strip_solvers.append(item[0])
+    all_strip_solvers = all_strip_solvers + current_strip_solvers
+
+count = Counter(all_strip_solvers)
+
+cluster_list = []
+for i, cluster in enumerate(sort):
+    for item in cluster['par2_strip']:
+        if item[1] != DatabaseReader.TIMEOUT * 2 and (item[0] == 'glucose' or item[0] == 'candy' or
+                                                      item[0] == 'glucose_var_decay099' or item[0] == 'lingeling'):
+            cluster_list.append((item[0], i))
+
 
 pass
-plot_family_distribution_of_clusters(sort, db_instance, show_plot=False,
-                                     output_file=output_file + clusterings[setting][1] + '_family_distribution',
-                                     dpi=dpi)
+# plot_family_distribution_of_clusters(sort, db_instance, show_plot=False,
+#                                      output_file=output_file + clusterings[setting][1] + '_family_distribution',
+#                                      dpi=dpi)
 
 
 # plot_performance_mean_std_and_performance_of_cluster(sort, db_instance, show_plot=False,

@@ -25,7 +25,7 @@ def plot_family_distribution_of_clusters(data_clusters, db_instance: DbInstance,
 
     X_axis = range(len(data_clusters))
 
-    plt.figure(figsize=(1200 / dpi, 1200 / dpi), dpi=dpi)
+    plt.figure(figsize=(1200 / dpi, 1000 / dpi), dpi=dpi)
     plt.barh(X_axis, biggest_family_size, label='Biggest Family')
     plt.barh(X_axis, other_families_size, label='Other Families', left=biggest_family_size)
 
@@ -35,9 +35,10 @@ def plot_family_distribution_of_clusters(data_clusters, db_instance: DbInstance,
                                                                  x], percentage=round(percentage_familes[x] * 100)),
                      (150, x-0.1), rotation=0)
 
-    plt.legend()
+    plt.legend(loc='lower right')
     plt.ylabel('Cluster')
     plt.xlabel('Size')
+    plt.tight_layout()
 
     if output_file != '':
         plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
@@ -61,18 +62,18 @@ def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_p
 
     X_axis = range(len(data_cluster))
 
-    plt.figure(figsize=(1200 / dpi, 600 / dpi), dpi=dpi)
+    plt.figure(figsize=(1200 / dpi, 1000 / dpi), dpi=dpi)
 
-    plt.scatter(X_axis, runtimes_sbs, zorder=2, label='SBS')
-    plt.bar(X_axis, runtimes_cluster_solver, zorder=1, label='BPS')
+    plt.scatter(runtimes_sbs, X_axis, zorder=2, label='SBS')
+    plt.barh(X_axis, runtimes_cluster_solver, zorder=1, label='CSBSS')
 
-    plt.xlabel('Cluster')
-    plt.ylabel('Par2-Score (s)')
+    plt.ylabel('Cluster')
+    plt.xlabel('Par2-Score (s)')
 
     for x, solver in zip(X_axis, solvers):
-        plt.annotate(solver, (x-0.05, 1000), rotation=90)
+        plt.annotate(solver, (1000, x-0.05), rotation=0)
 
-    plt.legend()
+    plt.legend(loc='lower right')
     plt.tight_layout()
 
     if output_file != '':

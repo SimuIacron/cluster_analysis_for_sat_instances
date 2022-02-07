@@ -1,10 +1,12 @@
 import numpy as np
 from collections import Counter
+
+from numpy import mean
+
 from DataFormats.DbInstance import DbInstance
 from run_experiments import write_json, read_json
 from util_scripts import util, DatabaseReader
 from util_scripts.pareto_optimal import get_pareto_indices
-
 
 # calculates the mean, variance and std for base, gate and runtimes
 # data_clustering
@@ -112,6 +114,31 @@ def filter_best_cluster_for_each_family(data_clusters, filter_param, minimize=Fa
     return family_dict
 
 
+def get_unsolvable_instances_amount(data_clustering, data_clusters, db_instance:DbInstance):
+
+    unsolvable_clusters = []
+    for cluster in data_clusters:
+        clustering = get_clustering_for_cluster(data_clustering, cluster)
+        unsolvable = 0
+        for instance, runtimes in zip(clustering['clustering'], db_instance.solver_wh):
+            if instance == cluster['cluster_idx']:
+                is_unsolvable = True
+                for time in runtimes:
+                    if time != DatabaseReader.TIMEOUT:
+                        is_unsolvable = False
+                        break
+                if is_unsolvable:
+                    unsolvable = unsolvable + 1
+        new_dict = dict(cluster, **{
+            'unsolvable instances': unsolvable
+        })
+
+        unsolvable_clusters.append(new_dict)
+
+    return unsolvable_clusters
+
+
+
 # filters the clusters that are pareto optimal for the given parameters
 # data_cluster
 # filter_params: List of the parameters that should be used when calculating pareto optimal clusters
@@ -162,9 +189,13 @@ def calculate_pareto_optimal_solvers_std_mean(data_clusters_stochastic, db_insta
 def calculate_cluster_performance_score(data_clusters_stochastic, db_instance: DbInstance):
     data_clusters_stochastic_performance_score = []
     for cluster in data_clusters_stochastic:
-        cluster_performances = [runtime_timeout_par2(mean_value, DatabaseReader.TIMEOUT) + standard_deviation
-                                for mean_value, standard_deviation in
-                                zip(cluster['runtimes_mean'],
+
+        par2_list = [mean([runtime_timeout_par2(runtime, DatabaseReader.TIMEOUT) for runtime in runtimes])
+                     for runtimes in util.rotateNestedLists(cluster['runtimes'])]
+
+        cluster_performances = [par2_ + standard_deviation
+                                for par2_, standard_deviation in
+                                zip(par2_list,
                                     cluster['runtimes_std'])]
         cluster_performance_score = min(cluster_performances)
         bps_index = np.argmin(cluster_performances)
@@ -274,9 +305,8 @@ def filter_specific_clustering(data_clusters, id_):
 
 
 def calculate_clusters_in_strip(data_clustering, data_clusters, db_instance: DbInstance):
-
     offset = 3
-    grade = 1/10
+    grade = 1 / 10
 
     data_cluster_par2_strip = []
 
@@ -302,6 +332,7 @@ def calculate_clusters_in_strip(data_clustering, data_clusters, db_instance: DbI
         data_cluster_par2_strip.append(new_dict)
 
     return data_cluster_par2_strip
+
 
 # calculates what family has the majority in a cluster
 # data_clustering: List of all clusterings
@@ -537,7 +568,8 @@ def find_best_clustering_by_performance_score(data_clustering, data_clusters):
     return clustering_list
 
 
-def sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering, data_clusters, min_cluster_size=20, sbs_solver='', use_best_n=3):
+def sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering, data_clusters, min_cluster_size=20,
+                                                                sbs_solver='', use_best_n=3):
     clusters_mapped_to_clustering = {}
     for cluster in data_clusters:
         if cluster['id'] not in clusters_mapped_to_clustering:
