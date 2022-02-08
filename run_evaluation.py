@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
     run_evaluation_par2_score('general_clustering_6_ext', 'general_clustering_6_ext_par2', db, cores)
 
-    export_clusters_sorted_best('general_clustering_6_par2', 'general_clustering_6_ext_clusters')
+    export_clusters_sorted_best('general_clustering_6_ext_par2', 'general_clustering_6_ext_clusters')
 
     # run_evaluation_par2_sbs_n_best('sbs_100_best', db, 100)
     # run_evaluation_par2_sbs_n_worst('sbs_100_worst', db, 100)
