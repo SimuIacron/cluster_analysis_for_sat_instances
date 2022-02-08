@@ -185,7 +185,7 @@ if __name__ == '__main__':
     #                 [[item] for item in DatabaseReader.FEATURES_GATE] + \
     #                 [[item] for item in DatabaseReader.FEATURES_SOLVER]
 
-    standard_settings = [('scaling_algorithm', ['SCALEMINUSPLUS1']),
+    standard_settings = [('scaling_algorithm', ['STANDARDSCALER']),
                          ('selection_algorithm', ['NONE']),
                          ('scaling_technique', ['NORMALSCALE']),
                          ('selected_data', output_merged[1:]),
@@ -240,11 +240,16 @@ if __name__ == '__main__':
                   ('eps_dbscan', np.arange(0.1, 1, 0.1)),
                   ('min_samples_dbscan', range(1, 10, 1))]
 
+    exp_dbscan_ext = standard_settings + \
+                 [('cluster_algorithm', ['DBSCAN']),
+                  ('eps_dbscan', np.arange(1, 3.1, 0.1)),
+                  ('min_samples_dbscan', range(1, 10, 1))]
+
     features = []
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_kmeans, exp_agg, exp_dbscan],  # , exp_gaussian, exp_optics, exp_affinity,
+    run_experiments([exp_dbscan_ext],  # , exp_gaussian, exp_optics, exp_affinity,
                     # exp_spectral, exp_meanshift],
                     features,
-                    'general_clustering_6_single_runtimes_linearscaler', 20, 0, cap_running_time=5000)
+                    'general_clustering_6_ext', 20, 24857, cap_running_time=5000)

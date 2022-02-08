@@ -31,7 +31,7 @@ for current_features, line, name in zip(output_merged, [0.5, 0.3, 0.7, 1.3, 0.9,
 
     reachabilities = pd.Series(optics_model.reachability_).iloc[optics_model.ordering_]
     reachabilities.plot.bar(xticks=range(0, 2525, 50), figsize=(16, 8))
-    plt.axhline(y=line, color='red')
+    # plt.axhline(y=line, color='red')
 
     plt.savefig(os.environ['TEXPATH'] + '/general_clustering_6/reachability/reachability_' + name + '.svg')
     plt.clf()

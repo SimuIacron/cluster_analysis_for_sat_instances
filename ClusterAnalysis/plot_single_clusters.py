@@ -8,16 +8,20 @@ from util_scripts import util
 
 
 def boxplot_cluster_feature_distribution(cluster, db_instance: DbInstance, dpi=192, use_base=False, use_gate=False,
-                                         angle=90, output_file='', show_plot=False):
+                                         angle=90, output_file='', show_plot=False, exclude_features = []):
     plot_data = []
     x_labels = []
 
     if use_base:
-        plot_data = plot_data + util.rotateNestedLists(cluster['base_01'])
-        x_labels = x_labels + db_instance.base_f
+        for feature_name, feature_data in zip(db_instance.base_f, util.rotateNestedLists(cluster['base_01'])):
+            if feature_name not in exclude_features:
+                plot_data.append(feature_data)
+                x_labels.append(feature_name)
     if use_gate:
-        plot_data = plot_data + util.rotateNestedLists(cluster['gate_01'])
-        x_labels = x_labels + db_instance.gate_f
+        for feature_name, feature_data in zip(db_instance.base_f, util.rotateNestedLists(cluster['gate_01'])):
+            if feature_name not in exclude_features:
+                plot_data.append(feature_data)
+                x_labels.append(feature_name)
 
     fig = plt.figure(figsize=(1700 / dpi, 1000 / dpi), dpi=dpi)
     ax = fig.add_subplot(111)

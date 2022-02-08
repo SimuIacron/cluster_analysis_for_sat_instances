@@ -13,6 +13,7 @@ from util_scripts.pareto_optimal import get_pareto_indices
 # data_clusters
 # db_instance
 from util_scripts.scores import par2
+from write_to_csv import write_to_csv
 
 
 def calculate_feature_stochastic(data_clustering, data_clusters, data_dataset, db_instance: DbInstance):
@@ -688,3 +689,17 @@ def scale_array_to_01_to_given_interval(array, min_v, max_v):
         scaled_array = [0] * len(array)
 
     return scaled_array
+
+
+def generate_csv_cluster_strip(data_clusters, header, file):
+    export_list = []
+    for i, cluster in enumerate(data_clusters):
+        strip = cluster['par2_strip']
+        text = ''
+        for elem in strip:
+            text = text + elem[0] + ', '
+
+        text = text.replace("_", "-")
+        export_list.append([i, text[:-2]])
+
+    write_to_csv(file, header, export_list)

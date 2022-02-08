@@ -50,22 +50,21 @@ def plot_family_distribution_of_clusters(data_clusters, db_instance: DbInstance,
 def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_plot=False, dpi=192):
     runtimes_sbs = []
     runtimes_cluster_solver = []
-    solvers = [cluster['cluster_performance_solver'] for cluster in data_cluster]
+    solvers = [cluster['cluster_par2'][0][0][0] for cluster in data_cluster]
     for cluster in data_cluster:
-        cluster_solver = cluster['cluster_performance_solver']
+        # cluster_solver = cluster['cluster_par2']
+        runtimes_cluster_solver.append(cluster['cluster_par2'][0][0][1])
 
         for solver_tuple in cluster['cluster_par2'][0]:
             if solver_tuple[0] == sbs_solver:
                 runtimes_sbs.append(solver_tuple[1])
-            if solver_tuple[0] == cluster_solver:
-                runtimes_cluster_solver.append(solver_tuple[1])
 
     X_axis = range(len(data_cluster))
 
     plt.figure(figsize=(1200 / dpi, 1000 / dpi), dpi=dpi)
 
     plt.scatter(runtimes_sbs, X_axis, zorder=2, label='SBS')
-    plt.barh(X_axis, runtimes_cluster_solver, zorder=1, label='CSBSS')
+    plt.barh(X_axis, runtimes_cluster_solver, zorder=1, label='CSBS')
 
     plt.ylabel('Cluster')
     plt.xlabel('Par2-Score (s)')
