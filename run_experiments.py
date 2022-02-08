@@ -167,13 +167,13 @@ if __name__ == '__main__':
 
     input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
     output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
-    output = [input_dbs, [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
-              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
-              [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_BASE, ['cadical']],
-              [DatabaseReader.FEATURES_GATE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['glucose']], [DatabaseReader.FEATURES_GATE, ['cadical']],
-              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['kissat']],
-              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['glucose']],
-              [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']]]
+    # output = [input_dbs, [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
+    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
+    #           [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_BASE, ['cadical']],
+    #           [DatabaseReader.FEATURES_GATE, ['kissat']], [DatabaseReader.FEATURES_GATE, ['glucose']], [DatabaseReader.FEATURES_GATE, ['cadical']],
+    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['kissat']],
+    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['glucose']],
+    #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']]]
     output_merged = []
     for combination in output:
         comb = []
