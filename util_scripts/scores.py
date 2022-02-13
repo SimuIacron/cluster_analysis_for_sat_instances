@@ -1,3 +1,4 @@
+import numpy as np
 from numpy import std
 
 from DataFormats.DbInstance import DbInstance
@@ -30,8 +31,15 @@ def spar2(solver_name, db_instance: DbInstance, instance_index_list, timeout):
     for instance in instance_index_list:
         runtimes_of_instances.append(solver[instance])
 
-    std_ = std(runtimes_of_instances)
+    # std_ = std(runtimes_of_instances)
     par2_ = par2(solver_name, db_instance, instance_index_list, timeout)
+
+    std_ = 0
+    for runtime in runtimes_of_instances:
+        if runtime >= timeout:
+            runtime = timeout * 2
+        std_ = std_ + ((runtime - par2_) * (runtime - par2_))
+    std_ = np.sqrt(std_ / len(runtimes_of_instances))
 
     return par2_ + std_
 

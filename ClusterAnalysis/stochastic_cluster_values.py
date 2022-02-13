@@ -12,7 +12,7 @@ from util_scripts.pareto_optimal import get_pareto_indices
 # data_clustering
 # data_clusters
 # db_instance
-from util_scripts.scores import par2
+from util_scripts.scores import par2, clustering_best, spar2
 from write_to_csv import write_to_csv
 
 
@@ -139,7 +139,6 @@ def get_unsolvable_instances_amount(data_clustering, data_clusters, db_instance:
     return unsolvable_clusters
 
 
-
 # filters the clusters that are pareto optimal for the given parameters
 # data_cluster
 # filter_params: List of the parameters that should be used when calculating pareto optimal clusters
@@ -187,17 +186,27 @@ def calculate_pareto_optimal_solvers_std_mean(data_clusters_stochastic, db_insta
 # calculates the cluster_deviation score for each cluster in data_clusters_stochastic
 # data_clusters_stochastic: Must contain mean and std
 # db_instance
-def calculate_cluster_performance_score(data_clusters_stochastic, db_instance: DbInstance):
+def calculate_cluster_performance_score(data_clusterings, data_clusters_stochastic, db_instance: DbInstance):
     data_clusters_stochastic_performance_score = []
     for cluster in data_clusters_stochastic:
 
-        par2_list = [mean([runtime_timeout_par2(runtime, DatabaseReader.TIMEOUT) for runtime in runtimes])
-                     for runtimes in util.rotateNestedLists(cluster['runtimes'])]
+        clustering = get_clustering_for_cluster(data_clusterings, cluster)
+        index_list = []
+        for i, elem in enumerate(clustering['clustering']):
+            if elem == cluster['cluster_idx']:
+                index_list.append(i)
 
-        cluster_performances = [par2_ + standard_deviation
-                                for par2_, standard_deviation in
-                                zip(par2_list,
-                                    cluster['runtimes_std'])]
+        # par2_list = [mean([runtime_timeout_par2(runtime, DatabaseReader.TIMEOUT) for runtime in runtimes])
+        #              for runtimes in util.rotateNestedLists(cluster['runtimes'])]
+
+        cluster_performances = []
+        for solver in db_instance.solver_f:
+            cluster_performances.append(spar2(solver, db_instance, index_list, DatabaseReader.TIMEOUT))
+
+        # cluster_performances = [par2_ + standard_deviation
+        #                         for par2_, standard_deviation in
+        #                         zip(par2_list,
+        #                             cluster['runtimes_std'])]
         cluster_performance_score = min(cluster_performances)
         bps_index = np.argmin(cluster_performances)
         solver = db_instance.solver_f[bps_index]
@@ -623,6 +632,15 @@ def filter_clusters_where_sbs_and_bps_are_different(data_cluster):
             filtered.append(cluster)
 
     return filtered
+
+
+def count_instances_in_clusters_with_sbs(data_cluster, sbs_solver):
+    counter = 0
+    for cluster in data_cluster:
+        if cluster['cluster_par2'][0][0][0] == sbs_solver:
+            counter = counter + cluster['cluster_size']
+
+    return counter
 
 
 # --- Helper functions -------------------------------------------------------------------------------------------------

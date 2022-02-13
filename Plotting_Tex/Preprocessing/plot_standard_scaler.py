@@ -7,6 +7,7 @@ from util_scripts import DatabaseReader
 dpi = 192
 angle = 20
 max_cluster_amount = 35
+max_id = 24856
 
 names = ['Linear Scaling', 'Standard Scaling']
 
@@ -35,7 +36,7 @@ plot_histograms_clustering([input_file_clustering_linear_scaler, input_file_clus
                            max_cluster_amount=max_cluster_amount, columns=2,
                            bin_step=10, height=5000,
                            output_file=output_file + 'hist_standardscaler_linearscaler_all',
-                           dpi=dpi)
+                           dpi=dpi, max_id=max_id)
 
 plot_boxplot_clustering([input_file_clustering_linear_scaler, input_file_clustering_standard_scaler],
                         0, ['scaling_algorithm'],
@@ -43,7 +44,7 @@ plot_boxplot_clustering([input_file_clustering_linear_scaler, input_file_cluster
                         names,
                         max_cluster_amount=max_cluster_amount, angle=angle,
                         output_file=output_file + 'box_standardscaler_linearscaler_all',
-                        dpi=dpi)
+                        dpi=dpi, max_id=max_id)
 
 input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE]
 output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
@@ -61,7 +62,7 @@ plot_histograms_clustering([input_file_clustering_linear_scaler, input_file_clus
                            max_cluster_amount=max_cluster_amount, columns=2,
                            bin_step=10, height=3000,
                            output_file=output_file + 'hist_standardscaler_linearscaler_base_gate',
-                           dpi=dpi)
+                           dpi=dpi, max_id=max_id)
 
 plot_boxplot_clustering([input_file_clustering_linear_scaler, input_file_clustering_standard_scaler],
                         0, ['scaling_algorithm', 'selected_data'],
@@ -69,7 +70,7 @@ plot_boxplot_clustering([input_file_clustering_linear_scaler, input_file_cluster
                         names,
                         max_cluster_amount=max_cluster_amount, angle=angle,
                         output_file=output_file + 'box_standardscaler_linearscaler_base_gate',
-                        dpi=dpi)
+                        dpi=dpi, max_id=max_id)
 
 # CHANGE ax.set_position to multiply by 0.7 instead of 0.8!
 # plot_cbs_comparison(['scaling_standardscaler/standardscaler_linearscaler_clustering_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',

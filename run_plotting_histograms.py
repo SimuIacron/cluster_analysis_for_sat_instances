@@ -11,7 +11,7 @@ from util_scripts import util
 
 def plot_histograms_clustering(input_file_par2, sbs_file, highlight_index, param_names, param_values_list,
                                label_list, max_cluster_amount=20, columns=2, bin_step=20, height=500, dpi=96,
-                               output_file='', normalize=False, show_plot=False):
+                               output_file='', normalize=False, show_plot=False, max_id=10000000000):
     x_label = 'CBS (s)'
     y_label = 'frequency'
 
@@ -32,6 +32,9 @@ def plot_histograms_clustering(input_file_par2, sbs_file, highlight_index, param
         split_data[str(value)] = []
 
     for evaluation in data:
+        if evaluation['id'] > max_id:
+            break
+
         eval_is_in_graph = True
         for idx, value in enumerate(param_names):
             if evaluation['settings'][value] not in param_values_list[idx]:
@@ -86,7 +89,7 @@ def plot_histograms_clustering(input_file_par2, sbs_file, highlight_index, param
 
 def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param_values_list,
                             label_list, max_cluster_amount=20, dpi=96, angle=90, y_axis_range=None,
-                            output_file='', show_plot=False, sbs_file='', remove_box_if_all_values_in_range_of_sbs=None):
+                            output_file='', show_plot=False, sbs_file='', remove_box_if_all_values_in_range_of_sbs=None, max_id=100000000):
     data = []
     if isinstance(input_file_par2, list):
         for file in input_file_par2:
@@ -99,6 +102,9 @@ def plot_boxplot_clustering(input_file_par2, highlight_index, param_names, param
         split_data[str(value)] = []
 
     for evaluation in data:
+        if evaluation['id'] > max_id:
+            break
+
         eval_is_in_graph = True
         for idx, value in enumerate(param_names):
             if evaluation['settings'][value] not in param_values_list[idx]:

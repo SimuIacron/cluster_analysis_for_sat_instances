@@ -15,6 +15,7 @@ dpi = 192
 angle=90
 y_axis_range = [3550, 3960]
 remove_time = 25
+max_id=24856
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)
@@ -37,7 +38,7 @@ plot_boxplot_clustering(input_file_single_features,
                         DatabaseReader.FEATURES_BASE, max_cluster_amount=20, angle=angle, dpi=dpi,
                         y_axis_range=y_axis_range,
                         output_file=output_file + 'box_single_feature_clustering_base', show_plot=False,
-                        remove_box_if_all_values_in_range_of_sbs=remove_time, sbs_file=input_file_sbs)
+                        remove_box_if_all_values_in_range_of_sbs=remove_time, sbs_file=input_file_sbs, max_id=max_id)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +57,7 @@ plot_boxplot_clustering(input_file_single_features,
                         DatabaseReader.FEATURES_GATE, max_cluster_amount=20, angle=angle, dpi=dpi,
                         y_axis_range=y_axis_range,
                         output_file=output_file + 'box_single_feature_clustering_gate', show_plot=False,
-                        remove_box_if_all_values_in_range_of_sbs=remove_time, sbs_file=input_file_sbs)
+                        remove_box_if_all_values_in_range_of_sbs=remove_time, sbs_file=input_file_sbs, max_id=max_id)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -76,4 +77,4 @@ plot_boxplot_clustering(input_file_single_features,
                         y_axis_range=y_axis_range,
                         output_file=output_file + 'box_single_feature_clustering_runtimes',
                         show_plot=False,
-                        remove_box_if_all_values_in_range_of_sbs=remove_time, sbs_file=input_file_sbs)
+                        remove_box_if_all_values_in_range_of_sbs=remove_time, sbs_file=input_file_sbs, max_id=max_id)

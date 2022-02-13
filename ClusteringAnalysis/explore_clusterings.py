@@ -1,6 +1,7 @@
 from sklearn.metrics import normalized_mutual_info_score
 
-from ClusteringAnalysis.plot_changes_between_clusterings import filter_clustering_settings
+from ClusteringAnalysis.plot_changes_between_clusterings import filter_clustering_settings, \
+    filter_clustering_cluster_number
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json
 from util_scripts import DatabaseReader
@@ -20,8 +21,9 @@ filtered = filter_clustering_settings(data, ['selected_data', 'cluster_algorithm
                            [
                                [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE,
                                 DatabaseReader.FEATURES_BASE + DatabaseReader.FEATURES_GATE],
-                               ['KMEANS']
+                               ['DBSCAN']
                            ])
+filtered2 = filter_clustering_cluster_number(filtered, 40)
 
 
 cbss_clusterings = []

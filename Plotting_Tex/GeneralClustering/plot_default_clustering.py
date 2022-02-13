@@ -10,7 +10,7 @@ from util_scripts.util import get_combinations_of_databases
 
 version = '6'
 output_directory = '/general_clustering_{ver}'.format(ver=version)
-input_file = 'clustering_general_v{ver}/general_clustering_{ver}_par2'.format(ver=version)
+input_file = 'clustering_general_v{ver}/standardscaler/general_clustering_{ver}_par2'.format(ver=version)
 sbs_file = 'clustering_general_v{ver}/sbs_{ver}'.format(ver=version)
 vbs_file = 'clustering_general_v{ver}/vbs_{ver}'.format(ver=version)
 

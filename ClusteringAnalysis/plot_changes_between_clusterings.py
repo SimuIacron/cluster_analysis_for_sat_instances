@@ -35,6 +35,16 @@ def calculate_homogeneity_of_clustering(clustering, db_instance: DbInstance):
     return family_homogeneity, family_completeness
 
 
+def filter_clustering_cluster_number(clusterings, max_size):
+    clusterings_filtered = []
+    for clustering in clusterings:
+        if len(clustering['clusters']) <= max_size:
+            clusterings_filtered.append(clustering)
+
+    print('Remaining instances after size filtering: {a}'.format(a=len(clusterings_filtered)))
+    return clusterings_filtered
+
+
 def filter_clustering_settings(clusterings, param_list, param_values_list):
 
     print('Initial Clusterings: {a}'.format(a=len(clusterings)))
