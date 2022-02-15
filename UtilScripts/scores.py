@@ -1,7 +1,7 @@
 import numpy as np
 
 from DataFormats.DbInstance import DbInstance
-from util_scripts.util import rotateNestedLists
+from UtilScripts.util import rotateNestedLists
 
 
 def par2(solver_name, db_instance: DbInstance, instance_index_list, timeout):

@@ -1,6 +1,6 @@
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import StandardScaler
-from util_scripts import util
+from UtilScripts import util
 from DataFormats import DatabaseReader
 
 SCALINGALGORITHMS = [

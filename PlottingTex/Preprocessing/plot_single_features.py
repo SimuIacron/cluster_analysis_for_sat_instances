@@ -1,6 +1,6 @@
 from PlottingAndEvaluationFunctions.func_plot_clustering_algorithm_comparison import plot_boxplot_clustering
 from DataFormats import DatabaseReader
-from util_scripts.util import get_combinations_of_databases
+from UtilScripts.util import get_combinations_of_databases
 
 version = 6
 input_file_single_features = 'clustering_general_v{ver}/standardscaler/single_features/general_clustering_{ver}_single_features_standardscaler_par2'.format(ver=version)

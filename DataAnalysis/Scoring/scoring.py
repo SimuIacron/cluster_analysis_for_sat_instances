@@ -1,4 +1,4 @@
-from DataAnalysis.Evaluation import scoring_modular, scoring_util
+from DataAnalysis.Scoring import scoring_modular, scoring_util
 from DataFormats.DbInstance import DbInstance
 from sklearn.metrics import adjusted_mutual_info_score, adjusted_rand_score, completeness_score, fowlkes_mallows_score, \
     homogeneity_score, mutual_info_score, normalized_mutual_info_score, rand_score, v_measure_score

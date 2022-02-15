@@ -1,5 +1,5 @@
 from PlottingAndEvaluationFunctions.func_plot_clustering_algorithm_comparison import plot_histograms_clustering, plot_boxplot_clustering
-from util_scripts.util import get_combinations_of_databases
+from UtilScripts.util import get_combinations_of_databases
 
 version = '6'
 output_directory = '/general_clustering_{ver}'.format(ver=version)

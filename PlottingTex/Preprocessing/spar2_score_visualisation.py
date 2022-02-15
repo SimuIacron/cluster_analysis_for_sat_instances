@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from PlottingAndEvaluationFunctions.func_stochastic_cluster_values import get_clustering_for_cluster
 from DataFormats.DbInstance import DbInstance
 from DataFormats import DatabaseReader
-from util_scripts.scores import par2, spar2
+from UtilScripts.scores import par2, spar2
 
 
 def visualisation_spar2(data_clustering, cluster, db_instance: DbInstance, dpi=192, output_file='', show_plot=False):

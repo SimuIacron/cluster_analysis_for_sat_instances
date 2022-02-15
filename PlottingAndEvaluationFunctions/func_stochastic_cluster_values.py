@@ -3,16 +3,16 @@ from collections import Counter
 
 from DataFormats.DbInstance import DbInstance
 from run_experiments import write_json, read_json
-from util_scripts import util
+from UtilScripts import util
 from DataFormats import DatabaseReader
-from util_scripts.pareto_optimal import get_pareto_indices
+from UtilScripts.pareto_optimal import get_pareto_indices
 
 # calculates the mean, variance and std for base, gate and runtimes
 # data_clustering
 # data_clusters
 # db_instance
-from util_scripts.scores import par2, spar2
-from util_scripts.write_to_csv import write_to_csv
+from UtilScripts.scores import par2, spar2
+from UtilScripts.write_to_csv import write_to_csv
 
 
 def calculate_feature_stochastic(data_clustering, data_clusters, data_dataset, db_instance: DbInstance):

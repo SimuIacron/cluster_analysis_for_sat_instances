@@ -5,8 +5,8 @@ from PlottingAndEvaluationFunctions.func_plot_changes_between_clusterings import
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json
 from DataFormats import DatabaseReader
-from util_scripts.scores import cbs, cbss, sbs, sbss, vbs, vbss
-from util_scripts.util import get_combinations_of_databases
+from UtilScripts.scores import cbs, cbss, sbs, sbss, vbs, vbss
+from UtilScripts.util import get_combinations_of_databases
 
 version = '6'
 input_file_clustering = 'clustering_general_v{ver}/standardscaler/general_clustering_{ver}_par2'.format(ver=version)

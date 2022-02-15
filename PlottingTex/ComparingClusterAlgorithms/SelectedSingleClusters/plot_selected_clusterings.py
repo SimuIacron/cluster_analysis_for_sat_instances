@@ -10,8 +10,8 @@ from PlottingAndEvaluationFunctions.func_stochastic_cluster_values import calcul
     generate_csv_csbs_csbss, filter_by_cluster_size
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json
-from Plotting_Tex.Preprocessing.spar2_score_visualisation import visualisation_spar2
-from util_scripts.util import get_combinations_of_databases
+from PlottingTex.Preprocessing.spar2_score_visualisation import visualisation_spar2
+from UtilScripts.util import get_combinations_of_databases
 
 version = '6'
 input_file_cluster = 'clustering_general_v{ver}/standardscaler/general_clustering_{ver}_clusters'.format(ver=version)

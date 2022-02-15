@@ -1,7 +1,7 @@
 from DataFormats.DbInstance import DbInstance
 from DataFormats import DatabaseReader
-from util_scripts.scores import par2, spar2
-from util_scripts.util import get_combinations_of_databases
+from UtilScripts.scores import par2, spar2
+from UtilScripts.util import get_combinations_of_databases
 
 output_merged, features = get_combinations_of_databases()
 

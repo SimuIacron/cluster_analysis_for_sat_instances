@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from sklearn.cluster import OPTICS
 from DataAnalysis import feature_selection, scaling
 from DataFormats.DbInstance import DbInstance
-from util_scripts.util import get_combinations_of_databases
+from UtilScripts.util import get_combinations_of_databases
 
 output_merged, features = get_combinations_of_databases()
 

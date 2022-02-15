@@ -1,8 +1,8 @@
-import util_scripts.util
+import UtilScripts.util
 from PlottingAndEvaluationFunctions.func_plot_single_clusters import boxplot_cluster_feature_distribution
 from PlottingAndEvaluationFunctions.func_stochastic_values_dataset import calculate_stochastic_value_for_dataset
 from DataFormats.DbInstance import DbInstance
-from util_scripts.util import get_combinations_of_databases
+from UtilScripts.util import get_combinations_of_databases
 
 version = '6'
 input_file_cluster = 'clustering_general_v{ver}/standardscaler/general_clustering_{ver}_clusters'.format(ver=version)
@@ -34,8 +34,8 @@ boxplot_cluster_feature_distribution(values, db_instance, dpi=dpi, use_base=Fals
                                      angle=90, output_file=output_file + 'dataset_gate',
                                      show_plot=False, exclude_features=excluded)
 
-base = util_scripts.util.rotateNestedLists(values['base_01'])
-gate = util_scripts.util.rotateNestedLists(values['gate_01'])
+base = UtilScripts.util.rotateNestedLists(values['base_01'])
+gate = UtilScripts.util.rotateNestedLists(values['gate_01'])
 
 empty_features_base = []
 for i, feature_base in enumerate(base):

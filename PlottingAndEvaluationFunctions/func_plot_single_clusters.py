@@ -1,7 +1,7 @@
 import os
 from matplotlib import pyplot as plt
 from DataFormats.DbInstance import DbInstance
-from util_scripts import util
+from UtilScripts import util
 
 
 # plots the distributions of base and/or gate features for the given cluster, can exclude selected features

@@ -6,8 +6,8 @@ from sklearn.metrics import normalized_mutual_info_score
 
 from DataFormats import DatabaseReader
 import run_experiments
-from DataAnalysis.Evaluation import scoring_util
-from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
+from DataAnalysis.Scoring import scoring_util
+from DataAnalysis.Scoring.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
     score_virtual_best_solver, score_single_best_solver, f3_weigh_with_cluster_size_n_best_cluster
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json, read_json_temp, append_json_temp
@@ -67,7 +67,7 @@ def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_core
     write_json(output_file, sorted(finished, key=lambda d: d['id']))
 
     t_stop = time()
-    print('Evaluation took %f' % (t_stop - t_start))
+    print('Scoring took %f' % (t_stop - t_start))
 
 
 def func_callback(result, filename, entry, dict_name):

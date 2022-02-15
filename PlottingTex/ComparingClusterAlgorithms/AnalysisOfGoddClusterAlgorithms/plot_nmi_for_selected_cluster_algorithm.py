@@ -2,7 +2,7 @@ from sklearn.metrics import normalized_mutual_info_score
 from PlottingAndEvaluationFunctions.func_plot_changes_between_clusterings import filter_clustering_settings, \
     plot_homogeneity_change
 from run_experiments import read_json
-from util_scripts.util import get_combinations_of_databases
+from UtilScripts.util import get_combinations_of_databases
 
 version = 6
 input_file_clustering = 'clustering_general_v{ver}/standardscaler/general_clustering_{ver}_par2'.format(ver=version)
