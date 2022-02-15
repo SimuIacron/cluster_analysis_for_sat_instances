@@ -1,32 +1,17 @@
-import itertools
-import os
-from collections import Counter
-
 import numpy as np
-
-from ClusterAnalysis.plot_single_clustering import plot_family_distribution_of_clusters, plot_runtime_comparison_sbs, \
-    plot_performance_mean_std_and_performance_of_cluster, boxplot_runtimes_distribution_per_cluster, \
-    plot_biggest_family_runtime
-from ClusterAnalysis.plot_single_clusters import boxplot_cluster_feature_distribution, barchart_compare_runtime_scores, \
-    barchart_compare_sbs_speedup
-from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cluster, filter_cluster_data, \
-    calculate_cluster_performance_score, calculate_biggest_family_for_cluster, \
-    calculate_pareto_optimal_solvers_std_mean, \
-    filter_best_cluster_for_each_family, filter_pareto_optimal_clusters, calculate_feature_stochastic, \
-    find_base_and_gate_features_with_low_std, sort_after_param, check_performance_for_all_instances_of_major_family, \
-    check_performance_for_instances_with_similar_feature_values, filter_non_clusters, filter_same_cluster, \
-    calculate_factor_of_sbs_and_deviation_solver, search_clusters_with_unsolvable_instances, \
-    find_best_clustering_by_performance_score, filter_specific_clustering, calculate_clusters_in_strip, \
+from PlottingAndEvaluationFunctions.func_plot_single_clustering import plot_family_distribution_of_clusters, \
+    plot_runtime_comparison_sbs
+from PlottingAndEvaluationFunctions.func_stochastic_cluster_values import calculate_cluster_performance_score, \
+    calculate_biggest_family_for_cluster, \
+    calculate_feature_stochastic, \
+    find_base_and_gate_features_with_low_std, check_performance_for_all_instances_of_major_family, \
+    check_performance_for_instances_with_similar_feature_values, filter_specific_clustering, calculate_clusters_in_strip, \
     get_unsolvable_instances_amount, generate_csv_cluster_strip, count_instances_in_clusters_with_sbs, \
-    generate_csv_csbs_csbss, filter_by_unsolvable_csbs, filter_by_cluster_size
-from ClusterAnalysis.stochastic_values_dataset import calculate_stochastic_value_for_dataset
+    generate_csv_csbs_csbss, filter_by_cluster_size
 from DataFormats.DbInstance import DbInstance
-from run_experiments import read_json, write_json
-from run_plotting_clusters import export_clusters_sorted_best, compare_with_family, plot_biggest_cluster_for_family
-from spar2_score_visualisation import visualisation_spar2
-from util_scripts import DatabaseReader
+from run_experiments import read_json
+from Plotting_Tex.Preprocessing.spar2_score_visualisation import visualisation_spar2
 from util_scripts.util import get_combinations_of_databases
-from write_to_csv import write_to_csv
 
 version = '6'
 input_file_cluster = 'clustering_general_v{ver}/standardscaler/general_clustering_{ver}_clusters'.format(ver=version)

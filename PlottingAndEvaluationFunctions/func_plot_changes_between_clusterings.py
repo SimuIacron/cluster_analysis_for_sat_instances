@@ -1,18 +1,13 @@
-
 # Filters the list of clusterings based on a list of params and the allowed values of settings
 import os
 from collections import Counter
-
 import matplotlib.pyplot as plt
-from sklearn.metrics import normalized_mutual_info_score, v_measure_score, homogeneity_score, completeness_score
-
+from sklearn.metrics import homogeneity_score, completeness_score
 from DataFormats.DbInstance import DbInstance
-from run_experiments import read_json
-from util_scripts import DatabaseReader
-from util_scripts.util import get_combinations_of_databases
 
 
-def calculate_homogeneity_of_clustering(clustering, db_instance: DbInstance):
+# calculates the homogeneity and completeness scores of the clustering compared to the family
+def calculate_homogeneity_completeness_of_clustering_to_family(clustering, db_instance: DbInstance):
     families = [item[0] for item in db_instance.family_wh]
     count = Counter(families)
     family_vector = {}
@@ -35,6 +30,7 @@ def calculate_homogeneity_of_clustering(clustering, db_instance: DbInstance):
     return family_homogeneity, family_completeness
 
 
+# filter clusterings with more clusters than max_size
 def filter_clustering_cluster_number(clusterings, max_size):
     clusterings_filtered = []
     for clustering in clusterings:
@@ -45,8 +41,8 @@ def filter_clustering_cluster_number(clusterings, max_size):
     return clusterings_filtered
 
 
+# filters clusterings if they don't have the given settings
 def filter_clustering_settings(clusterings, param_list, param_values_list):
-
     print('Initial Clusterings: {a}'.format(a=len(clusterings)))
 
     clusterings_filtered = []
@@ -78,8 +74,9 @@ def check_if_param_is_unique_in_cluster_list(clusterings, param):
     return True
 
 
+# plots the change of homogeneity for a given set of clusterings, by changing one setting parameter
+# given clusterings must all be of the same cluster algorithm
 def plot_homogeneity_change(clusterings, param, param_label, scoring_function, scoring_function_label, output_file=''):
-
     assert check_if_param_is_unique_in_cluster_list(clusterings, param), 'found multiple equal param values'
 
     sorted_clustering = sorted(clusterings, key=lambda d: d['settings'][param])
@@ -108,7 +105,3 @@ def plot_homogeneity_change(clusterings, param, param_label, scoring_function, s
 
     if output_file != '':
         plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
-
-
-
-

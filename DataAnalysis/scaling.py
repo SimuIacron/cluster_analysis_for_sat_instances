@@ -1,7 +1,7 @@
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import StandardScaler
-
-from util_scripts import util, DatabaseReader
+from util_scripts import util
+from DataFormats import DatabaseReader
 
 SCALINGALGORITHMS = [
     ('Scale to [-1,1]', 'SCALEMINUSPLUS1'),

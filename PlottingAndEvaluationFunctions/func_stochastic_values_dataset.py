@@ -1,10 +1,11 @@
 import numpy as np
 
-from ClusterAnalysis.stochastic_cluster_values import scale_array_to_01_to_given_interval
+from PlottingAndEvaluationFunctions.func_stochastic_cluster_values import scale_array_to_01_to_given_interval
 from DataFormats.DbInstance import DbInstance
 from util_scripts import util
 
 
+# this calculates a set of stochastic values on all instances in the dataset
 def calculate_stochastic_value_for_dataset(db_instance: DbInstance):
     base_rot = util.rotateNestedLists(db_instance.base_wh)
     base_mean = [np.mean(item) for item in base_rot]

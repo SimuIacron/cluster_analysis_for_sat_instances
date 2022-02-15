@@ -1,8 +1,7 @@
 import itertools
-from run_plotting import plot_cbs_comparison
-from run_plotting_histograms import plot_histograms_clustering, plot_boxplot_clustering
+from PlottingAndEvaluationFunctions.func_plot_clustering_algorithm_comparison import plot_histograms_clustering, plot_boxplot_clustering
 
-from util_scripts import DatabaseReader
+from DataFormats import DatabaseReader
 
 dpi = 192
 angle = 20

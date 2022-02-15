@@ -2,9 +2,9 @@ import os
 
 from matplotlib import pyplot as plt
 
-from ClusterAnalysis.stochastic_cluster_values import get_clustering_for_cluster
+from PlottingAndEvaluationFunctions.func_stochastic_cluster_values import get_clustering_for_cluster
 from DataFormats.DbInstance import DbInstance
-from util_scripts import DatabaseReader
+from DataFormats import DatabaseReader
 from util_scripts.scores import par2, spar2
 
 

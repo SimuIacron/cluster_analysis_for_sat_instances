@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import std
 
 from DataFormats.DbInstance import DbInstance
 from util_scripts.util import rotateNestedLists

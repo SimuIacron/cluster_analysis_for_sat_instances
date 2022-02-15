@@ -1,10 +1,9 @@
 from sklearn.metrics import normalized_mutual_info_score
-
-from ClusteringAnalysis.plot_changes_between_clusterings import filter_clustering_settings, \
+from PlottingAndEvaluationFunctions.func_plot_changes_between_clusterings import filter_clustering_settings, \
     filter_clustering_cluster_number
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json
-from util_scripts import DatabaseReader
+from DataFormats import DatabaseReader
 from util_scripts.scores import clustering_best, spar2
 from util_scripts.util import get_combinations_of_databases
 

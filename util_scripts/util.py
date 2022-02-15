@@ -2,9 +2,7 @@
 import itertools
 import random
 
-from matplotlib import pyplot as plt
-
-from util_scripts import DatabaseReader
+from DataFormats import DatabaseReader
 
 
 def chunks(lst, n):

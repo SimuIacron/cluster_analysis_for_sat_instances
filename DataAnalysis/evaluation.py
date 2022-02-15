@@ -1,10 +1,9 @@
 import pandas as pd
 from numpy import argmin, min, median, mean
 import plotly.express as px
-
-from util_scripts import util, DatabaseReader
+from util_scripts import util
+from DataFormats import DatabaseReader
 import plotly.graph_objects as go
-
 from DataAnalysis.Evaluation import scoring
 from DataFormats.DbInstance import DbInstance
 

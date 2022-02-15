@@ -1,19 +1,18 @@
 import numpy as np
 from collections import Counter
 
-from numpy import mean
-
 from DataFormats.DbInstance import DbInstance
 from run_experiments import write_json, read_json
-from util_scripts import util, DatabaseReader
+from util_scripts import util
+from DataFormats import DatabaseReader
 from util_scripts.pareto_optimal import get_pareto_indices
 
 # calculates the mean, variance and std for base, gate and runtimes
 # data_clustering
 # data_clusters
 # db_instance
-from util_scripts.scores import par2, clustering_best, spar2
-from write_to_csv import write_to_csv
+from util_scripts.scores import par2, spar2
+from util_scripts.write_to_csv import write_to_csv
 
 
 def calculate_feature_stochastic(data_clustering, data_clusters, data_dataset, db_instance: DbInstance):
@@ -419,6 +418,7 @@ def sort_after_param(data_cluster, sort_param, descending=False):
     return sorted(data_cluster, key=lambda x: x[sort_param], reverse=descending)
 
 
+# filters clusters that are smaller than min_cluster_size
 def filter_by_cluster_size(data_clusters, min_cluster_size):
     filtered = []
     for cluster in data_clusters:
@@ -428,6 +428,7 @@ def filter_by_cluster_size(data_clusters, min_cluster_size):
     return filtered
 
 
+# filters all clusters where the csbs can't solve at least one instance in the cluster
 def filter_by_unsolvable_csbs(data_clusters):
     filtered = []
     for cluster  in data_clusters:
@@ -435,6 +436,7 @@ def filter_by_unsolvable_csbs(data_clusters):
             filtered.append(cluster)
 
     return filtered
+
 
 # uses the best solver with the lowest deviation score on all instances in the whole dataset,
 # that has a majority in the cluster
@@ -473,6 +475,7 @@ def check_performance_for_all_instances_of_major_family(data_clustering, data_cl
     return database_cluster_complete_family
 
 
+# checks how instances with similar feature values perform with the csbs
 def check_performance_for_instances_with_similar_feature_values(data_cluster, data_clustering, db_instance: DbInstance,
                                                                 only_allow_features_that_were_used_in_clustering=True):
     database_cluster_similar_instances = []
@@ -535,6 +538,7 @@ def check_performance_for_instances_with_similar_feature_values(data_cluster, da
     return database_cluster_similar_instances
 
 
+# filters all clusters that are outlier clusters
 def filter_non_clusters(data_cluster):
     data_cluster_filtered = []
     for cluster in data_cluster:
@@ -545,6 +549,7 @@ def filter_non_clusters(data_cluster):
     return data_cluster_filtered
 
 
+# filters all clusters that are equal
 def filter_same_cluster(data_clustering, data_cluster):
     remaining_clusters = []
     accepted_clusters = []
@@ -645,7 +650,7 @@ def sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering,
     return sorted(clusterings, key=lambda d: d['clustering_performance_score_n_best'])
 
 
-def filter_clusters_where_sbs_and_bps_are_different(data_cluster):
+def filter_clusters_where_csbs_and_csbss_are_different(data_cluster):
     filtered = []
     for cluster in data_cluster:
         if cluster['cluster_performance_solver'] != cluster['cluster_par2'][0][0][0]:

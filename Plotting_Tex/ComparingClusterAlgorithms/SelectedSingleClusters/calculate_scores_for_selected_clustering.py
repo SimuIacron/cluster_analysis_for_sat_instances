@@ -1,10 +1,10 @@
 from numpy import mean
 from sklearn.metrics import normalized_mutual_info_score
 
-from ClusteringAnalysis.plot_changes_between_clusterings import calculate_homogeneity_of_clustering
+from PlottingAndEvaluationFunctions.func_plot_changes_between_clusterings import calculate_homogeneity_completeness_of_clustering_to_family
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json
-from util_scripts import DatabaseReader
+from DataFormats import DatabaseReader
 from util_scripts.scores import cbs, cbss, sbs, sbss, vbs, vbss
 from util_scripts.util import get_combinations_of_databases
 
@@ -21,7 +21,7 @@ assert clustering['id'] == id_, 'expected id to match the index'
 output, features = get_combinations_of_databases()
 db_instance = DbInstance(features)
 
-homogeneity, completeness = calculate_homogeneity_of_clustering(clustering['clustering'], db_instance)
+homogeneity, completeness = calculate_homogeneity_completeness_of_clustering_to_family(clustering['clustering'], db_instance)
 homogeneity_list = [item for _, item in homogeneity.items()]
 completeness_list = [item for _, item in completeness.items()]
 homogeneity_mean = mean(homogeneity_list)

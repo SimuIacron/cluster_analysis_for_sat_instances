@@ -1,14 +1,10 @@
 import itertools
 import os
-
 from sklearn.cluster import KMeans
-from sklearn.datasets import make_blobs
-
 from yellowbrick.cluster import KElbowVisualizer
-
 from DataAnalysis import feature_selection, scaling
 from DataFormats.DbInstance import DbInstance
-from util_scripts import DatabaseReader
+from DataFormats import DatabaseReader
 
 temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
 temp_solver_features.pop(14)

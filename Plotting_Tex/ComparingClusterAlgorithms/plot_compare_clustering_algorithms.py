@@ -1,11 +1,4 @@
-import itertools
-
-from DataFormats.DbInstance import DbInstance
-from run_evaluation import run_evaluation_par2_sbs, run_evaluation_par2_vbs
-from run_plotting import plot_cbs_comparison
-from run_plotting_histograms import plot_histograms_clustering, plot_boxplot_clustering
-
-from util_scripts import DatabaseReader
+from PlottingAndEvaluationFunctions.func_plot_clustering_algorithm_comparison import plot_histograms_clustering, plot_boxplot_clustering
 from util_scripts.util import get_combinations_of_databases
 
 version = '6'

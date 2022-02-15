@@ -1,8 +1,7 @@
 import itertools
-
 from DataFormats.DbInstance import DbInstance
-from run_plotting_histograms import plot_boxplot_family
-from util_scripts import DatabaseReader
+from PlottingAndEvaluationFunctions.func_plot_clustering_algorithm_comparison import plot_boxplot_family
+from DataFormats import DatabaseReader
 
 output_directory = '/family'
 dpi = 192

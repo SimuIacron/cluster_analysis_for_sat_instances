@@ -1,6 +1,5 @@
 from numpy import unique
 from sklearn.mixture import GaussianMixture
-
 from sklearn.cluster import DBSCAN, KMeans, AffinityPropagation, MeanShift, SpectralClustering, AgglomerativeClustering, \
     OPTICS, Birch
 

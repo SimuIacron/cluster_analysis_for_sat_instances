@@ -1,5 +1,4 @@
 from collections import Counter
-
 from DataAnalysis.Evaluation import scoring
 from DataFormats.DbInstance import DbInstance
 
