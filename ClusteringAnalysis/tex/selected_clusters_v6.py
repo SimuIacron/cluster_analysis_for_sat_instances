@@ -2,6 +2,8 @@ import itertools
 import os
 from collections import Counter
 
+import numpy as np
+
 from ClusterAnalysis.plot_single_clustering import plot_family_distribution_of_clusters, plot_runtime_comparison_sbs, \
     plot_performance_mean_std_and_performance_of_cluster, boxplot_runtimes_distribution_per_cluster, \
     plot_biggest_family_runtime
@@ -15,11 +17,13 @@ from ClusterAnalysis.stochastic_cluster_values import export_variance_mean_of_cl
     check_performance_for_instances_with_similar_feature_values, filter_non_clusters, filter_same_cluster, \
     calculate_factor_of_sbs_and_deviation_solver, search_clusters_with_unsolvable_instances, \
     find_best_clustering_by_performance_score, filter_specific_clustering, calculate_clusters_in_strip, \
-    get_unsolvable_instances_amount, generate_csv_cluster_strip, count_instances_in_clusters_with_sbs
+    get_unsolvable_instances_amount, generate_csv_cluster_strip, count_instances_in_clusters_with_sbs, \
+    generate_csv_csbs_csbss, filter_by_unsolvable_csbs, filter_by_cluster_size
 from ClusterAnalysis.stochastic_values_dataset import calculate_stochastic_value_for_dataset
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json
 from run_plotting_clusters import export_clusters_sorted_best, compare_with_family, plot_biggest_cluster_for_family
+from spar2_score_visualisation import visualisation_spar2
 from util_scripts import DatabaseReader
 from util_scripts.util import get_combinations_of_databases
 from write_to_csv import write_to_csv
@@ -35,7 +39,7 @@ clusterings = [
     (33, 'kmeans_33/kmeans_33'),
     (25522, 'dbscan_25522/dbscan_25522'),
 ]
-setting = 1
+setting = 0
 dpi = 120
 
 output_merged, features = get_combinations_of_databases()
@@ -77,7 +81,10 @@ unsolvable = get_unsolvable_instances_amount(data_clustering, strip_par2, db_ins
 
 # best_families = filter_best_cluster_for_each_family(family_performance, 'cluster_performance_score', minimize=True)
 # clusterings = find_best_clustering_by_deviation_score(data_clustering, deviation_data)
-sort = sorted(unsolvable, key=lambda d: d['cluster_par2'][0][0][1])
+sort = sorted(unsolvable, key=lambda d: d['cluster_size'], reverse=True)
+
+quantile = np.quantile([cluster['cluster_size'] for cluster in sort], 0.25)
+print('0.25-Quantile {a}'.format(a=quantile))
 
 sort2 = []
 outlier_cluster = []
@@ -88,18 +95,11 @@ for elem in sort:
         outlier_cluster = [elem]
 sort = outlier_cluster + sort2
 
-print(count_instances_in_clusters_with_sbs(sort, sbs_solver))
+filtered_size = filter_by_cluster_size(sort, quantile + 1)
+print(count_instances_in_clusters_with_sbs(filtered_size, sbs_solver))
 
-solver_list = []
-for i, elem in enumerate(sort):
-     csbs = elem['cluster_par2'][0][0][0].replace('_', '-')
-     csbss = elem['cluster_performance_solver'].replace('_', '-')
-     solver_list.append([i, csbs, csbss])
-     
-write_to_csv(output_file + clusterings[setting][1] + '_solvers', ['Cluster', 'CSBS', 'CSBSS'], solver_list)
-
-# generate csv
-# generate_csv_cluster_strip(sort, ['Cluster', 'Strip'], output_file + clusterings[setting][1] + '_strip')
+generate_csv_csbs_csbss(filtered_size, ['Cluster', 'CSBS', 'CSBSS'], output_file + clusterings[setting][1] + '_solvers')
+generate_csv_cluster_strip(filtered_size, ['Cluster', 'Strip'], output_file + clusterings[setting][1] + '_strip')
 
 excluded = ['levels_min'
                  'levels_none_mean', 'levels_none_variance', 'levels_none_min', 'levels_none_max',
@@ -135,16 +135,16 @@ cluster_index = 17
 #                                      show_plot=False, exclude_features=excluded)
 
 pass
-# plot_family_distribution_of_clusters(sort, db_instance, show_plot=False,
-#                                      output_file=output_file + clusterings[setting][1] + '_family_distribution',
-#                                      dpi=dpi)
+plot_family_distribution_of_clusters(filtered_size, db_instance, show_plot=False,
+                                     output_file=output_file + clusterings[setting][1] + '_family_distribution',
+                                     dpi=dpi)
 
 
 # plot_performance_mean_std_and_performance_of_cluster(sort, db_instance, show_plot=False,
 #                                                      output_file=output_file + clusterings[setting][
 #                                                          1] + '_performance_score', dpi=dpi)
-# plot_runtime_comparison_sbs(sort, sbs_solver, show_plot=False,
-#                             output_file=output_file + clusterings[setting][1] + '_sbs_comparison', dpi=dpi)
+plot_runtime_comparison_sbs(filtered_size, sbs_solver, show_plot=False,
+                            output_file=output_file + clusterings[setting][1] + '_sbs_comparison', dpi=dpi)
 # boxplot_runtimes_distribution_per_cluster(sort, db_instance,
 #                                           output_file=output_file + clusterings[setting][1] + '_boxplot_runtimes',
 #                                           dpi=dpi)
@@ -156,3 +156,10 @@ pass
 #                                          angle=90, output_file=output_file + clusterings[setting][1] + '_' +
 #                                                                str(i) + '_base',
 #                                          show_plot=False)
+
+index_list = [[12, 13, 18], [4,6,17,24,26]]
+
+for index in index_list[setting]:
+    cluster = filtered_size[index]
+    visualisation_spar2(data_clustering, cluster, db_instance,show_plot=False,
+                                output_file=output_file + clusterings[setting][1] + '_spar_vis_' + str(index), dpi=dpi)

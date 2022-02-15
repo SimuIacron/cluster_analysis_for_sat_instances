@@ -336,6 +336,9 @@ def calculate_clusters_in_strip(data_clustering, data_clusters, db_instance: DbI
             if par2_ <= csbs_strip:
                 par2_strip.append((solver, par2_))
 
+        if csbs[1] >= DatabaseReader.TIMEOUT * 2:
+            par2_strip = [('unsolvable', DatabaseReader.TIMEOUT * 2)]
+
         new_dict = dict(cluster, **{
             'par2_strip': sorted(par2_strip, key=lambda d: d[1])
         })
@@ -415,6 +418,23 @@ def find_base_and_gate_features_with_low_std(data_cluster, dataset_stochastic_va
 def sort_after_param(data_cluster, sort_param, descending=False):
     return sorted(data_cluster, key=lambda x: x[sort_param], reverse=descending)
 
+
+def filter_by_cluster_size(data_clusters, min_cluster_size):
+    filtered = []
+    for cluster in data_clusters:
+        if cluster['cluster_size'] >= min_cluster_size:
+            filtered.append(cluster)
+
+    return filtered
+
+
+def filter_by_unsolvable_csbs(data_clusters):
+    filtered = []
+    for cluster  in data_clusters:
+        if cluster['cluster_par2'][0][0][1] < DatabaseReader.TIMEOUT * 2:
+            filtered.append(cluster)
+
+    return filtered
 
 # uses the best solver with the lowest deviation score on all instances in the whole dataset,
 # that has a majority in the cluster
@@ -721,3 +741,15 @@ def generate_csv_cluster_strip(data_clusters, header, file):
         export_list.append([i, text[:-2]])
 
     write_to_csv(file, header, export_list)
+
+
+def generate_csv_csbs_csbss(data_clusters, header, file):
+    solver_list = []
+    for i, elem in enumerate(data_clusters):
+
+        csbs = elem['cluster_par2'][0][0][0].replace('_', '-')
+        csbss = elem['cluster_performance_solver'].replace('_', '-')
+        if csbss != csbs:
+            solver_list.append([i, csbs, csbss])
+
+    write_to_csv(file, header, solver_list)
