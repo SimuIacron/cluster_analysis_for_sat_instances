@@ -10,6 +10,13 @@ def chunks(lst, n):
     return [lst[i:i + n] for i in range(0, len(lst), n)]
 
 
+def scale_array_to_add_to_1(array):
+    sum_ = 0
+    for elem in array:
+        sum_ = sum_ + elem
+
+    return [elem / sum_ for elem in array]
+
 # scales given array values to a scale of 0 to 1
 # example: [3,5,7] --> [0, 0.5, 1]
 def scale_array_to_01(array):

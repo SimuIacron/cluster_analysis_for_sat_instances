@@ -20,7 +20,7 @@ filtered = filter_clustering_settings(data, ['selected_data', 'cluster_algorithm
                            [
                                [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE,
                                 DatabaseReader.FEATURES_BASE + DatabaseReader.FEATURES_GATE],
-                               ['DBSCAN']
+                               ['KMEANS']
                            ])
 filtered2 = filter_clustering_cluster_number(filtered, 40)
 

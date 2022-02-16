@@ -11,7 +11,7 @@ from UtilScripts.util import get_combinations_of_databases
 version = '6'
 input_file_clustering = 'clustering_general_v{ver}/standardscaler/general_clustering_{ver}_par2'.format(ver=version)
 print(input_file_clustering)
-id_ = 33
+id_ = 25522
 
 data = read_json(input_file_clustering)
 

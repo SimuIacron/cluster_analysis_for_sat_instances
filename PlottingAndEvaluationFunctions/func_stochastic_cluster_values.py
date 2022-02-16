@@ -182,6 +182,22 @@ def calculate_pareto_optimal_solvers_std_mean(data_clusters_stochastic, db_insta
     return data_clusters_pareto_optimal
 
 
+def filter_clusters_with_difference_between_csbs_and_sbs(data_clusters, db_instance:DbInstance, sbs_solver, margin):
+    filtered = []
+    for cluster in data_clusters:
+        csbs = cluster['cluster_par2'][0][0][1]
+        sbs = csbs
+        for runtime in cluster['cluster_par2'][0]:
+            if runtime[0] == sbs_solver:
+                sbs = runtime[1]
+
+        if sbs - csbs > margin:
+            filtered.append(cluster)
+
+    return filtered
+
+
+
 # calculates the cluster_deviation score for each cluster in data_clusters_stochastic
 # data_clusters_stochastic: Must contain mean and std
 # db_instance

@@ -22,7 +22,7 @@ def par2(solver_name, db_instance: DbInstance, instance_index_list, timeout):
     return par2_ / len(runtimes_of_instances)
 
 
-def spar2(solver_name, db_instance: DbInstance, instance_index_list, timeout):
+def spar2_old(solver_name, db_instance: DbInstance, instance_index_list, timeout):
     solver_index = db_instance.solver_f.index(solver_name)
     solver = rotateNestedLists(db_instance.solver_wh)[solver_index]
 
@@ -41,6 +41,34 @@ def spar2(solver_name, db_instance: DbInstance, instance_index_list, timeout):
     std_ = np.sqrt(std_ / len(runtimes_of_instances))
 
     return par2_ + std_
+
+
+def spar2(solver_name, db_instance: DbInstance, instance_index_list, timeout):
+    solver_index = db_instance.solver_f.index(solver_name)
+    solver = rotateNestedLists(db_instance.solver_wh)[solver_index]
+
+    par2_ = par2(solver_name, db_instance, instance_index_list, timeout)
+
+    runtimes_of_instances = []
+    timeouts_of_instances = []
+    for instance in instance_index_list:
+        runtime = solver[instance]
+        if runtime >= timeout:
+            timeouts_of_instances.append(runtime)
+        else:
+            runtimes_of_instances.append(solver[instance])
+
+    mad_ = 0
+    if len(runtimes_of_instances) != 0:
+        mean_ = np.mean(runtimes_of_instances)
+        for runtime in runtimes_of_instances:
+            mad_ = mad_ + np.abs(mean_ - runtime)
+        mad_ = mad_ / len(runtimes_of_instances)
+
+    penalized_std = (len(runtimes_of_instances) * mad_
+                     + len(timeouts_of_instances * 2) * timeout) / len(instance_index_list)
+
+    return penalized_std
 
 
 def clustering_best(clustering, db_instances: DbInstance, scoring_function, timeout):
@@ -65,7 +93,6 @@ def clustering_best(clustering, db_instances: DbInstance, scoring_function, time
 
 
 def virtual_best(db_instances: DbInstance, scoring_function, timeout):
-
     instance_number = len(db_instances.solver_wh)
 
     v_score = 0
@@ -82,7 +109,6 @@ def virtual_best(db_instances: DbInstance, scoring_function, timeout):
 
 
 def single_best(db_instances: DbInstance, scoring_function, timeout):
-
     best_solver = ''
     min_score = timeout * 1000
     for solver in db_instances.solver_f:
@@ -116,4 +142,3 @@ def vbs(db_instances: DbInstance, timeout):
 
 def vbss(db_instances: DbInstance, timeout):
     return virtual_best(db_instances, spar2, timeout)
-
