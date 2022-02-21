@@ -7,7 +7,7 @@ from time import time
 import numpy as np
 import multiprocessing as mp
 
-from util_scripts import DatabaseReader
+from DataFormats import DatabaseReader
 from DataAnalysis import feature_selection, scaling, clustering
 from DataFormats.DbInstance import DbInstance
 
@@ -167,6 +167,7 @@ if __name__ == '__main__':
 
     input_dbs = [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, temp_solver_features]
     output = sum([list(map(list, itertools.combinations(input_dbs, i))) for i in range(len(input_dbs) + 1)], [])
+
     # output = [input_dbs, [DatabaseReader.FEATURES_BASE], [DatabaseReader.FEATURES_GATE],
     #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE],
     #           [DatabaseReader.FEATURES_BASE, ['kissat']], [DatabaseReader.FEATURES_BASE, ['glucose']], [DatabaseReader.FEATURES_BASE, ['cadical']],
@@ -174,6 +175,7 @@ if __name__ == '__main__':
     #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['kissat']],
     #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['glucose']],
     #           [DatabaseReader.FEATURES_BASE, DatabaseReader.FEATURES_GATE, ['cadical']]]
+
     output_merged = []
     for combination in output:
         comb = []
@@ -249,7 +251,7 @@ if __name__ == '__main__':
     for feature_vector in input_dbs:
         features = features + feature_vector
 
-    run_experiments([exp_dbscan_ext],  # , exp_gaussian, exp_optics, exp_affinity,
-                    # exp_spectral, exp_meanshift],
+    run_experiments([exp_kmeans, exp_agg, exp_dbscan, exp_gaussian, exp_optics, exp_affinity,
+                    exp_spectral, exp_meanshift],
                     features,
                     'general_clustering_6_ext', 20, 24857, cap_running_time=5000)

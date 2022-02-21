@@ -1,8 +1,7 @@
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import VarianceThreshold, SelectPercentile, mutual_info_classif, SelectKBest
 from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
-
-from util_scripts import DatabaseReader
+from DataFormats import DatabaseReader
 from numpy import argmin
 
 FEATURESELECTIONALGORITHMS = [
@@ -18,6 +17,7 @@ FEATURESELECTIONIGNORE = [
     ('Variance applies to all features ', 'NONE'),
     ('Variance ignores solver time', 'TIMEIGNORE')
 ]
+
 
 def get_best_solver_per_instance(solvers):
     best_list = []
@@ -61,7 +61,6 @@ def feature_selection(data, features, solvers, params_dict):
     elif algorithm == "NONE":
         return data
     elif algorithm == "VARIANCE":
-
 
         if ignore_solver_time:
 

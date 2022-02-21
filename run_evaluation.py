@@ -4,11 +4,10 @@ from time import time
 
 from sklearn.metrics import normalized_mutual_info_score
 
-from run_plotting_clusters import export_clusters_sorted_best
-from util_scripts import DatabaseReader
+from DataFormats import DatabaseReader
 import run_experiments
-from DataAnalysis.Evaluation import scoring_util
-from DataAnalysis.Evaluation.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
+from DataAnalysis.Scoring import scoring_util
+from DataAnalysis.Scoring.scoring_modular import score, f1_par2, f2_par2_cluster, f3_weigh_with_cluster_size, \
     score_virtual_best_solver, score_single_best_solver, f3_weigh_with_cluster_size_n_best_cluster
 from DataFormats.DbInstance import DbInstance
 from run_experiments import read_json, write_json, read_json_temp, append_json_temp
@@ -68,7 +67,7 @@ def run_evaluation(input_file, output_file, func_eval, dict_name, args, num_core
     write_json(output_file, sorted(finished, key=lambda d: d['id']))
 
     t_stop = time()
-    print('Evaluation took %f' % (t_stop - t_start))
+    print('Scoring took %f' % (t_stop - t_start))
 
 
 def func_callback(result, filename, entry, dict_name):
@@ -189,6 +188,21 @@ def run_evaluation_par2_sbs_n_worst(output_file, db_instance: DbInstance, n):
                                                                f2_par2_cluster, func_weight)
     write_json(output_file, [final_score, cluster_score_dict])
 
+
+def export_clusters_sorted_best(input_file_par2, output_file):
+    data = read_json(input_file_par2)
+    exportList = []
+    for evaluation in data:
+        cluster_sizes = Counter(evaluation['clustering'])
+        for cluster, size in cluster_sizes.items():
+            cluster_dict = {'id': evaluation['id'],
+                            'cluster_idx': cluster,
+                            'cluster_par2': evaluation['par2'][1][str(cluster)],
+                            'cluster_size': size}
+            exportList.append(cluster_dict)
+
+    sorted_export_list = sorted(exportList, key=lambda d: d['cluster_par2'])
+    write_json(output_file, sorted_export_list)
 
 # ----------------------------------------------------------------------------------------------------------------------
 

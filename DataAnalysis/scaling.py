@@ -1,7 +1,7 @@
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import StandardScaler
-
-from util_scripts import util, DatabaseReader
+from UtilScripts import util
+from DataFormats import DatabaseReader
 
 SCALINGALGORITHMS = [
     ('Scale to [-1,1]', 'SCALEMINUSPLUS1'),
@@ -17,6 +17,7 @@ SCALINGTECHNIQUES = [
 ]
 
 
+# scales the given data based on the parameters given in the params_dict
 def scaling(data, features, params_dict):
     algorithm = params_dict['scaling_algorithm']
 
