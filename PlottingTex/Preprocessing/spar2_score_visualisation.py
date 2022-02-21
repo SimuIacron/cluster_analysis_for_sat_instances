@@ -8,6 +8,7 @@ from DataFormats import DatabaseReader
 from UtilScripts.scores import par2, spar2
 
 
+# for a cluster draws the runtime distributions of csbs and csbss with the corresponding spar2 and par2 score
 def visualisation_spar2(data_clustering, cluster, db_instance: DbInstance, dpi=192, output_file='', show_plot=False):
     clustering = get_clustering_for_cluster(data_clustering, cluster)
     csbs = cluster['cluster_par2'][0][0][0]

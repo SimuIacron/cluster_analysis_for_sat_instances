@@ -71,6 +71,7 @@ plot_boxplot_clustering([input_file_clustering_linear_scaler, input_file_cluster
                         output_file=output_file + 'box_standardscaler_linearscaler_base_gate',
                         dpi=dpi, max_id=max_id)
 
+
 # CHANGE ax.set_position to multiply by 0.7 instead of 0.8!
 # plot_cbs_comparison(['scaling_standardscaler/standardscaler_linearscaler_clustering_par2'], 'vbs_sbs/vbs', 'vbs_sbs/sbs',
 #                      '',

@@ -22,25 +22,25 @@ def par2(solver_name, db_instance: DbInstance, instance_index_list, timeout):
     return par2_ / len(runtimes_of_instances)
 
 
-def spar2_old(solver_name, db_instance: DbInstance, instance_index_list, timeout):
-    solver_index = db_instance.solver_f.index(solver_name)
-    solver = rotateNestedLists(db_instance.solver_wh)[solver_index]
-
-    runtimes_of_instances = []
-    for instance in instance_index_list:
-        runtimes_of_instances.append(solver[instance])
-
-    # std_ = std(runtimes_of_instances)
-    par2_ = par2(solver_name, db_instance, instance_index_list, timeout)
-
-    std_ = 0
-    for runtime in runtimes_of_instances:
-        if runtime >= timeout:
-            runtime = timeout * 2
-        std_ = std_ + ((runtime - par2_) * (runtime - par2_))
-    std_ = np.sqrt(std_ / len(runtimes_of_instances))
-
-    return par2_ + std_
+# def spar2_old(solver_name, db_instance: DbInstance, instance_index_list, timeout):
+#     solver_index = db_instance.solver_f.index(solver_name)
+#     solver = rotateNestedLists(db_instance.solver_wh)[solver_index]
+#
+#     runtimes_of_instances = []
+#     for instance in instance_index_list:
+#         runtimes_of_instances.append(solver[instance])
+#
+#     # std_ = std(runtimes_of_instances)
+#     par2_ = par2(solver_name, db_instance, instance_index_list, timeout)
+#
+#     std_ = 0
+#     for runtime in runtimes_of_instances:
+#         if runtime >= timeout:
+#             runtime = timeout * 2
+#         std_ = std_ + ((runtime - par2_) * (runtime - par2_))
+#     std_ = np.sqrt(std_ / len(runtimes_of_instances))
+#
+#     return par2_ + std_
 
 
 def spar2(solver_name, db_instance: DbInstance, instance_index_list, timeout):

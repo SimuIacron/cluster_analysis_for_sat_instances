@@ -18,6 +18,7 @@ FEATURESELECTIONIGNORE = [
     ('Variance ignores solver time', 'TIMEIGNORE')
 ]
 
+
 def get_best_solver_per_instance(solvers):
     best_list = []
     for inst in solvers:
@@ -60,7 +61,6 @@ def feature_selection(data, features, solvers, params_dict):
     elif algorithm == "NONE":
         return data
     elif algorithm == "VARIANCE":
-
 
         if ignore_solver_time:
 

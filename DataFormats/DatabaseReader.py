@@ -5,6 +5,7 @@ from gbd_tool.gbd_api import GBD
 
 from UtilScripts import util
 
+# creates the Path to all relevant databases for the GBD Object
 DB_PATH = os.environ["DBPATH"] + "meta.db" + os.pathsep + \
           os.environ["DBPATH"] + "base.db" + os.pathsep + \
           os.environ["DBPATH"] + "gate.db" + os.pathsep + \
@@ -42,21 +43,6 @@ FEATURES_BASE = ['clauses', 'variables', 'clause_size_1', 'clause_size_2', 'clau
                  'cg_degrees_variance', 'cg_degrees_min', 'cg_degrees_max', 'cg_degrees_entropy',
                  'base_features_runtime']
 
-# sc2020.db
-# FEATURES_SOLVER = ['cadical_sc2020', 'duriansat', 'exmaple_padc_dl', 'exmaple_padc_dl_ovau_exp',
-#                   'exmaple_padc_dl_ovau_lin',
-#                   'exmaple_psids_dl', 'kissat', 'kissat_sat', 'kissat_unsat', 'maple_scavel', 'maple_alluip_trail',
-#                   'maple_lrb_vsids_2_init', 'maplecomsps_lrb_vsids_2', 'maple_scavel01', 'maple_scavel02',
-#                   'maple_dl_f2trc',
-#                   'maplelcmdistchronobt_dl_v3', 'maple_f2trc', 'maple_f2trc_s', 'maple_cm_dist',
-#                   'maple_cm_dist_sattime2s',
-#                   'maple_cm_dist_simp2', 'maple_cmused_dist', 'maple_mix', 'maple_simp', 'parafrost', 'parafrost_cbt',
-#                   'pausat', 'relaxed', 'relaxed_newtech', 'relaxed_notimepara', 'slime', 'undominated_top16',
-#                   'undominated_top24', 'undominated_top36', 'undominated', 'cadical_alluip', 'cadical_alluip_trail',
-#                   'cadical_trail', 'cryptominisat_ccnr', 'cryptominisat_ccnr_lsids', 'cryptominisat_walksat',
-#                   'exp_l_mld_cbt_dl', 'exp_v_lgb_mld_cbt_dl', 'exp_v_l_mld_cbt_dl', 'exp_v_mld_cbt_dl', 'glucose3',
-#                   'upglucose_3_padc']
-
 # runtimes.db
 FEATURES_SOLVER = ['cadical_elimfalse', 'cadical', 'cadical_pripro', 'cadical_stability', 'candy', 'glucose_chanseok',
                    'glucose', 'glucose_syrup', 'glucose_var_decay099', 'kissat', 'lingeling', 'march_nh', 'minisat',
@@ -66,6 +52,8 @@ FEATURES_FAMILY = ['family']
 FEATURES_RESULT = ['result']
 
 
+# removes keywords "empty", "memout", "timeout" and "failed" from the database and replaces them with
+# with values depending on the feature and keyword
 def remove_keywords_from_query_with_hash(query, features):
 
     empties = 0
@@ -91,12 +79,13 @@ def remove_keywords_from_query_with_hash(query, features):
                 except ValueError:
                     pass
 
-    print(empties)
-    print(other_missing)
+    # print(empties)
+    # print(other_missing)
 
     return query
 
 
+# combines queries into one query for both the variant with and without hash
 def combine_queries(queries, queries_without_hash):
     # combine the queries, to one
     # check if all queries have the same order, if not throw an error for now
@@ -122,6 +111,8 @@ def combine_queries(queries, queries_without_hash):
     return final_query, final_query_without_hash
 
 
+# removes all instances based on the removed_indexes array, that marks instances to keep with 1 and instance to
+# remove with 0
 def remove_with_index_array(dataset, removed_indexes):
     result = []
     for i in range(len(removed_indexes)):
@@ -131,6 +122,7 @@ def remove_with_index_array(dataset, removed_indexes):
     return result
 
 
+# generates an array that contains a 1 if the instances contains no missing entries, and 0 if it does
 def generate_empty_array(dataset):
     # result = []
     removed_indexes = []

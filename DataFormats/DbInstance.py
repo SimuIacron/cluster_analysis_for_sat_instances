@@ -1,6 +1,8 @@
 from DataFormats import DatabaseReader
 
 
+# Abstraction of the database, that gets all information from the databases and
+# supplies it during clustering and evaluation
 class DbInstance:
 
     def __init__(self, features=None, cap_running_time=DatabaseReader.TIMEOUT):
@@ -45,6 +47,8 @@ class DbInstance:
         self.dataset_f, self.base_f, self.gate_f, self.solver_f, self.dataset, self.dataset_wh, self.base, self.base_wh,\
         self.gate, self.gate_wh, self.solver, self.solver_wh = self.generate_dataset(features)
 
+        # get an empty array for each feature set and combine the empty array before using it to remove
+        # instances with missing entries
         removed_array_base = DatabaseReader.generate_empty_array(self.base)
         removed_array_gate = DatabaseReader.generate_empty_array(self.gate)
         removed_array_solver = DatabaseReader.generate_empty_array(self.solver)
@@ -67,6 +71,7 @@ class DbInstance:
         self.un_sat = DatabaseReader.remove_with_index_array(self.un_sat, removed_array)
         self.un_sat_wh = DatabaseReader.remove_with_index_array(self.un_sat_wh, removed_array)
 
+        # replace all runtimes that are bigger than the timeout with the timeout
         if cap_running_time != DatabaseReader.TIMEOUT:
             for i in range(len(self.solver_wh)):
                 for j in range(len(self.solver_f)):

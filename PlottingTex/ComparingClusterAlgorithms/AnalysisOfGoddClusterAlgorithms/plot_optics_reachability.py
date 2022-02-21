@@ -16,6 +16,8 @@ comb_dict = {
     'scaling_technique': 'NORMALSCALE'
 }
 
+dpi = 150
+
 names = ['base', 'gate', 'runtimes', 'base_gate', 'base_runtimes', 'gate_runtimes', 'base_gate_runtimes']
 
 for current_features, line, name in zip(output_merged, [0.5, 0.3, 0.7, 1.3, 0.9, 1.3, 1.8], names):
@@ -27,8 +29,13 @@ for current_features, line, name in zip(output_merged, [0.5, 0.3, 0.7, 1.3, 0.9,
     optics_model = OPTICS(min_samples=5)
     optics_model.fit(X=scaled_data)
 
+    plt.figure(figsize=(1000 / dpi, 500 / dpi), dpi=dpi)
+    plt.ylabel('Eps')
+    plt.xlabel('Instances')
+
     reachabilities = pd.Series(optics_model.reachability_).iloc[optics_model.ordering_]
-    reachabilities.plot.bar(xticks=range(0, 2525, 50), figsize=(16, 8))
+    reachabilities.plot.bar(xticks=range(0, 2525, 50))
+    plt.tight_layout()
     # plt.axhline(y=line, color='red')
 
     plt.savefig(os.environ['TEXPATH'] + '/general_clustering_6/reachability/reachability_' + name + '.svg')

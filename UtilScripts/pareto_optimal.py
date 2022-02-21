@@ -1,3 +1,4 @@
+# this import structure is used, because some servers had problems installing oapackage
 try:
     import oapackage
 except ImportError:

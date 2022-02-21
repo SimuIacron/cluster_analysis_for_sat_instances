@@ -17,6 +17,7 @@ SCALINGTECHNIQUES = [
 ]
 
 
+# scales the given data based on the parameters given in the params_dict
 def scaling(data, features, params_dict):
     algorithm = params_dict['scaling_algorithm']
 

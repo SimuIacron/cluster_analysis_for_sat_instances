@@ -2,6 +2,7 @@ import csv
 import os
 
 
+# exports a csv containing the data, with the header appended as the first row
 def write_to_csv(file, header, data):
 
     data = [header] + data

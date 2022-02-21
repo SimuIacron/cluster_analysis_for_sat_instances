@@ -4,7 +4,7 @@ from pathlib import Path
 export_path = os.environ['EXPPATH']
 
 
-# epxorts the figure as html with the name to
+# exports the figure as html with the name to
 # the path given by EXPPATH and adds the fitting number if the file already exists
 def export_plot_as_html(figure, name):
     path = export_path + name + '.html'

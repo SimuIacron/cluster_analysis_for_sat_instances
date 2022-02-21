@@ -5,17 +5,20 @@ import random
 from DataFormats import DatabaseReader
 
 
+# splits up the list into chunks with each having a maximum size of n
 def chunks(lst, n):
     n = max(1, n)
     return [lst[i:i + n] for i in range(0, len(lst), n)]
 
 
+# scales values of an array linear, so that all values added together make 1
 def scale_array_to_add_to_1(array):
     sum_ = 0
     for elem in array:
         sum_ = sum_ + elem
 
     return [elem / sum_ for elem in array]
+
 
 # scales given array values to a scale of 0 to 1
 # example: [3,5,7] --> [0, 0.5, 1]
@@ -95,10 +98,7 @@ def add_line_breaks_to_text(text, letter_to_break_at, replace_n):
     return text_string
 
 
-def random_color():
-    return random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)
-
-
+# returns a combination of the database, where glucose_syrup and ylasat are removed from runtimes
 def get_combinations_of_databases(use_base=True, use_gate=True, use_solver=True):
     temp_solver_features = DatabaseReader.FEATURES_SOLVER.copy()
     temp_solver_features.pop(14)

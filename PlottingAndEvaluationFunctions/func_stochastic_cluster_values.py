@@ -15,6 +15,7 @@ from UtilScripts.scores import par2, spar2
 from UtilScripts.write_to_csv import write_to_csv
 
 
+# calculates multiple stochastic measurements over each feature set for each cluster
 def calculate_feature_stochastic(data_clustering, data_clusters, data_dataset, db_instance: DbInstance):
     data_clusters_stochastic = []
 
@@ -114,6 +115,7 @@ def filter_best_cluster_for_each_family(data_clusters, filter_param, minimize=Fa
     return family_dict
 
 
+# counts the unsolvable instances for each cluster
 def get_unsolvable_instances_amount(data_clustering, data_clusters, db_instance:DbInstance):
 
     unsolvable_clusters = []
@@ -197,7 +199,6 @@ def filter_clusters_with_difference_between_csbs_and_sbs(data_clusters, db_insta
     return filtered
 
 
-
 # calculates the cluster_deviation score for each cluster in data_clusters_stochastic
 # data_clusters_stochastic: Must contain mean and std
 # db_instance
@@ -239,6 +240,7 @@ def calculate_cluster_performance_score(data_clusterings, data_clusters_stochast
     return sorted_data
 
 
+# calculates the speedup factor of sbs and csbss for each solver
 def calculate_factor_of_sbs_and_deviation_solver(data_clustering, data_clusters, sbs_solver, db_instance: DbInstance):
     data_clusters_factor = []
     for cluster in data_clusters:
@@ -320,6 +322,7 @@ def filter_cluster_data(data_clustering, data_cluster, param_names, param_values
     return filtered_data_cluster
 
 
+# filters out the clusters of a specific clustering given by the id
 def filter_specific_clustering(data_clusters, id_):
     data_specific_clustering = []
     for cluster in data_clusters:
@@ -329,6 +332,7 @@ def filter_specific_clustering(data_clusters, id_):
     return data_specific_clustering
 
 
+# calculates for each cluster that are in the strip of the csbs
 def calculate_clusters_in_strip(data_clustering, data_clusters, db_instance: DbInstance):
     offset = 3
     grade = 1 / 10
@@ -590,35 +594,6 @@ def filter_same_cluster(data_clustering, data_cluster):
     return remaining_clusters
 
 
-def find_best_clustering_by_performance_score(data_clustering, data_clusters):
-    clustering_list = []
-    for clustering in data_clustering:
-        id_ = clustering['id']
-        count = 0
-        size = 0
-        clustering_performance_score = 0
-        for cluster in data_clusters:
-            if cluster['id'] == id_:
-                count = count + 1
-                size = size + cluster['cluster_size']
-                clustering_performance_score = clustering_performance_score + cluster['cluster_performance_score'] * \
-                                               cluster['cluster_size']
-
-        if count != 0:
-            clustering_performance_score = clustering_performance_score / size
-            assert count == len(
-                clustering['clusters']), '{id}: added {a} clusters to the score, but expected {b}'.format(
-                id=id_, a=count, b=len(clustering['clusters']))
-            new_dict = dict({
-                'clustering_performance_score': clustering_performance_score,
-                'size': len(clustering['clusters']),
-                'cluster_sizes': Counter(clustering['clustering'])
-            }, **clustering)
-            clustering_list.append(new_dict)
-
-    return clustering_list
-
-
 def sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering, data_clusters, min_cluster_size=20,
                                                                 sbs_solver='', use_best_n=3):
     clusters_mapped_to_clustering = {}
@@ -666,6 +641,7 @@ def sort_clusters_by_lowest_performance_scores_of_best_clusters(data_clustering,
     return sorted(clusterings, key=lambda d: d['clustering_performance_score_n_best'])
 
 
+# returns list of clusters which have different csbs and csbss
 def filter_clusters_where_csbs_and_csbss_are_different(data_cluster):
     filtered = []
     for cluster in data_cluster:
@@ -675,6 +651,7 @@ def filter_clusters_where_csbs_and_csbss_are_different(data_cluster):
     return filtered
 
 
+# count clusters that use the sbs as csbs
 def count_instances_in_clusters_with_sbs(data_cluster, sbs_solver):
     counter = 0
     for cluster in data_cluster:
@@ -750,6 +727,7 @@ def scale_array_to_01_to_given_interval(array, min_v, max_v):
     return scaled_array
 
 
+# generates csv that contains the solver strip
 def generate_csv_cluster_strip(data_clusters, header, file):
     export_list = []
     for i, cluster in enumerate(data_clusters):
@@ -764,6 +742,7 @@ def generate_csv_cluster_strip(data_clusters, header, file):
     write_to_csv(file, header, export_list)
 
 
+# generates csv containing the csbs and csbss of clusters
 def generate_csv_csbs_csbss(data_clusters, header, file):
     solver_list = []
     for i, elem in enumerate(data_clusters):
