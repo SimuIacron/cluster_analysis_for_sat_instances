@@ -1,6 +1,7 @@
 import numpy as np
 from PlottingAndEvaluationFunctions.func_plot_single_clustering import plot_family_distribution_of_clusters, \
-    plot_runtime_comparison_sbs, plot_cluster_distribution_for_families, plot_family_distribution_of_clusters_v2
+    plot_runtime_comparison_sbs, plot_cluster_distribution_for_families, plot_family_distribution_of_clusters_v2, \
+    plot_heatmap
 from PlottingAndEvaluationFunctions.func_stochastic_cluster_values import calculate_cluster_performance_score, \
     calculate_biggest_family_for_cluster, \
     calculate_feature_stochastic, \
@@ -25,7 +26,7 @@ clusterings = [
     (33, 'kmeans_33/kmeans_33'),
     (25522, 'dbscan_25522/dbscan_25522'),
 ]
-setting = 0
+setting = 1
 dpi = 120
 
 output_merged, features = get_combinations_of_databases()
@@ -129,19 +130,30 @@ pass
 #                                      output_file=output_file + clusterings[setting][1] + '_family_distribution',
 #                                      dpi=dpi)
 #
-plot_family_distribution_of_clusters_v2(filtered_size, db_instance, show_plot=False,
-                                     output_file=output_file + clusterings[setting][1] + '_family_distribution_v2',
-                                     dpi=dpi)
-
+# plot_family_distribution_of_clusters_v2(filtered_size, db_instance, show_plot=False,
+#                                      output_file=output_file + clusterings[setting][1] + '_family_distribution',
+#                                      dpi=dpi, family_min_percentage=0.2)
+#
 # plot_cluster_distribution_for_families(filtered_size, db_instance, show_plot=False,
 #                                        output_file=output_file + clusterings[setting][1] + '_cluster_distribution',
-#                                        dpi=dpi)
+#                                        dpi=dpi, )
+
+plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=False,
+                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_family_size', dpi=dpi)
+plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=True,
+                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_cluster_size', dpi=dpi)
+
+plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=False,
+                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_family_size_all', dpi=dpi/2, q=0)
+plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=True,
+                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_cluster_size_all', dpi=dpi/2, q=0)
+
 #
 # plot_performance_mean_std_and_performance_of_cluster(sort, db_instance, show_plot=False,
 #                                                      output_file=output_file + clusterings[setting][
 #                                                          1] + '_performance_score', dpi=dpi)
-plot_runtime_comparison_sbs(filtered_size, sbs_solver, show_plot=False,
-                            output_file=output_file + clusterings[setting][1] + '_sbs_comparison', dpi=dpi)
+# plot_runtime_comparison_sbs(filtered_size, sbs_solver, show_plot=False,
+#                             output_file=output_file + clusterings[setting][1] + '_sbs_comparison', dpi=dpi)
 # boxplot_runtimes_distribution_per_cluster(sort, db_instance,
 #                                           output_file=output_file + clusterings[setting][1] + '_boxplot_runtimes',
 #                                           dpi=dpi)

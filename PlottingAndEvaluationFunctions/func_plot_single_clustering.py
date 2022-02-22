@@ -203,31 +203,50 @@ def plot_cluster_distribution_for_families(data_clusters, db_instance: DbInstanc
         if item > quantile:
             Y_axis.append(key)
 
-    plt.figure(figsize=(1200 / dpi, 1000 / dpi), dpi=dpi)
+    plt.figure(figsize=(1500 / dpi, 1100 / dpi), dpi=dpi)
     plt.ylabel('Families')
     plt.xlabel('Share in cluster')
 
+    data_clusters = sorted(data_clusters, key=lambda d: d['cluster_size'], reverse=True)
+
     data = []
+    data_cluster_id = []
     for current_family in Y_axis:
         family_data = []
-        for cluster in data_clusters:
+        cluster_id_data = []
+        for i, cluster in enumerate(data_clusters):
             for (family, size) in cluster['family_list']:
                 if family == current_family:
                     family_data.append(size)
+                    cluster_id_data.append(i)
 
         zero_padding = [0] * (len(data_clusters) - len(family_data))
-        family_data = UtilScripts.util.scale_array_to_add_to_1(sorted(family_data, reverse=True)) + zero_padding
-        data.append(family_data)
+        family_data = UtilScripts.util.scale_array_to_add_to_1(family_data) + zero_padding
+        cluster_id_data = cluster_id_data + zero_padding
+        family_data, cluster_id_data = zip(*sorted(zip(family_data, cluster_id_data), key=lambda d: d[0], reverse=True))
 
-    data, Y_axis = zip(*sorted(zip(data, Y_axis), key=lambda d: d[1], reverse=True))
-    data, Y_axis = zip(*sorted(zip(data, Y_axis), key=lambda d: d[0][0], reverse=True))
+        data.append(family_data)
+        data_cluster_id.append(cluster_id_data)
+
+    data, Y_axis, data_cluster_id = zip(*sorted(zip(data, Y_axis, data_cluster_id), key=lambda d: d[1], reverse=True))
+    data, Y_axis, data_cluster_id = zip(*sorted(zip(data, Y_axis, data_cluster_id), key=lambda d: d[0][0], reverse=True))
 
     data_scaled = UtilScripts.util.rotateNestedLists(data)
+    data_cluster_id = UtilScripts.util.rotateNestedLists(data_cluster_id)
 
     bottom = [0] * len(Y_axis)
+    ax_list = []
     for i, cluster_data in enumerate(data_scaled):
-        plt.barh(Y_axis, cluster_data, label=i, left=bottom)
+        ax = plt.barh(Y_axis, cluster_data, label=i, left=bottom)
+        ax_list.append(ax)
         bottom = [a + b for a, b in zip(bottom, cluster_data)]
+
+    for ax, cluster_data, cluster_id_data in zip(ax_list, data_scaled, data_cluster_id):
+        for p, elem, id_ in zip(ax.patches, cluster_data, cluster_id_data):
+            if elem > 0.025:
+                width, height = p.get_width(), p.get_height()
+                x, y = p.get_xy()
+                plt.annotate('{cluster}'.format(cluster=id_), (x + width / 2, y + height / 2 + 0.1), ha='center')
 
     plt.tight_layout()
     plt.yticks(Y_axis)
@@ -238,3 +257,63 @@ def plot_cluster_distribution_for_families(data_clusters, db_instance: DbInstanc
 
     if show_plot:
         plt.show()
+
+
+def plot_heatmap(data_clusters, db_instance: DbInstance, relative_to_cluster_size=True, output_file='',
+                                           show_plot=False, dpi=192, q=0.75, font_size=8):
+    family_list = [family[0] for family in db_instance.family_wh]
+    count = Counter(family_list)
+    count_list = [item for key, item in count.items()]
+    quantile = np.quantile(count_list, q)
+
+    X_axis = []
+    for key, item in count.items():
+        if item > quantile:
+            X_axis.append(key)
+
+    data = []
+    for cluster in data_clusters:
+        data_current = []
+        for family in X_axis:
+            found_family = False
+            for current_family, size in cluster['family_list']:
+                if family == current_family:
+                    if relative_to_cluster_size:
+                        data_current.append(round(size / cluster['cluster_size'] * 100))
+                    else:
+                        data_current.append(round(size / count[current_family] * 100))
+                    found_family = True
+                    break
+
+            if not found_family:
+                data_current.append(0)
+
+        data.append(data_current)
+
+    data = UtilScripts.util.rotateNestedLists(data)
+
+    plt.figure(figsize=(500 / dpi, 1000 / dpi), dpi=dpi)
+    plt.ylabel('Family')
+    plt.xlabel('Cluster')
+
+    plt.imshow(data)
+
+    # Loop over data dimensions and create text annotations.
+    for i in range(len(X_axis)):
+        for j in range(len(data_clusters)):
+            color = 'w'
+            if data[i][j] > 75:
+                color = 'black'
+            plt.annotate('{p}'.format(p=data[i][j]), (j, i),
+                           ha="center", va="center", color=color, fontsize=font_size)
+
+    plt.yticks(range(len(X_axis)), X_axis)
+    plt.xticks(range(len(data_clusters)))
+    plt.tight_layout()
+
+    if output_file != '':
+        plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
+
+    if show_plot:
+        plt.show()
+
