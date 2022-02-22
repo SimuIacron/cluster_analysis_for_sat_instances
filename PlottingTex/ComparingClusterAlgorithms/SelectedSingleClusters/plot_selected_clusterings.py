@@ -1,6 +1,6 @@
 import numpy as np
 from PlottingAndEvaluationFunctions.func_plot_single_clustering import plot_family_distribution_of_clusters, \
-    plot_runtime_comparison_sbs, plot_cluster_distribution_for_families
+    plot_runtime_comparison_sbs, plot_cluster_distribution_for_families, plot_family_distribution_of_clusters_v2
 from PlottingAndEvaluationFunctions.func_stochastic_cluster_values import calculate_cluster_performance_score, \
     calculate_biggest_family_for_cluster, \
     calculate_feature_stochastic, \
@@ -25,7 +25,7 @@ clusterings = [
     (33, 'kmeans_33/kmeans_33'),
     (25522, 'dbscan_25522/dbscan_25522'),
 ]
-setting = 1
+setting = 0
 dpi = 120
 
 output_merged, features = get_combinations_of_databases()
@@ -84,8 +84,8 @@ sort = outlier_cluster + sort2
 filtered_size = filter_by_cluster_size(sort, quantile + 1)
 print(count_instances_in_clusters_with_sbs(filtered_size, sbs_solver))
 
-generate_csv_csbs_csbss(filtered_size, ['Cluster', 'CSBS', 'CSBSS'], output_file + clusterings[setting][1] + '_solvers')
-generate_csv_cluster_strip(filtered_size, ['Cluster', 'Strip'], output_file + clusterings[setting][1] + '_strip')
+# generate_csv_csbs_csbss(filtered_size, ['Cluster', 'CSBS', 'CSBSS'], output_file + clusterings[setting][1] + '_solvers')
+# generate_csv_cluster_strip(filtered_size, ['Cluster', 'Strip'], output_file + clusterings[setting][1] + '_strip')
 
 excluded = ['levels_min'
             'levels_none_mean', 'levels_none_variance', 'levels_none_min', 'levels_none_max',
@@ -125,14 +125,18 @@ print('Cluster with difference: {a}'.format(a=len(clusters_with_difference_in_cs
 
 
 pass
-plot_family_distribution_of_clusters(filtered_size, db_instance, show_plot=False,
-                                     output_file=output_file + clusterings[setting][1] + '_family_distribution',
+# plot_family_distribution_of_clusters(filtered_size, db_instance, show_plot=False,
+#                                      output_file=output_file + clusterings[setting][1] + '_family_distribution',
+#                                      dpi=dpi)
+#
+plot_family_distribution_of_clusters_v2(filtered_size, db_instance, show_plot=False,
+                                     output_file=output_file + clusterings[setting][1] + '_family_distribution_v2',
                                      dpi=dpi)
 
-plot_cluster_distribution_for_families(filtered_size, db_instance, show_plot=False,
-                                       output_file=output_file + clusterings[setting][1] + '_cluster_distribution',
-                                       dpi=dpi)
-
+# plot_cluster_distribution_for_families(filtered_size, db_instance, show_plot=False,
+#                                        output_file=output_file + clusterings[setting][1] + '_cluster_distribution',
+#                                        dpi=dpi)
+#
 # plot_performance_mean_std_and_performance_of_cluster(sort, db_instance, show_plot=False,
 #                                                      output_file=output_file + clusterings[setting][
 #                                                          1] + '_performance_score', dpi=dpi)
@@ -150,9 +154,9 @@ plot_runtime_comparison_sbs(filtered_size, sbs_solver, show_plot=False,
 #                                                                str(i) + '_base',
 #                                          show_plot=False)
 
-index_list = [[13, 15], [4]]
-
-for index in index_list[setting]:
-    cluster = filtered_size[index]
-    visualisation_spar2(data_clustering, cluster, db_instance, show_plot=False,
-                        output_file=output_file + clusterings[setting][1] + '_spar_vis_' + str(index), dpi=dpi)
+# index_list = [[13, 15], [4]]
+#
+# for index in index_list[setting]:
+#     cluster = filtered_size[index]
+#     visualisation_spar2(data_clustering, cluster, db_instance, show_plot=False,
+#                         output_file=output_file + clusterings[setting][1] + '_spar_vis_' + str(index), dpi=dpi)

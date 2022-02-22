@@ -34,12 +34,101 @@ def plot_family_distribution_of_clusters(data_clusters, db_instance: DbInstance,
     plt.barh(X_axis, other_families_size, label='Other Families', left=biggest_family_size)
 
     for x, family in zip(X_axis, biggest_family_name):
-        plt.annotate('{family} ({size}/{total_size}), {percentage}% of family'.format(family=family, size=biggest_family_size[x],
-                                                             total_size=biggest_family_size[x] + other_families_size[
-                                                                 x], percentage=round(percentage_familes[x] * 100)),
-                     (150, x+0.1), rotation=0)
+        plt.annotate(
+            '{family} ({size}/{total_size}), {percentage}% of family'.format(family=family, size=biggest_family_size[x],
+                                                                             total_size=biggest_family_size[x] +
+                                                                                        other_families_size[
+                                                                                            x], percentage=round(
+                    percentage_familes[x] * 100)),
+            (150, x + 0.1), rotation=0)
 
     plt.legend(loc='upper right')
+    plt.ylabel('Cluster')
+    plt.xlabel('Size')
+    plt.tight_layout()
+    plt.yticks(X_axis)
+    plt.gca().invert_yaxis()
+
+    if output_file != '':
+        plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
+
+    if show_plot:
+        plt.show()
+
+
+# For a clustering plots the size of each cluster together with the share of the biggest family and some infos for the
+# biggest family in each cluster
+def plot_family_distribution_of_clusters_v2(data_clusters, db_instance: DbInstance, output_file='',
+                                            show_plot=False, dpi=192, family_min_percentage = 0.2):
+
+    family_sizes = Counter([family[0] for family in db_instance.family_wh])
+    other_familes_label = 'other families'
+
+    biggest_families_size_all = []
+    biggest_families_name_all = []
+    max_biggest_families = 0
+    for cluster in data_clusters:
+        biggest_families_size = [0]
+        biggest_families_name = [other_familes_label]
+
+        for family_name, family_size in cluster['family_list']:
+            if family_size / cluster['cluster_size'] >= family_min_percentage:
+                biggest_families_size.append(family_size)
+                biggest_families_name.append(family_name)
+            else:
+                biggest_families_size[0] = biggest_families_size[0] + family_size
+
+        if len(biggest_families_size) > max_biggest_families:
+            max_biggest_families = len(biggest_families_size)
+
+        biggest_families_size_all.append(biggest_families_size)
+        biggest_families_name_all.append(biggest_families_name)
+
+    for sizes, names in zip(biggest_families_size_all, biggest_families_name_all):
+        while len(sizes) < max_biggest_families:
+            sizes.append(0)
+            names.append('')
+
+    plot_sizes = UtilScripts.util.rotateNestedLists(biggest_families_size_all)
+    plot_names = UtilScripts.util.rotateNestedLists(biggest_families_name_all)
+
+    plot_sizes = plot_sizes[1:] + [plot_sizes[0]]
+    plot_names = plot_names[1:] + [plot_names[0]]
+
+    X_axis = range(len(plot_sizes[0]))
+
+    plt.figure(figsize=(1200 / dpi, 1000 / dpi), dpi=dpi)
+    bottom = [0] * len(plot_sizes[0])
+    for elem in plot_sizes:
+        plt.barh(X_axis, elem, left=bottom)
+        bottom = [a + b for a, b in zip(bottom, elem)]
+
+    texts = [''] * len(plot_sizes[0])
+    for x, families, sizes in zip(X_axis, plot_names, plot_sizes):
+        for i, (family, size, cluster) in enumerate(zip(families, sizes, data_clusters)):
+            cluster_size = cluster['cluster_size']
+            if size != 0:
+                if family == other_familes_label:
+                    texts[i] = texts[i] + '({family}, {size}/{cluster_size}, -), '\
+                        .format(family=families[0], size=size, cluster_size=cluster_size)
+                else:
+                    texts[i] = texts[i] + '({family}, {size}/{cluster_size}, {percentage}%), '\
+                        .format(family=family, size=size, cluster_size=cluster_size, percentage=round(size/family_sizes[family] * 100))
+
+    plt.annotate('Legend: (family, share in cluster, percentage of all family instances)', (20, -1), rotation=0)
+
+    for x, text in zip(X_axis, texts):
+        plt.annotate(text, (50, x + 0.1), rotation=0)
+
+        # plt.annotate(
+        #     '{family} ({size}/{total_size}), {percentage}% of family'.format(family=family, size=biggest_family_size[x],
+        #                                                                      total_size=biggest_family_size[x] +
+        #                                                                                 other_families_size[
+        #                                                                                     x], percentage=round(
+        #             percentage_familes[x] * 100)),
+        #     (150, x + 0.1), rotation=0)
+
+    # plt.legend(loc='upper right')
     plt.ylabel('Cluster')
     plt.xlabel('Size')
     plt.tight_layout()
@@ -79,7 +168,7 @@ def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_p
     plt.xlabel('Par2-Score (s)')
 
     for x, strip in zip(X_axis, solvers):
-        plt.annotate(strip[0][0], (1000, x+0.1), rotation=0, weight='bold')
+        plt.annotate(strip[0][0], (1000, x + 0.1), rotation=0, weight='bold')
         strip_text = ''
         for i, current_solver in enumerate(strip[1:]):
             if i < 5:
@@ -88,7 +177,7 @@ def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_p
                 strip_text = strip_text + ', ' + str(len(strip[1:]) - i) + ' more solvers'
                 break
 
-        plt.annotate(strip_text, (1000 + 92 * len(strip[0][0]), x+0.1), rotation=0)
+        plt.annotate(strip_text, (1000 + 92 * len(strip[0][0]), x + 0.1), rotation=0)
 
     plt.legend(loc='upper right')
     plt.tight_layout()
@@ -103,7 +192,7 @@ def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_p
 
 
 def plot_cluster_distribution_for_families(data_clusters, db_instance: DbInstance, output_file='',
-                                         show_plot=False, dpi=192):
+                                           show_plot=False, dpi=192):
     family_list = [family[0] for family in db_instance.family_wh]
     count = Counter(family_list)
     count_list = [item for key, item in count.items()]
@@ -117,24 +206,6 @@ def plot_cluster_distribution_for_families(data_clusters, db_instance: DbInstanc
     plt.figure(figsize=(1200 / dpi, 1000 / dpi), dpi=dpi)
     plt.ylabel('Families')
     plt.xlabel('Share in cluster')
-
-    # data = []
-    # for i, cluster in enumerate(data_clusters):
-    #     cluster_data = []
-    #     for current_family in Y_axis:
-    #         found_family = False
-    #         for (family, size) in cluster['family_list']:
-    #             if family == current_family:
-    #                 cluster_data.append(size)
-    #                 found_family = True
-    #                 break
-    #
-    #         if not found_family:
-    #             cluster_data.append(0)
-    #
-    #     data.append(cluster_data)
-    # data_scaled = UtilScripts.util.rotateNestedLists([UtilScripts.util.scale_array_to_add_to_1(family) for family in
-    #                                                  UtilScripts.util.rotateNestedLists(data)])
 
     data = []
     for current_family in Y_axis:
