@@ -292,7 +292,7 @@ def plot_heatmap(data_clusters, db_instance: DbInstance, relative_to_cluster_siz
 
     data = UtilScripts.util.rotateNestedLists(data)
 
-    plt.figure(figsize=(500 / dpi, 1000 / dpi), dpi=dpi)
+    plt.figure(figsize=(600 / dpi, 1000 / dpi), dpi=dpi)
     plt.ylabel('Family')
     plt.xlabel('Cluster')
 

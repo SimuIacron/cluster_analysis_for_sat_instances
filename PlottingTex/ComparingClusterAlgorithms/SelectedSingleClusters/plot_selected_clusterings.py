@@ -26,7 +26,7 @@ clusterings = [
     (33, 'kmeans_33/kmeans_33'),
     (25522, 'dbscan_25522/dbscan_25522'),
 ]
-setting = 1
+setting = 0
 dpi = 120
 
 output_merged, features = get_combinations_of_databases()
@@ -138,14 +138,14 @@ pass
 #                                        output_file=output_file + clusterings[setting][1] + '_cluster_distribution',
 #                                        dpi=dpi, )
 
-plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=False,
+plot_heatmap(sort, db_instance, relative_to_cluster_size=False,
                                        output_file=output_file + clusterings[setting][1] + '_family_share_per_family_size', dpi=dpi)
-plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=True,
+plot_heatmap(sort, db_instance, relative_to_cluster_size=True,
                                        output_file=output_file + clusterings[setting][1] + '_family_share_per_cluster_size', dpi=dpi)
 
-plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=False,
+plot_heatmap(sort, db_instance, relative_to_cluster_size=False,
                                        output_file=output_file + clusterings[setting][1] + '_family_share_per_family_size_all', dpi=dpi/2, q=0)
-plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=True,
+plot_heatmap(sort, db_instance, relative_to_cluster_size=True,
                                        output_file=output_file + clusterings[setting][1] + '_family_share_per_cluster_size_all', dpi=dpi/2, q=0)
 
 #
