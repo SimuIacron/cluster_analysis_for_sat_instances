@@ -13,7 +13,7 @@ def plot_histograms_clustering(input_file_par2, sbs_file, highlight_index, param
                                label_list, max_cluster_amount=20, columns=2, bin_step=20, height=500, dpi=96,
                                output_file='', normalize=False, show_plot=False, max_id=10000000000):
     x_label = 'CBS (s)'
-    y_label = 'frequency'
+    y_label = 'Number of clusterings'
 
     data = []
     if isinstance(input_file_par2, list):
@@ -170,7 +170,7 @@ def plot_boxplot_family(db_instance: DbInstance, dpi=96, output_file='', show_pl
                      constrained_layout=True)
 
     ax = fig.add_subplot(111)
-    ax.set_xlabel('CBS (s)')
+    ax.set_xlabel('Number of family instances')
 
     ax.boxplot(count_list, vert=False, widths=[1.7])
 

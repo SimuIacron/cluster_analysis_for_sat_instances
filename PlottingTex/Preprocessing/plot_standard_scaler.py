@@ -11,7 +11,7 @@ max_id = 24856
 names = ['Linear Scaling', 'Standard Scaling']
 
 version = 6
-input_file_clustering_standard_scaler = 'clustering_general_v{ver}/general_clustering_{ver}_par2'.format(ver=version)
+input_file_clustering_standard_scaler = 'clustering_general_v{ver}/standardscaler/general_clustering_{ver}_par2'.format(ver=version)
 input_file_clustering_linear_scaler = \
     'clustering_general_v{ver}/linearscaler/general_clustering_{ver}_linearscaler_par2'.format(ver=version)
 input_file_sbs = 'clustering_general_v{ver}/sbs_{ver}'.format(ver=version)

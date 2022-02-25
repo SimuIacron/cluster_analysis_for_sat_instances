@@ -17,7 +17,6 @@ comb_dict = {
 }
 
 dpi = 150
-
 names = ['base', 'gate', 'runtimes', 'base_gate', 'base_runtimes', 'gate_runtimes', 'base_gate_runtimes']
 
 for current_features, line, name in zip(output_merged, [0.5, 0.3, 0.7, 1.3, 0.9, 1.3, 1.8], names):
@@ -34,7 +33,7 @@ for current_features, line, name in zip(output_merged, [0.5, 0.3, 0.7, 1.3, 0.9,
     plt.xlabel('Instances')
 
     reachabilities = pd.Series(optics_model.reachability_).iloc[optics_model.ordering_]
-    reachabilities.plot.bar(xticks=range(0, 2525, 50))
+    reachabilities.plot.bar(xticks=range(0, 2525, 250))
     plt.tight_layout()
     # plt.axhline(y=line, color='red')
 

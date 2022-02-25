@@ -43,7 +43,7 @@ def visualisation_spar2(data_clustering, cluster, db_instance: DbInstance, dpi=1
 
 
     plt.xlabel('Solvers')
-    plt.ylabel('(S)Par2-Score (s)')
+    plt.ylabel('(S)Par2-Score/Runtime (s)')
 
     plt.legend(loc='upper center')
     plt.tight_layout()

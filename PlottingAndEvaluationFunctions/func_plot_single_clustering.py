@@ -59,7 +59,7 @@ def plot_family_distribution_of_clusters(data_clusters, db_instance: DbInstance,
 # For a clustering plots the size of each cluster together with the share of the biggest family and some infos for the
 # biggest family in each cluster
 def plot_family_distribution_of_clusters_v2(data_clusters, db_instance: DbInstance, output_file='',
-                                            show_plot=False, dpi=192, family_min_percentage = 0.2):
+                                            show_plot=False, dpi=192, family_min_percentage = 0.2, fontsize=10):
 
     family_sizes = Counter([family[0] for family in db_instance.family_wh])
     other_familes_label = 'other families'
@@ -129,10 +129,11 @@ def plot_family_distribution_of_clusters_v2(data_clusters, db_instance: DbInstan
         #     (150, x + 0.1), rotation=0)
 
     # plt.legend(loc='upper right')
-    plt.ylabel('Cluster')
-    plt.xlabel('Size')
+    plt.ylabel('Cluster', fontsize=fontsize)
+    plt.xlabel('Size', fontsize=fontsize)
     plt.tight_layout()
-    plt.yticks(X_axis)
+    plt.yticks(X_axis, fontsize=fontsize)
+    plt.xticks(fontsize=fontsize)
     plt.gca().invert_yaxis()
 
     if output_file != '':
@@ -144,7 +145,7 @@ def plot_family_distribution_of_clusters_v2(data_clusters, db_instance: DbInstan
 
 # for a clustering plots the csbs score of each cluster and the speed of the sbs on the cluster.
 # annotates the csbs as well as the solvers in the strip of the csbs
-def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_plot=False, dpi=192):
+def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_plot=False, dpi=192, fontsize=16):
     runtimes_sbs = []
     runtimes_cluster_solver = []
     solvers = [cluster['par2_strip'] for cluster in data_cluster]
@@ -164,8 +165,8 @@ def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_p
     plt.scatter(runtimes_sbs, X_axis, zorder=2, label='SBS')
     plt.barh(X_axis, runtimes_cluster_solver, zorder=1, label='CSBS')
 
-    plt.ylabel('Cluster')
-    plt.xlabel('Par2-Score (s)')
+    plt.ylabel('Cluster', fontsize=fontsize)
+    plt.xlabel('Par2-Score (s)', fontsize=fontsize)
 
     for x, strip in zip(X_axis, solvers):
         plt.annotate(strip[0][0], (1000, x + 0.1), rotation=0, weight='bold')
@@ -181,7 +182,8 @@ def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_p
 
     plt.legend(loc='upper right')
     plt.tight_layout()
-    plt.yticks(X_axis)
+    plt.yticks(X_axis, fontsize=fontsize)
+    plt.xticks(fontsize=fontsize)
     plt.gca().invert_yaxis()
 
     if output_file != '':
@@ -246,7 +248,7 @@ def plot_cluster_distribution_for_families(data_clusters, db_instance: DbInstanc
             if elem > 0.025:
                 width, height = p.get_width(), p.get_height()
                 x, y = p.get_xy()
-                plt.annotate('{cluster}'.format(cluster=id_), (x + width / 2, y + height / 2 + 0.1), ha='center')
+                plt.annotate('{cluster}'.format(cluster=id_), (x + width / 2, y + height / 2 + 0.2), ha='center')
 
     plt.tight_layout()
     plt.yticks(Y_axis)
@@ -260,7 +262,7 @@ def plot_cluster_distribution_for_families(data_clusters, db_instance: DbInstanc
 
 
 def plot_heatmap(data_clusters, db_instance: DbInstance, relative_to_cluster_size=True, output_file='',
-                                           show_plot=False, dpi=192, q=0.75, font_size=8):
+                 show_plot=False, dpi=192, q=0.75, fontsize_annotations=8, fontsize_labels=8):
     family_list = [family[0] for family in db_instance.family_wh]
     count = Counter(family_list)
     count_list = [item for key, item in count.items()]
@@ -293,8 +295,8 @@ def plot_heatmap(data_clusters, db_instance: DbInstance, relative_to_cluster_siz
     data = UtilScripts.util.rotateNestedLists(data)
 
     plt.figure(figsize=(600 / dpi, 1000 / dpi), dpi=dpi)
-    plt.ylabel('Family')
-    plt.xlabel('Cluster')
+    plt.ylabel('Family', fontsize=fontsize_labels)
+    plt.xlabel('Cluster', fontsize=fontsize_labels)
 
     plt.imshow(data)
 
@@ -305,10 +307,10 @@ def plot_heatmap(data_clusters, db_instance: DbInstance, relative_to_cluster_siz
             if data[i][j] > 75:
                 color = 'black'
             plt.annotate('{p}'.format(p=data[i][j]), (j, i),
-                           ha="center", va="center", color=color, fontsize=font_size)
+                         ha="center", va="center", color=color, fontsize=fontsize_annotations)
 
-    plt.yticks(range(len(X_axis)), X_axis)
-    plt.xticks(range(len(data_clusters)))
+    plt.yticks(range(len(X_axis)), X_axis, fontsize=fontsize_labels)
+    plt.xticks(range(len(data_clusters)), fontsize=fontsize_labels)
     plt.tight_layout()
 
     if output_file != '':
