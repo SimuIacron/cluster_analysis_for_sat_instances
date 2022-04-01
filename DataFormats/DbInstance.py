@@ -28,6 +28,7 @@ class DbInstance:
         (self.solver, self.solver_wh), self.solver_f, = DatabaseReader.read_solver_from_db()
         (self.family, self.family_wh), self.family_f = DatabaseReader.read_family_from_db()
         (self.un_sat, self.un_sat_wh), self.result_f = DatabaseReader.read_result_from_db()
+        (self.name, self.name_wh), self.name_f = DatabaseReader.read_name_from_db()
         print("Queries finished")
 
         print("starting instances: " + str(len(self.solver)))
@@ -70,6 +71,8 @@ class DbInstance:
         self.family_wh = DatabaseReader.remove_with_index_array(self.family_wh, removed_array)
         self.un_sat = DatabaseReader.remove_with_index_array(self.un_sat, removed_array)
         self.un_sat_wh = DatabaseReader.remove_with_index_array(self.un_sat_wh, removed_array)
+        self.name = DatabaseReader.remove_with_index_array(self.name, removed_array)
+        self.name_wh = DatabaseReader.remove_with_index_array(self.name_wh, removed_array)
 
         # replace all runtimes that are bigger than the timeout with the timeout
         if cap_running_time != DatabaseReader.TIMEOUT:

@@ -1,7 +1,7 @@
 import numpy as np
 from PlottingAndEvaluationFunctions.func_plot_single_clustering import plot_family_distribution_of_clusters, \
     plot_runtime_comparison_sbs, plot_cluster_distribution_for_families, plot_family_distribution_of_clusters_v2, \
-    plot_heatmap
+    plot_heatmap, plot_cluster_sizes, plot_family_sizes, get_family_instances
 from PlottingAndEvaluationFunctions.func_stochastic_cluster_values import calculate_cluster_performance_score, \
     calculate_biggest_family_for_cluster, \
     calculate_feature_stochastic, \
@@ -26,7 +26,7 @@ clusterings = [
     (33, 'kmeans_33/kmeans_33'),
     (25522, 'dbscan_25522/dbscan_25522'),
 ]
-setting = 0
+setting = 1
 dpi = 120  # 120
 
 output_merged, features = get_combinations_of_databases()
@@ -43,7 +43,10 @@ sbs_solver = sbs[1]["0"][0][0][0]
 
 print('starting with {a} clusters'.format(a=len(data_clusters)))
 
+
 filtered1 = filter_specific_clustering(data_clusters, clusterings[setting][0])
+
+get_family_instances(data_clustering, filtered1, db_instance, clusterings[setting][0])
 
 calculated = calculate_feature_stochastic(data_clustering, filtered1, data_dataset, db_instance)
 
@@ -119,21 +122,29 @@ print('Cluster with difference: {a}'.format(a=len(clusters_with_difference_in_cs
 # plot_family_distribution_of_clusters_v2(filtered_size, db_instance, show_plot=False,
 #                                      output_file=output_file + clusterings[setting][1] + '_family_distribution',
 #                                      dpi=dpi, family_min_percentage=0.2, fontsize=16)
-#
+
+plot_cluster_sizes(filtered_size, db_instance, show_plot=False,
+                   output_file=output_file + clusterings[setting][1] + '_cluster_size',
+                   dpi=dpi, family_min_percentage=0.2, fontsize=16)
+
+plot_family_sizes(filtered_size, db_instance, show_plot=False,
+                   output_file=output_file + clusterings[setting][1] + '_family_size',
+                   dpi=dpi, family_min_percentage=0.2, fontsize=16)
+
 # plot_cluster_distribution_for_families(filtered_size, db_instance, show_plot=False,
 #                                        output_file=output_file + clusterings[setting][1] + '_cluster_distribution',
 #                                        dpi=192)
 
-plot_heatmap(sort, db_instance, relative_to_cluster_size=False,
-                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_family_size', dpi=dpi)
-plot_heatmap(sort, db_instance, relative_to_cluster_size=True,
-                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_cluster_size', dpi=dpi)
-
-plot_heatmap(sort, db_instance, relative_to_cluster_size=False,
-                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_family_size_all', dpi=dpi/2, q=0)
-plot_heatmap(sort, db_instance, relative_to_cluster_size=True,
-                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_cluster_size_all', dpi=dpi/2, q=0)
-
+plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=False,
+                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_family_size', dpi=dpi, fontsize_labels=5, disable_annotations=True)
+plot_heatmap(filtered_size, db_instance, relative_to_cluster_size=True,
+                                       output_file=output_file + clusterings[setting][1] + '_family_share_per_cluster_size', dpi=dpi, fontsize_labels=5, disable_annotations=True)
+#
+# plot_heatmap(sort, db_instance, relative_to_cluster_size=False,
+#                                        output_file=output_file + clusterings[setting][1] + '_family_share_per_family_size_all', dpi=dpi/2, q=0)
+# plot_heatmap(sort, db_instance, relative_to_cluster_size=True,
+#                                        output_file=output_file + clusterings[setting][1] + '_family_share_per_cluster_size_all', dpi=dpi/2, q=0)
+# 
 # plot_runtime_comparison_sbs(filtered_size, sbs_solver, show_plot=False,
 #                             output_file=output_file + clusterings[setting][1] + '_sbs_comparison', dpi=dpi, fontsize=16)
 
@@ -144,3 +155,4 @@ plot_heatmap(sort, db_instance, relative_to_cluster_size=True,
 #     cluster = filtered_size[index]
 #     visualisation_spar2(data_clustering, cluster, db_instance, show_plot=False,
 #                         output_file=output_file + clusterings[setting][1] + '_spar_vis_' + str(index), dpi=dpi)
+#

@@ -143,6 +143,82 @@ def plot_family_distribution_of_clusters_v2(data_clusters, db_instance: DbInstan
         plt.show()
 
 
+def plot_family_sizes(data_clusters, db_instance: DbInstance, output_file='',
+                                            show_plot=False, dpi=192, family_min_percentage = 0.2, fontsize=10):
+    family_list = [family[0] for family in db_instance.family_wh]
+    count = Counter(family_list)
+    count_list = [item for key, item in count.items()]
+    quantile = np.quantile(count_list, 0.75)
+
+    X_axis = []
+    Y = []
+    for key, item in count.items():
+        if item > quantile:
+            X_axis.append(key)
+            Y.append(item)
+
+    plt.figure(figsize=(700 / dpi, 1200/ dpi), dpi=dpi)
+
+    plt.barh(X_axis, Y)
+
+    # plt.legend(loc='upper right')
+    # plt.xlabel('Family Size', fontsize=20)
+    plt.tight_layout()
+    plt.xticks(fontsize=20)
+    plt.gca().invert_yaxis()
+
+    if output_file != '':
+        plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
+
+    if show_plot:
+        plt.show()
+
+
+def get_family_instances(data_clustering, data_cluster, db_instance: DbInstance, id_):
+    clustering = data_clustering[id_]
+    assert id_ == clustering['id']
+    all_names = []
+    for cluster in data_cluster:
+        cluster_names = []
+        for i, value in enumerate(clustering['clustering']):
+            if cluster['cluster_idx'] == value:
+                name = db_instance.name_wh[i]
+                family = db_instance.family_wh[i]
+                cluster_names.append((name, family))
+        all_names.append((cluster['cluster_idx'], cluster['cluster_size'], cluster_names))
+
+    sort = sorted(all_names, key=lambda d: d[1], reverse=True)
+
+    pass
+
+
+
+
+def plot_cluster_sizes(data_clusters, db_instance: DbInstance, output_file='',
+                       show_plot=False, dpi=192, family_min_percentage = 0.2, fontsize=10):
+
+    Y = []
+    for cluster in data_clusters:
+        Y.append(cluster['cluster_size'] )
+
+    X_axis = range(len(Y))
+
+    plt.figure(figsize=(1200 / dpi, 300 / dpi), dpi=dpi)
+
+    plt.bar(X_axis, Y)
+
+    # plt.legend(loc='upper right')
+    # plt.ylabel('Cluster Size', fontsize=10)
+    plt.tight_layout()
+    plt.yticks(fontsize=fontsize)
+
+    if output_file != '':
+        plt.savefig(os.environ['TEXPATH'] + output_file + '.svg')
+
+    if show_plot:
+        plt.show()
+
+
 # for a clustering plots the csbs score of each cluster and the speed of the sbs on the cluster.
 # annotates the csbs as well as the solvers in the strip of the csbs
 def plot_runtime_comparison_sbs(data_cluster, sbs_solver, output_file='', show_plot=False, dpi=192, fontsize=16):
@@ -262,7 +338,7 @@ def plot_cluster_distribution_for_families(data_clusters, db_instance: DbInstanc
 
 
 def plot_heatmap(data_clusters, db_instance: DbInstance, relative_to_cluster_size=True, output_file='',
-                 show_plot=False, dpi=192, q=0.75, fontsize_annotations=8, fontsize_labels=8):
+                 show_plot=False, dpi=192, q=0.75, fontsize_annotations=8, fontsize_labels=8, disable_annotations=False):
     family_list = [family[0] for family in db_instance.family_wh]
     count = Counter(family_list)
     count_list = [item for key, item in count.items()]
@@ -298,16 +374,21 @@ def plot_heatmap(data_clusters, db_instance: DbInstance, relative_to_cluster_siz
     plt.ylabel('Family', fontsize=fontsize_labels)
     plt.xlabel('Cluster', fontsize=fontsize_labels)
 
-    plt.imshow(data)
+    extent = (0, len(data[0]), len(data), 0)
+    _, ax = plt.subplots()
+    ax.imshow(data, extent=extent)
+    ax.grid(color='w', linewidth=0.5)
+    ax.set_frame_on(False)
 
     # Loop over data dimensions and create text annotations.
-    for i in range(len(X_axis)):
-        for j in range(len(data_clusters)):
-            color = 'w'
-            if data[i][j] > 75:
-                color = 'black'
-            plt.annotate('{p}'.format(p=data[i][j]), (j, i),
-                         ha="center", va="center", color=color, fontsize=fontsize_annotations)
+    if not disable_annotations:
+        for i in range(len(X_axis)):
+            for j in range(len(data_clusters)):
+                color = 'w'
+                if data[i][j] > 75:
+                    color = 'black'
+                plt.annotate('{p}'.format(p=data[i][j]), (j, i),
+                             ha="center", va="center", color=color, fontsize=fontsize_annotations)
 
     plt.yticks(range(len(X_axis)), X_axis, fontsize=fontsize_labels)
     plt.xticks(range(len(data_clusters)), fontsize=fontsize_labels)

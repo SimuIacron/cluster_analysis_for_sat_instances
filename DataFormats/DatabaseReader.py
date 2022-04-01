@@ -51,6 +51,8 @@ FEATURES_SOLVER = ['cadical_elimfalse', 'cadical', 'cadical_pripro', 'cadical_st
 FEATURES_FAMILY = ['family']
 FEATURES_RESULT = ['result']
 
+FEATURES_NAME = ['filename']
+
 
 # removes keywords "empty", "memout", "timeout" and "failed" from the database and replaces them with
 # with values depending on the feature and keyword
@@ -197,3 +199,6 @@ def read_base_from_db():
 
 def read_result_from_db():
     return read_from_db(FEATURES_RESULT), FEATURES_RESULT
+
+def read_name_from_db():
+    return read_from_db(FEATURES_NAME), FEATURES_NAME
